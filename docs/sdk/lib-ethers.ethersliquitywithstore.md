@@ -6,16 +6,16 @@
 
 Variant of [EthersLiquity](./lib-ethers.ethersliquity.md) that exposes a [LiquityStore](./lib-base.liquitystore.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface EthersLiquityWithStore<T extends LiquityStore = LiquityStore> extends EthersLiquity 
 ```
-<b>Extends:</b> [EthersLiquity](./lib-ethers.ethersliquity.md)
+**Extends:** [EthersLiquity](./lib-ethers.ethersliquity.md)
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [store](./lib-ethers.ethersliquitywithstore.store.md) | T | An object that implements LiquityStore. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [store](./lib-ethers.ethersliquitywithstore.store.md) |  | T | An object that implements LiquityStore. |
 

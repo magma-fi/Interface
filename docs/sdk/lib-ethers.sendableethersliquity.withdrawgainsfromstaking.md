@@ -6,7 +6,7 @@
 
 Withdraw [collateral gain](./lib-base.lqtystake.collateralgain.md) and [LUSD gain](./lib-base.lqtystake.lusdgain.md) from LQTY stake.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 withdrawGainsFromStaking(overrides?: EthersTransactionOverrides): Promise<SentEthersLiquityTransaction<void>>;
@@ -18,7 +18,7 @@ withdrawGainsFromStaking(overrides?: EthersTransactionOverrides): Promise<SentEt
 |  --- | --- | --- |
 |  overrides | [EthersTransactionOverrides](./lib-ethers.etherstransactionoverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[SentEthersLiquityTransaction](./lib-ethers.sentethersliquitytransaction.md)<!-- -->&lt;void&gt;&gt;
 

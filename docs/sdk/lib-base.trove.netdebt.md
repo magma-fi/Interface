@@ -6,7 +6,7 @@
 
 Amount of LUSD that must be repaid to close this Trove.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 get netDebt(): Decimal;

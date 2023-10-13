@@ -6,7 +6,7 @@
 
 Amount of LUSD that was actually redeemed by the transaction.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 actualLUSDAmount: Decimal;

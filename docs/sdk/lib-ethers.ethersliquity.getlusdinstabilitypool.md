@@ -6,7 +6,7 @@
 
 Get the total amount of LUSD currently deposited in the Stability Pool.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getLUSDInStabilityPool(overrides?: EthersCallOverrides): Promise<Decimal>;
@@ -18,7 +18,7 @@ getLUSDInStabilityPool(overrides?: EthersCallOverrides): Promise<Decimal>;
 |  --- | --- | --- |
 |  overrides | [EthersCallOverrides](./lib-ethers.etherscalloverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[Decimal](./lib-base.decimal.md)<!-- -->&gt;
 

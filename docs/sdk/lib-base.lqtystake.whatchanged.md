@@ -6,7 +6,7 @@
 
 Calculate the difference between this `LQTYStake` and `thatStakedLQTY`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 whatChanged(thatStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined;
@@ -18,7 +18,7 @@ whatChanged(thatStakedLQTY: Decimalish): LQTYStakeChange<Decimal> | undefined;
 |  --- | --- | --- |
 |  thatStakedLQTY | [Decimalish](./lib-base.decimalish.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 [LQTYStakeChange](./lib-base.lqtystakechange.md)<!-- -->&lt;[Decimal](./lib-base.decimal.md)<!-- -->&gt; \| undefined
 

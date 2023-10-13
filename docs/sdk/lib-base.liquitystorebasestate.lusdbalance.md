@@ -6,7 +6,7 @@
 
 User's LUSD token balance.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 lusdBalance: Decimal;

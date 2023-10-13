@@ -6,7 +6,7 @@
 
 Create a [LiquityStore](./lib-base.liquitystore.md) and expose it as the `store` property.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly useStore?: EthersLiquityStoreOption;

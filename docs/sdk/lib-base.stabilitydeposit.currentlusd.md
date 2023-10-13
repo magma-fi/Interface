@@ -6,7 +6,7 @@
 
 Amount of LUSD left in the Stability Deposit.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly currentLUSD: Decimal;

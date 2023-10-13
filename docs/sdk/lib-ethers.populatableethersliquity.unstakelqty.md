@@ -6,7 +6,7 @@
 
 Withdraw LQTY from staking.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 unstakeLQTY(amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<PopulatedEthersLiquityTransaction<void>>;
@@ -19,7 +19,7 @@ unstakeLQTY(amount: Decimalish, overrides?: EthersTransactionOverrides): Promise
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LQTY to withdraw. |
 |  overrides | [EthersTransactionOverrides](./lib-ethers.etherstransactionoverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[PopulatedEthersLiquityTransaction](./lib-ethers.populatedethersliquitytransaction.md)<!-- -->&lt;void&gt;&gt;
 

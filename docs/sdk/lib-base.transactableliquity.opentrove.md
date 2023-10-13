@@ -6,7 +6,7 @@
 
 Open a new Trove by depositing collateral and borrowing LUSD.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 openTrove(params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<TroveCreationDetails>;
@@ -19,7 +19,7 @@ openTrove(params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish
 |  params | [TroveCreationParams](./lib-base.trovecreationparams.md)<!-- -->&lt;[Decimalish](./lib-base.decimalish.md)<!-- -->&gt; | How much to deposit and borrow. |
 |  maxBorrowingRate | [Decimalish](./lib-base.decimalish.md) | Maximum acceptable [borrowing rate](./lib-base.fees.borrowingrate.md)<!-- -->. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[TroveCreationDetails](./lib-base.trovecreationdetails.md)<!-- -->&gt;
 

@@ -6,7 +6,7 @@
 
 Get the current state of an LQTY Stake.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getLQTYStake(address?: string): Promise<LQTYStake>;
@@ -18,7 +18,7 @@ getLQTYStake(address?: string): Promise<LQTYStake>;
 |  --- | --- | --- |
 |  address | string | Address that owns the LQTY Stake. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[LQTYStake](./lib-base.lqtystake.md)<!-- -->&gt;
 

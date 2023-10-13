@@ -6,7 +6,7 @@
 
 Withdraw LUSD from Stability Deposit.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 withdrawLUSDFromStabilityPool(amount: Decimalish): Promise<StabilityDepositChangeDetails>;
@@ -18,7 +18,7 @@ withdrawLUSDFromStabilityPool(amount: Decimalish): Promise<StabilityDepositChang
 |  --- | --- | --- |
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LUSD to withdraw. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[StabilityDepositChangeDetails](./lib-base.stabilitydepositchangedetails.md)<!-- -->&gt;
 

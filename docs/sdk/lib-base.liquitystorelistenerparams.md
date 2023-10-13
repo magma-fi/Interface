@@ -6,7 +6,7 @@
 
 Parameters passed to [LiquityStore](./lib-base.liquitystore.md) listeners.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface LiquityStoreListenerParams<T = unknown> 
@@ -18,9 +18,9 @@ Use the [subscribe()](./lib-base.liquitystore.subscribe.md) function to register
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [newState](./lib-base.liquitystorelistenerparams.newstate.md) | [LiquityStoreState](./lib-base.liquitystorestate.md)<!-- -->&lt;T&gt; | The entire previous state. |
-|  [oldState](./lib-base.liquitystorelistenerparams.oldstate.md) | [LiquityStoreState](./lib-base.liquitystorestate.md)<!-- -->&lt;T&gt; | The entire new state. |
-|  [stateChange](./lib-base.liquitystorelistenerparams.statechange.md) | Partial&lt;[LiquityStoreState](./lib-base.liquitystorestate.md)<!-- -->&lt;T&gt;&gt; | Only the state variables that have changed. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [newState](./lib-base.liquitystorelistenerparams.newstate.md) |  | [LiquityStoreState](./lib-base.liquitystorestate.md)<!-- -->&lt;T&gt; | The entire previous state. |
+|  [oldState](./lib-base.liquitystorelistenerparams.oldstate.md) |  | [LiquityStoreState](./lib-base.liquitystorestate.md)<!-- -->&lt;T&gt; | The entire new state. |
+|  [stateChange](./lib-base.liquitystorelistenerparams.statechange.md) |  | Partial&lt;[LiquityStoreState](./lib-base.liquitystorestate.md)<!-- -->&lt;T&gt;&gt; | Only the state variables that have changed. |
 

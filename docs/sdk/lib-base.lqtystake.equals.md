@@ -6,7 +6,7 @@
 
 Compare to another instance of `LQTYStake`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 equals(that: LQTYStake): boolean;
@@ -18,7 +18,7 @@ equals(that: LQTYStake): boolean;
 |  --- | --- | --- |
 |  that | [LQTYStake](./lib-base.lqtystake.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 boolean
 

@@ -6,7 +6,7 @@
 
 Check whether an address is registered as a Liquity frontend, and what its kickback rate is.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getFrontendStatus(address?: string): Promise<FrontendStatus>;
@@ -18,7 +18,7 @@ getFrontendStatus(address?: string): Promise<FrontendStatus>;
 |  --- | --- | --- |
 |  address | string | Address to check. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[FrontendStatus](./lib-base.frontendstatus.md)<!-- -->&gt;
 

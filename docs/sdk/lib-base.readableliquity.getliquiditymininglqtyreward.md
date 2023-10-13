@@ -6,7 +6,7 @@
 
 Get the amount of LQTY earned by an address through mining liquidity.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getLiquidityMiningLQTYReward(address?: string): Promise<Decimal>;
@@ -18,7 +18,7 @@ getLiquidityMiningLQTYReward(address?: string): Promise<Decimal>;
 |  --- | --- | --- |
 |  address | string | Address whose LQTY reward should be retrieved. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[Decimal](./lib-base.decimal.md)<!-- -->&gt;
 

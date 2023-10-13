@@ -6,12 +6,12 @@
 
 A transaction that has already been sent.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class SentEthersLiquityTransaction<T = unknown> implements SentLiquityTransaction<EthersTransactionResponse, LiquityReceipt<EthersTransactionReceipt, T>> 
 ```
-<b>Implements:</b> [SentLiquityTransaction](./lib-base.sentliquitytransaction.md)<!-- -->&lt;[EthersTransactionResponse](./lib-ethers.etherstransactionresponse.md)<!-- -->, [LiquityReceipt](./lib-base.liquityreceipt.md)<!-- -->&lt;[EthersTransactionReceipt](./lib-ethers.etherstransactionreceipt.md)<!-- -->, T&gt;&gt;
+**Implements:** [SentLiquityTransaction](./lib-base.sentliquitytransaction.md)<!-- -->&lt;[EthersTransactionResponse](./lib-ethers.etherstransactionresponse.md)<!-- -->, [LiquityReceipt](./lib-base.liquityreceipt.md)<!-- -->&lt;[EthersTransactionReceipt](./lib-ethers.etherstransactionreceipt.md)<!-- -->, T&gt;&gt;
 
 ## Remarks
 

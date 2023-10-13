@@ -6,7 +6,7 @@
 
 Get the total amount of collateral and debt in the Liquity system.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getTotal(overrides?: EthersCallOverrides): Promise<Trove>;
@@ -18,7 +18,7 @@ getTotal(overrides?: EthersCallOverrides): Promise<Trove>;
 |  --- | --- | --- |
 |  overrides | [EthersCallOverrides](./lib-ethers.etherscalloverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[Trove](./lib-base.trove.md)<!-- -->&gt;
 

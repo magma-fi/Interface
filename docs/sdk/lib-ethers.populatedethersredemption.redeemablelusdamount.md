@@ -6,7 +6,7 @@
 
 Maximum amount of LUSD that is currently redeemable from `attemptedLUSDAmount`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly redeemableLUSDAmount: Decimal;

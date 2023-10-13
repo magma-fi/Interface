@@ -6,7 +6,7 @@
 
 Whether `redeemableLUSDAmount` is less than `attemptedLUSDAmount`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly isTruncated: boolean;

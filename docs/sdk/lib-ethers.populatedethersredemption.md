@@ -6,14 +6,14 @@
 
 A redemption transaction that has been prepared for sending.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class PopulatedEthersRedemption extends PopulatedEthersLiquityTransaction<RedemptionDetails> implements PopulatedRedemption<EthersPopulatedTransaction, EthersTransactionResponse, EthersTransactionReceipt> 
 ```
-<b>Extends:</b> [PopulatedEthersLiquityTransaction](./lib-ethers.populatedethersliquitytransaction.md)<!-- -->&lt;[RedemptionDetails](./lib-base.redemptiondetails.md)<!-- -->&gt;
+**Extends:** [PopulatedEthersLiquityTransaction](./lib-ethers.populatedethersliquitytransaction.md)<!-- -->&lt;[RedemptionDetails](./lib-base.redemptiondetails.md)<!-- -->&gt;
 
-<b>Implements:</b> [PopulatedRedemption](./lib-base.populatedredemption.md)<!-- -->&lt;[EthersPopulatedTransaction](./lib-ethers.etherspopulatedtransaction.md)<!-- -->, [EthersTransactionResponse](./lib-ethers.etherstransactionresponse.md)<!-- -->, [EthersTransactionReceipt](./lib-ethers.etherstransactionreceipt.md)<!-- -->&gt;
+**Implements:** [PopulatedRedemption](./lib-base.populatedredemption.md)<!-- -->&lt;[EthersPopulatedTransaction](./lib-ethers.etherspopulatedtransaction.md)<!-- -->, [EthersTransactionResponse](./lib-ethers.etherstransactionresponse.md)<!-- -->, [EthersTransactionReceipt](./lib-ethers.etherstransactionreceipt.md)<!-- -->&gt;
 
 ## Remarks
 

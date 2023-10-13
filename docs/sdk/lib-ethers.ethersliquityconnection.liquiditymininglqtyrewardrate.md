@@ -6,7 +6,7 @@
 
 Amount of LQTY collectively rewarded to stakers of the liquidity mining pool per second.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly liquidityMiningLQTYRewardRate: Decimal;

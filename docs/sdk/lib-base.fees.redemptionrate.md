@@ -6,7 +6,7 @@
 
 Calculate the current redemption rate.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 redemptionRate(redeemedFractionOfSupply?: Decimalish, when?: Date): Decimal;
@@ -19,7 +19,7 @@ redemptionRate(redeemedFractionOfSupply?: Decimalish, when?: Date): Decimal;
 |  redeemedFractionOfSupply | [Decimalish](./lib-base.decimalish.md) | The amount of LUSD being redeemed divided by the total supply. |
 |  when | Date | Optional timestamp that can be used to calculate what the redemption rate would decay to at a point of time in the future. |
 
-<b>Returns:</b>
+**Returns:**
 
 [Decimal](./lib-base.decimal.md)
 
@@ -42,6 +42,5 @@ const redeemedLUSDAmount = Decimal.from(100);
 const redeemedFractionOfSupply = redeemedLUSDAmount.div(total.debt);
 const redemptionRate = fees.redemptionRate(redeemedFractionOfSupply);
 const redemptionFeeLUSD = redemptionRate.mul(redeemedLUSDAmount);
-
 ```
 

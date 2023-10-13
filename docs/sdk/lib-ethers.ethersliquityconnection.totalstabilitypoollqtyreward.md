@@ -6,7 +6,7 @@
 
 Total amount of LQTY allocated for rewarding stability depositors.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly totalStabilityPoolLQTYReward: Decimal;

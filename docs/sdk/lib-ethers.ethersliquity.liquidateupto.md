@@ -6,7 +6,7 @@
 
 Liquidate the least collateralized Troves up to a maximum number.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 liquidateUpTo(maximumNumberOfTrovesToLiquidate: number, overrides?: EthersTransactionOverrides): Promise<LiquidationDetails>;
@@ -19,7 +19,7 @@ liquidateUpTo(maximumNumberOfTrovesToLiquidate: number, overrides?: EthersTransa
 |  maximumNumberOfTrovesToLiquidate | number | Stop after liquidating this many Troves. |
 |  overrides | [EthersTransactionOverrides](./lib-ethers.etherstransactionoverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[LiquidationDetails](./lib-base.liquidationdetails.md)<!-- -->&gt;
 

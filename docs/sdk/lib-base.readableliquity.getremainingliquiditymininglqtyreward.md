@@ -6,12 +6,12 @@
 
 Get the remaining LQTY that will be collectively rewarded to liquidity miners.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getRemainingLiquidityMiningLQTYReward(): Promise<Decimal>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[Decimal](./lib-base.decimal.md)<!-- -->&gt;
 

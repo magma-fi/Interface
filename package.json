@@ -109,5 +109,10 @@
     "semantic-release": "^17.4.2",
     "semantic-release-monorepo": "^7.0.4"
   },
-  "packageManager": "yarn@3.5.1"
+  "packageManager": "yarn@3.5.1",
+  "dependencies": {
+    "@liquity/lib-ethers": "workspace:^",
+    "connectkit": "1.3.0",
+    "viem": "^1.16.4"
+  }
 }

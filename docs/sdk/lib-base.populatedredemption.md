@@ -6,12 +6,12 @@
 
 A redemption transaction that has been prepared for sending.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface PopulatedRedemption<P = unknown, S = unknown, R = unknown> extends PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, RedemptionDetails>>> 
 ```
-<b>Extends:</b> [PopulatedLiquityTransaction](./lib-base.populatedliquitytransaction.md)<!-- -->&lt;P, [SentLiquityTransaction](./lib-base.sentliquitytransaction.md)<!-- -->&lt;S, [LiquityReceipt](./lib-base.liquityreceipt.md)<!-- -->&lt;R, [RedemptionDetails](./lib-base.redemptiondetails.md)<!-- -->&gt;&gt;&gt;
+**Extends:** [PopulatedLiquityTransaction](./lib-base.populatedliquitytransaction.md)<!-- -->&lt;P, [SentLiquityTransaction](./lib-base.sentliquitytransaction.md)<!-- -->&lt;S, [LiquityReceipt](./lib-base.liquityreceipt.md)<!-- -->&lt;R, [RedemptionDetails](./lib-base.redemptiondetails.md)<!-- -->&gt;&gt;&gt;
 
 ## Remarks
 
@@ -21,11 +21,11 @@ When [redeemLUSD()](./lib-base.populatableliquity.redeemlusd.md) is called with 
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [attemptedLUSDAmount](./lib-base.populatedredemption.attemptedlusdamount.md) | [Decimal](./lib-base.decimal.md) | Amount of LUSD the redeemer is trying to redeem. |
-|  [isTruncated](./lib-base.populatedredemption.istruncated.md) | boolean | Whether <code>redeemableLUSDAmount</code> is less than <code>attemptedLUSDAmount</code>. |
-|  [redeemableLUSDAmount](./lib-base.populatedredemption.redeemablelusdamount.md) | [Decimal](./lib-base.decimal.md) | Maximum amount of LUSD that is currently redeemable from <code>attemptedLUSDAmount</code>. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [attemptedLUSDAmount](./lib-base.populatedredemption.attemptedlusdamount.md) |  | [Decimal](./lib-base.decimal.md) | Amount of LUSD the redeemer is trying to redeem. |
+|  [isTruncated](./lib-base.populatedredemption.istruncated.md) |  | boolean | Whether <code>redeemableLUSDAmount</code> is less than <code>attemptedLUSDAmount</code>. |
+|  [redeemableLUSDAmount](./lib-base.populatedredemption.redeemablelusdamount.md) |  | [Decimal](./lib-base.decimal.md) | Maximum amount of LUSD that is currently redeemable from <code>attemptedLUSDAmount</code>. |
 
 ## Methods
 

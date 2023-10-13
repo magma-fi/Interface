@@ -6,7 +6,7 @@
 
 Optional parameters taken by [ReadableEthersLiquity](./lib-ethers.readableethersliquity.md) functions.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface EthersCallOverrides 
@@ -14,7 +14,7 @@ export interface EthersCallOverrides
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [blockTag?](./lib-ethers.etherscalloverrides.blocktag.md) | BlockTag | <i>(Optional)</i> |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [blockTag?](./lib-ethers.etherscalloverrides.blocktag.md) |  | BlockTag | _(Optional)_ |
 

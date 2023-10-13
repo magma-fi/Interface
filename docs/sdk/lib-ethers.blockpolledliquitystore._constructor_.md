@@ -6,7 +6,7 @@
 
 Constructs a new instance of the `BlockPolledLiquityStore` class
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 constructor(readable: ReadableEthersLiquity);

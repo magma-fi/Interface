@@ -6,7 +6,7 @@
 
 Send LQTY tokens to an address.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 sendLQTY(toAddress: string, amount: Decimalish): Promise<void>;
@@ -19,7 +19,7 @@ sendLQTY(toAddress: string, amount: Decimalish): Promise<void>;
 |  toAddress | string | Address of receipient. |
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LQTY to send. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;void&gt;
 

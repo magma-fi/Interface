@@ -6,12 +6,12 @@
 
 Ethers-based implementation of [ReadableLiquity](./lib-base.readableliquity.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class ReadableEthersLiquity implements ReadableLiquity 
 ```
-<b>Implements:</b> [ReadableLiquity](./lib-base.readableliquity.md)
+**Implements:** [ReadableLiquity](./lib-base.readableliquity.md)
 
 ## Remarks
 

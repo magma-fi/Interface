@@ -6,7 +6,7 @@
 
 Withdraw LQTY from staking.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 unstakeLQTY(amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
@@ -18,7 +18,7 @@ unstakeLQTY(amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceip
 |  --- | --- | --- |
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LQTY to withdraw. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[SentLiquityTransaction](./lib-base.sentliquitytransaction.md)<!-- -->&lt;S, [LiquityReceipt](./lib-base.liquityreceipt.md)<!-- -->&lt;R, void&gt;&gt;&gt;
 

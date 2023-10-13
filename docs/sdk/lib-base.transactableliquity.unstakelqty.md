@@ -6,7 +6,7 @@
 
 Withdraw LQTY from staking.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 unstakeLQTY(amount: Decimalish): Promise<void>;
@@ -18,7 +18,7 @@ unstakeLQTY(amount: Decimalish): Promise<void>;
 |  --- | --- | --- |
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LQTY to withdraw. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;void&gt;
 

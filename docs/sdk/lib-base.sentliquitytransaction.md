@@ -6,7 +6,7 @@
 
 A transaction that has already been sent.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SentLiquityTransaction<S = unknown, T extends LiquityReceipt = LiquityReceipt> 
@@ -18,9 +18,9 @@ Implemented by [SentEthersLiquityTransaction](./lib-ethers.sentethersliquitytran
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [rawSentTransaction](./lib-base.sentliquitytransaction.rawsenttransaction.md) | S | Implementation-specific sent transaction object. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [rawSentTransaction](./lib-base.sentliquitytransaction.rawsenttransaction.md) |  | S | Implementation-specific sent transaction object. |
 
 ## Methods
 

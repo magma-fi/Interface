@@ -6,12 +6,12 @@
 
 Prepare Liquity transactions for sending.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface PopulatableLiquity<R = unknown, S = unknown, P = unknown> extends _PopulatableFrom<SendableLiquity<R, S>, P> 
 ```
-<b>Extends:</b> \_PopulatableFrom&lt;[SendableLiquity](./lib-base.sendableliquity.md)<!-- -->&lt;R, S&gt;, P&gt;
+**Extends:** \_PopulatableFrom&lt;[SendableLiquity](./lib-base.sendableliquity.md)<!-- -->&lt;R, S&gt;, P&gt;
 
 ## Remarks
 

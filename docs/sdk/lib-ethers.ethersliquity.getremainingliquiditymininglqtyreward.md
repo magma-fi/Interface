@@ -6,7 +6,7 @@
 
 Get the remaining LQTY that will be collectively rewarded to liquidity miners.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getRemainingLiquidityMiningLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal>;
@@ -18,7 +18,7 @@ getRemainingLiquidityMiningLQTYReward(overrides?: EthersCallOverrides): Promise<
 |  --- | --- | --- |
 |  overrides | [EthersCallOverrides](./lib-ethers.etherscalloverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[Decimal](./lib-base.decimal.md)<!-- -->&gt;
 

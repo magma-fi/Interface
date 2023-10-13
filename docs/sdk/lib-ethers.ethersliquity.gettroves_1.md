@@ -6,7 +6,7 @@
 
 Get a slice from the list of Troves.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getTroves(params: TroveListingParams, overrides?: EthersCallOverrides): Promise<UserTrove[]>;
@@ -19,7 +19,7 @@ getTroves(params: TroveListingParams, overrides?: EthersCallOverrides): Promise<
 |  params | [TroveListingParams](./lib-base.trovelistingparams.md) | Controls how the list is sorted, and where the slice begins and ends. |
 |  overrides | [EthersCallOverrides](./lib-ethers.etherscalloverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[UserTrove](./lib-base.usertrove.md)<!-- -->\[\]&gt;
 

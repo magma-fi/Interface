@@ -6,7 +6,7 @@
 
 Adjust existing Trove by withdrawing some of its collateral.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 withdrawCollateral(amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
@@ -18,7 +18,7 @@ withdrawCollateral(amount: Decimalish): Promise<SentLiquityTransaction<S, Liquit
 |  --- | --- | --- |
 |  amount | [Decimalish](./lib-base.decimalish.md) | The amount of collateral to withdraw from the Trove. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[SentLiquityTransaction](./lib-base.sentliquitytransaction.md)<!-- -->&lt;S, [LiquityReceipt](./lib-base.liquityreceipt.md)<!-- -->&lt;R, [TroveAdjustmentDetails](./lib-base.troveadjustmentdetails.md)<!-- -->&gt;&gt;&gt;
 
@@ -28,6 +28,5 @@ Equivalent to:
 
 ```typescript
 adjustTrove({ withdrawCollateral: amount })
-
 ```
 

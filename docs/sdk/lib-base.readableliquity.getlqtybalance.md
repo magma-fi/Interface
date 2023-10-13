@@ -6,7 +6,7 @@
 
 Get the amount of LQTY held by an address.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getLQTYBalance(address?: string): Promise<Decimal>;
@@ -18,7 +18,7 @@ getLQTYBalance(address?: string): Promise<Decimal>;
 |  --- | --- | --- |
 |  address | string | Address whose balance should be retrieved. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[Decimal](./lib-base.decimal.md)<!-- -->&gt;
 

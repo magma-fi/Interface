@@ -6,7 +6,7 @@
 
 Amount of LUSD paid to the liquidator as gas compensation.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 lusdGasCompensation: Decimal;

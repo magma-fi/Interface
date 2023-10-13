@@ -6,7 +6,7 @@
 
 A transaction that has been prepared for sending.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface PopulatedLiquityTransaction<P = unknown, T extends SentLiquityTransaction = SentLiquityTransaction> 
@@ -18,9 +18,9 @@ Implemented by [PopulatedEthersLiquityTransaction](./lib-ethers.populatedethersl
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [rawPopulatedTransaction](./lib-base.populatedliquitytransaction.rawpopulatedtransaction.md) | P | Implementation-specific populated transaction object. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [rawPopulatedTransaction](./lib-base.populatedliquitytransaction.rawpopulatedtransaction.md) |  | P | Implementation-specific populated transaction object. |
 
 ## Methods
 

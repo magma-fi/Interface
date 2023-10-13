@@ -6,7 +6,7 @@
 
 Get the current state of an LQTY Stake.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getLQTYStake(address?: string, overrides?: EthersCallOverrides): Promise<LQTYStake>;
@@ -19,7 +19,7 @@ getLQTYStake(address?: string, overrides?: EthersCallOverrides): Promise<LQTYSta
 |  address | string | Address that owns the LQTY Stake. |
 |  overrides | [EthersCallOverrides](./lib-ethers.etherscalloverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[LQTYStake](./lib-base.lqtystake.md)<!-- -->&gt;
 

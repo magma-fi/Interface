@@ -6,7 +6,7 @@
 
 Total amount of LUSD currently deposited in the Stability Pool.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 lusdInStabilityPool: Decimal;

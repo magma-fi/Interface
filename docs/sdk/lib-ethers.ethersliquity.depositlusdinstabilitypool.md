@@ -6,7 +6,7 @@
 
 Make a new Stability Deposit, or top up existing one.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 depositLUSDInStabilityPool(amount: Decimalish, frontendTag?: string, overrides?: EthersTransactionOverrides): Promise<StabilityDepositChangeDetails>;
@@ -20,7 +20,7 @@ depositLUSDInStabilityPool(amount: Decimalish, frontendTag?: string, overrides?:
 |  frontendTag | string | Address that should receive a share of this deposit's LQTY rewards. |
 |  overrides | [EthersTransactionOverrides](./lib-ethers.etherstransactionoverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[StabilityDepositChangeDetails](./lib-base.stabilitydepositchangedetails.md)<!-- -->&gt;
 

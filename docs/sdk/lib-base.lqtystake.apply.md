@@ -6,7 +6,7 @@
 
 Apply a [LQTYStakeChange](./lib-base.lqtystakechange.md) to this `LQTYStake`<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 apply(change: LQTYStakeChange<Decimalish> | undefined): Decimal;
@@ -18,7 +18,7 @@ apply(change: LQTYStakeChange<Decimalish> | undefined): Decimal;
 |  --- | --- | --- |
 |  change | [LQTYStakeChange](./lib-base.lqtystakechange.md)<!-- -->&lt;[Decimalish](./lib-base.decimalish.md)<!-- -->&gt; \| undefined |  |
 
-<b>Returns:</b>
+**Returns:**
 
 [Decimal](./lib-base.decimal.md)
 

@@ -6,7 +6,7 @@
 
 Get a Trove in its state after the last direct modification.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getTroveBeforeRedistribution(address?: string, overrides?: EthersCallOverrides): Promise<TroveWithPendingRedistribution>;
@@ -19,7 +19,7 @@ getTroveBeforeRedistribution(address?: string, overrides?: EthersCallOverrides):
 |  address | string | Address that owns the Trove. |
 |  overrides | [EthersCallOverrides](./lib-ethers.etherscalloverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[TroveWithPendingRedistribution](./lib-base.trovewithpendingredistribution.md)<!-- -->&gt;
 

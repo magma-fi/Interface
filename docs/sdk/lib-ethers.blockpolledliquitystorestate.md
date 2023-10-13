@@ -6,10 +6,10 @@
 
 The type of [BlockPolledLiquityStore](./lib-ethers.blockpolledliquitystore.md)<!-- -->'s [state](./lib-base.liquitystore.state.md)<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare type BlockPolledLiquityStoreState = LiquityStoreState<BlockPolledLiquityStoreExtraState>;
 ```
-<b>References:</b> [LiquityStoreState](./lib-base.liquitystorestate.md)<!-- -->, [BlockPolledLiquityStoreExtraState](./lib-ethers.blockpolledliquitystoreextrastate.md)
+**References:** [LiquityStoreState](./lib-base.liquitystorestate.md)<!-- -->, [BlockPolledLiquityStoreExtraState](./lib-ethers.blockpolledliquitystoreextrastate.md)
 

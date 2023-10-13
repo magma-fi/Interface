@@ -6,7 +6,7 @@
 
 Withdraw LQTY that has been earned by mining liquidity.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 withdrawLQTYRewardFromLiquidityMining(overrides?: EthersTransactionOverrides): Promise<void>;
@@ -18,7 +18,7 @@ withdrawLQTYRewardFromLiquidityMining(overrides?: EthersTransactionOverrides): P
 |  --- | --- | --- |
 |  overrides | [EthersTransactionOverrides](./lib-ethers.etherstransactionoverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;void&gt;
 

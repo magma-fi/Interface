@@ -6,7 +6,7 @@
 
 User's LQTY token balance.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 lqtyBalance: Decimal;

@@ -6,7 +6,7 @@
 
 Adjust existing Trove by depositing more collateral.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 depositCollateral(amount: Decimalish): Promise<TroveAdjustmentDetails>;
@@ -18,7 +18,7 @@ depositCollateral(amount: Decimalish): Promise<TroveAdjustmentDetails>;
 |  --- | --- | --- |
 |  amount | [Decimalish](./lib-base.decimalish.md) | The amount of collateral to add to the Trove's existing collateral. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[TroveAdjustmentDetails](./lib-base.troveadjustmentdetails.md)<!-- -->&gt;
 
@@ -32,6 +32,5 @@ Equivalent to:
 
 ```typescript
 adjustTrove({ depositCollateral: amount })
-
 ```
 

@@ -6,7 +6,7 @@
 
 The amount of LQTY that's staked.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly stakedLQTY: Decimal;

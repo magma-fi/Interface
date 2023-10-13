@@ -6,7 +6,7 @@
 
 Total amount of LQTY currently staked.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 totalStakedLQTY: Decimal;

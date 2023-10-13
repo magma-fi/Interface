@@ -6,12 +6,12 @@
 
 A transaction that has been prepared for sending.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class PopulatedEthersLiquityTransaction<T = unknown> implements PopulatedLiquityTransaction<EthersPopulatedTransaction, SentEthersLiquityTransaction<T>> 
 ```
-<b>Implements:</b> [PopulatedLiquityTransaction](./lib-base.populatedliquitytransaction.md)<!-- -->&lt;[EthersPopulatedTransaction](./lib-ethers.etherspopulatedtransaction.md)<!-- -->, [SentEthersLiquityTransaction](./lib-ethers.sentethersliquitytransaction.md)<!-- -->&lt;T&gt;&gt;
+**Implements:** [PopulatedLiquityTransaction](./lib-base.populatedliquitytransaction.md)<!-- -->&lt;[EthersPopulatedTransaction](./lib-ethers.etherspopulatedtransaction.md)<!-- -->, [SentEthersLiquityTransaction](./lib-ethers.sentethersliquitytransaction.md)<!-- -->&lt;T&gt;&gt;
 
 ## Remarks
 
@@ -23,7 +23,7 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [gasHeadroom?](./lib-ethers.populatedethersliquitytransaction.gasheadroom.md) |  | number | <i>(Optional)</i> Extra gas added to the transaction's <code>gasLimit</code> on top of the estimated minimum requirement. |
+|  [gasHeadroom?](./lib-ethers.populatedethersliquitytransaction.gasheadroom.md) |  | number | _(Optional)_ Extra gas added to the transaction's <code>gasLimit</code> on top of the estimated minimum requirement. |
 |  [rawPopulatedTransaction](./lib-ethers.populatedethersliquitytransaction.rawpopulatedtransaction.md) |  | [EthersPopulatedTransaction](./lib-ethers.etherspopulatedtransaction.md) | Unsigned transaction object populated by Ethers. |
 
 ## Methods

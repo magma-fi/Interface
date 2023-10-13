@@ -6,7 +6,7 @@
 
 Read the state of the Liquity protocol.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface ReadableLiquity 

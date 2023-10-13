@@ -6,7 +6,7 @@
 
 Make a new Stability Deposit, or top up existing one.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 depositLUSDInStabilityPool(amount: Decimalish, frontendTag?: string): Promise<StabilityDepositChangeDetails>;
@@ -19,7 +19,7 @@ depositLUSDInStabilityPool(amount: Decimalish, frontendTag?: string): Promise<St
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LUSD to add to new or existing deposit. |
 |  frontendTag | string | Address that should receive a share of this deposit's LQTY rewards. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[StabilityDepositChangeDetails](./lib-base.stabilitydepositchangedetails.md)<!-- -->&gt;
 

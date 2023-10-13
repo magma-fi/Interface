@@ -6,7 +6,7 @@
 
 Check whether an address is registered as a Liquity frontend, and what its kickback rate is.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getFrontendStatus(address?: string, overrides?: EthersCallOverrides): Promise<FrontendStatus>;
@@ -19,7 +19,7 @@ getFrontendStatus(address?: string, overrides?: EthersCallOverrides): Promise<Fr
 |  address | string | Address to check. |
 |  overrides | [EthersCallOverrides](./lib-ethers.etherscalloverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[FrontendStatus](./lib-base.frontendstatus.md)<!-- -->&gt;
 

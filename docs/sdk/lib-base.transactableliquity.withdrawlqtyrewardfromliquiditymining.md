@@ -6,12 +6,12 @@
 
 Withdraw LQTY that has been earned by mining liquidity.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 withdrawLQTYRewardFromLiquidityMining(): Promise<void>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;void&gt;
 

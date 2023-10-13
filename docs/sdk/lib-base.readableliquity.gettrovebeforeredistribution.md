@@ -6,7 +6,7 @@
 
 Get a Trove in its state after the last direct modification.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getTroveBeforeRedistribution(address?: string): Promise<TroveWithPendingRedistribution>;
@@ -18,7 +18,7 @@ getTroveBeforeRedistribution(address?: string): Promise<TroveWithPendingRedistri
 |  --- | --- | --- |
 |  address | string | Address that owns the Trove. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[TroveWithPendingRedistribution](./lib-base.trovewithpendingredistribution.md)<!-- -->&gt;
 

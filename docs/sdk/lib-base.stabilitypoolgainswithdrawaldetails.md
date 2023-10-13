@@ -6,7 +6,7 @@
 
 Details of a [withdrawGainsFromStabilityPool()](./lib-base.transactableliquity.withdrawgainsfromstabilitypool.md) transaction.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface StabilityPoolGainsWithdrawalDetails 
@@ -14,10 +14,10 @@ export interface StabilityPoolGainsWithdrawalDetails
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [collateralGain](./lib-base.stabilitypoolgainswithdrawaldetails.collateralgain.md) | [Decimal](./lib-base.decimal.md) | Amount of native currency (e.g. Ether) paid out to the depositor in this transaction. |
-|  [lqtyReward](./lib-base.stabilitypoolgainswithdrawaldetails.lqtyreward.md) | [Decimal](./lib-base.decimal.md) | Amount of LQTY rewarded to the depositor in this transaction. |
-|  [lusdLoss](./lib-base.stabilitypoolgainswithdrawaldetails.lusdloss.md) | [Decimal](./lib-base.decimal.md) | Amount of LUSD burned from the deposit by liquidations since the last modification. |
-|  [newLUSDDeposit](./lib-base.stabilitypoolgainswithdrawaldetails.newlusddeposit.md) | [Decimal](./lib-base.decimal.md) | Amount of LUSD in the deposit directly after this transaction. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [collateralGain](./lib-base.stabilitypoolgainswithdrawaldetails.collateralgain.md) |  | [Decimal](./lib-base.decimal.md) | Amount of native currency (e.g. Ether) paid out to the depositor in this transaction. |
+|  [lqtyReward](./lib-base.stabilitypoolgainswithdrawaldetails.lqtyreward.md) |  | [Decimal](./lib-base.decimal.md) | Amount of LQTY rewarded to the depositor in this transaction. |
+|  [lusdLoss](./lib-base.stabilitypoolgainswithdrawaldetails.lusdloss.md) |  | [Decimal](./lib-base.decimal.md) | Amount of LUSD burned from the deposit by liquidations since the last modification. |
+|  [newLUSDDeposit](./lib-base.stabilitypoolgainswithdrawaldetails.newlusddeposit.md) |  | [Decimal](./lib-base.decimal.md) | Amount of LUSD in the deposit directly after this transaction. |
 

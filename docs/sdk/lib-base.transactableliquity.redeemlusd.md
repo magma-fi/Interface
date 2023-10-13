@@ -6,7 +6,7 @@
 
 Redeem LUSD to native currency (e.g. Ether) at face value.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 redeemLUSD(amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<RedemptionDetails>;
@@ -19,7 +19,7 @@ redeemLUSD(amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<Redempti
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LUSD to be redeemed. |
 |  maxRedemptionRate | [Decimalish](./lib-base.decimalish.md) | Maximum acceptable [redemption rate](./lib-base.fees.redemptionrate.md)<!-- -->. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[RedemptionDetails](./lib-base.redemptiondetails.md)<!-- -->&gt;
 

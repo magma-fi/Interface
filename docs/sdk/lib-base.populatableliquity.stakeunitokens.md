@@ -6,7 +6,7 @@
 
 Stake Uniswap ETH/LUSD LP tokens to participate in liquidity mining and earn LQTY.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 stakeUniTokens(amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
@@ -18,7 +18,7 @@ stakeUniTokens(amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentL
 |  --- | --- | --- |
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LP tokens to add to new or existing stake. |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[PopulatedLiquityTransaction](./lib-base.populatedliquitytransaction.md)<!-- -->&lt;P, [SentLiquityTransaction](./lib-base.sentliquitytransaction.md)<!-- -->&lt;S, [LiquityReceipt](./lib-base.liquityreceipt.md)<!-- -->&lt;R, void&gt;&gt;&gt;&gt;
 

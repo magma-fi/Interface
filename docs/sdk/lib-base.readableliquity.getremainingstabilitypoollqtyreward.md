@@ -6,12 +6,12 @@
 
 Get the remaining LQTY that will be collectively rewarded to stability depositors.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getRemainingStabilityPoolLQTYReward(): Promise<Decimal>;
 ```
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[Decimal](./lib-base.decimal.md)<!-- -->&gt;
 

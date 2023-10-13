@@ -4,7 +4,7 @@
 
 ## ReadableEthersLiquity.connect() method
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 static connect(signerOrProvider: EthersSigner | EthersProvider, optionalParams?: EthersLiquityConnectionOptionalParams): Promise<ReadableEthersLiquity>;
@@ -17,7 +17,7 @@ static connect(signerOrProvider: EthersSigner | EthersProvider, optionalParams?:
 |  signerOrProvider | [EthersSigner](./lib-ethers.etherssigner.md) \| [EthersProvider](./lib-ethers.ethersprovider.md) |  |
 |  optionalParams | [EthersLiquityConnectionOptionalParams](./lib-ethers.ethersliquityconnectionoptionalparams.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[ReadableEthersLiquity](./lib-ethers.readableethersliquity.md)<!-- -->&gt;
 

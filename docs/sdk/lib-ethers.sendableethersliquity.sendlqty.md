@@ -6,7 +6,7 @@
 
 Send LQTY tokens to an address.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 sendLQTY(toAddress: string, amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<SentEthersLiquityTransaction<void>>;
@@ -20,7 +20,7 @@ sendLQTY(toAddress: string, amount: Decimalish, overrides?: EthersTransactionOve
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LQTY to send. |
 |  overrides | [EthersTransactionOverrides](./lib-ethers.etherstransactionoverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[SentEthersLiquityTransaction](./lib-ethers.sentethersliquitytransaction.md)<!-- -->&lt;void&gt;&gt;
 

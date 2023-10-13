@@ -6,7 +6,7 @@
 
 Open a new Trove by depositing collateral and borrowing LUSD.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 openTrove(params: TroveCreationParams<Decimalish>, maxBorrowingRateOrOptionalParams?: Decimalish | BorrowingOperationOptionalParams, overrides?: EthersTransactionOverrides): Promise<TroveCreationDetails>;
@@ -20,7 +20,7 @@ openTrove(params: TroveCreationParams<Decimalish>, maxBorrowingRateOrOptionalPar
 |  maxBorrowingRateOrOptionalParams | [Decimalish](./lib-base.decimalish.md) \| [BorrowingOperationOptionalParams](./lib-ethers.borrowingoperationoptionalparams.md) |  |
 |  overrides | [EthersTransactionOverrides](./lib-ethers.etherstransactionoverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[TroveCreationDetails](./lib-base.trovecreationdetails.md)<!-- -->&gt;
 

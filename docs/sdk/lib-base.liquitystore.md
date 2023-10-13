@@ -6,7 +6,7 @@
 
 Abstract base class of Liquity data store implementations.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare abstract class LiquityStore<T = unknown> 
@@ -23,7 +23,7 @@ Implemented by [BlockPolledLiquityStore](./lib-ethers.blockpolledliquitystore.md
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
 |  [logging](./lib-base.liquitystore.logging.md) |  | boolean | Turn console logging on/off. |
-|  [onLoaded?](./lib-base.liquitystore.onloaded.md) |  | () =&gt; void | <i>(Optional)</i> Called after the state is fetched for the first time. |
+|  [onLoaded?](./lib-base.liquitystore.onloaded.md) |  | () =&gt; void | _(Optional)_ Called after the state is fetched for the first time. |
 |  [state](./lib-base.liquitystore.state.md) |  | [LiquityStoreState](./lib-base.liquitystorestate.md)<!-- -->&lt;T&gt; | The current store state. |
 
 ## Methods

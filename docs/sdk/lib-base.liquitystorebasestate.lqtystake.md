@@ -6,7 +6,7 @@
 
 User's LQTY stake.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 lqtyStake: LQTYStake;

@@ -6,7 +6,7 @@
 
 Get number of Troves that are currently open.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 getNumberOfTroves(overrides?: EthersCallOverrides): Promise<number>;
@@ -18,7 +18,7 @@ getNumberOfTroves(overrides?: EthersCallOverrides): Promise<number>;
 |  --- | --- | --- |
 |  overrides | [EthersCallOverrides](./lib-ethers.etherscalloverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;number&gt;
 

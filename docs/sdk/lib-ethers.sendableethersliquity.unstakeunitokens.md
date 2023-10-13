@@ -6,7 +6,7 @@
 
 Withdraw Uniswap ETH/LUSD LP tokens from liquidity mining.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 unstakeUniTokens(amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<SentEthersLiquityTransaction<void>>;
@@ -19,7 +19,7 @@ unstakeUniTokens(amount: Decimalish, overrides?: EthersTransactionOverrides): Pr
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LP tokens to withdraw. |
 |  overrides | [EthersTransactionOverrides](./lib-ethers.etherstransactionoverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[SentEthersLiquityTransaction](./lib-ethers.sentethersliquitytransaction.md)<!-- -->&lt;void&gt;&gt;
 

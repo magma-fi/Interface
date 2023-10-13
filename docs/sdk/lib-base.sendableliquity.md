@@ -6,12 +6,12 @@
 
 Send Liquity transactions.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface SendableLiquity<R = unknown, S = unknown> extends _SendableFrom<TransactableLiquity, R, S> 
 ```
-<b>Extends:</b> \_SendableFrom&lt;[TransactableLiquity](./lib-base.transactableliquity.md)<!-- -->, R, S&gt;
+**Extends:** \_SendableFrom&lt;[TransactableLiquity](./lib-base.transactableliquity.md)<!-- -->, R, S&gt;
 
 ## Remarks
 

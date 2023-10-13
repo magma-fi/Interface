@@ -6,7 +6,7 @@
 
 LUSD gain available to withdraw.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 readonly lusdGain: Decimal;

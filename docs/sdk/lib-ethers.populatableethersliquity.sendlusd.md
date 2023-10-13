@@ -6,7 +6,7 @@
 
 Send LUSD tokens to an address.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 sendLUSD(toAddress: string, amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<PopulatedEthersLiquityTransaction<void>>;
@@ -20,7 +20,7 @@ sendLUSD(toAddress: string, amount: Decimalish, overrides?: EthersTransactionOve
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LUSD to send. |
 |  overrides | [EthersTransactionOverrides](./lib-ethers.etherstransactionoverrides.md) |  |
 
-<b>Returns:</b>
+**Returns:**
 
 Promise&lt;[PopulatedEthersLiquityTransaction](./lib-ethers.populatedethersliquitytransaction.md)<!-- -->&lt;void&gt;&gt;
 

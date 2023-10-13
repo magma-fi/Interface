@@ -6,12 +6,12 @@
 
 Convenience class that combines multiple interfaces of the library in one object.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity 
 ```
-<b>Implements:</b> [ReadableEthersLiquity](./lib-ethers.readableethersliquity.md)<!-- -->, [TransactableLiquity](./lib-base.transactableliquity.md)
+**Implements:** [ReadableEthersLiquity](./lib-ethers.readableethersliquity.md)<!-- -->, [TransactableLiquity](./lib-base.transactableliquity.md)
 
 ## Remarks
 

@@ -6,7 +6,7 @@
 
 Check whether this `EthersLiquity` is an [EthersLiquityWithStore](./lib-ethers.ethersliquitywithstore.md)<!-- -->&lt;[BlockPolledLiquityStore](./lib-ethers.blockpolledliquitystore.md)<!-- -->&gt;<!-- -->.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 hasStore(store: "blockPolled"): this is EthersLiquityWithStore<BlockPolledLiquityStore>;
@@ -18,7 +18,7 @@ hasStore(store: "blockPolled"): this is EthersLiquityWithStore<BlockPolledLiquit
 |  --- | --- | --- |
 |  store | "blockPolled" |  |
 
-<b>Returns:</b>
+**Returns:**
 
 this is [EthersLiquityWithStore](./lib-ethers.ethersliquitywithstore.md)<!-- -->&lt;[BlockPolledLiquityStore](./lib-ethers.blockpolledliquitystore.md)<!-- -->&gt;
 
