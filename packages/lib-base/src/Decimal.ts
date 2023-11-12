@@ -111,9 +111,11 @@ export class Decimal {
   static from(decimalish: Decimalish): Decimal {
     switch (typeof decimalish) {
       case "object":
+        console.debug("lib-base: 转换大数时报错0", decimalish instanceof Decimal)
         if (decimalish instanceof Decimal) {
-          return decimalish;
+          return Decimal.from(decimalish.toString());
         } else {
+          console.debug("lib-base: 转换大数时报错0", decimalish, typeof decimalish);
           throw new Error("invalid Decimalish value");
         }
       case "string":
@@ -121,6 +123,7 @@ export class Decimal {
       case "number":
         return Decimal._fromString(decimalish.toString());
       default:
+        console.debug("lib-base: 转换大数时报错1", decimalish, typeof decimalish);
         throw new Error("invalid Decimalish value");
     }
   }

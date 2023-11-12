@@ -19,7 +19,8 @@ export const MINIMUM_COLLATERAL_RATIO = Decimal.from(1.1);
  *
  * @public
  */
-export const LUSD_LIQUIDATION_RESERVE = Decimal.from(200);
+// export const LUSD_LIQUIDATION_RESERVE = Decimal.from(200);
+export const LUSD_LIQUIDATION_RESERVE = Decimal.from(1);
 
 /**
  * A Trove must always have at least this much debt on top of the

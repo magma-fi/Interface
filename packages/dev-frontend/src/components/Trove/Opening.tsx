@@ -66,7 +66,7 @@ export const Opening: React.FC = () => {
   console.debug("类型检查 trove", trove instanceof Trove, priceDecimal instanceof Decimal);
   const collateralRatio =
     !collateral.isZero && !borrowAmount.isZero ? trove.collateralRatio(priceDecimal) : undefined;
-  console.debug("检查collateralRatio", collateral.isZero, borrowAmount.isZero, collateralRatio);
+  console.debug("检查collateralRatio", collateral.isZero, borrowAmount.isZero, collateralRatio instanceof Decimal);
 
   const [troveChange, description] = validateTroveChange(
     EMPTY_TROVE,

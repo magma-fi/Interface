@@ -15,6 +15,7 @@ type CollateralRatioProps = {
 };
 
 export const CollateralRatio: React.FC<CollateralRatioProps> = ({ value, change }) => {
+  const value1 = Decimal.from(value.toString());
   const collateralRatioPct = new Percent(value ?? { toString: () => "N/A" });
   const changePct = change && new Percent(change);
   return (
@@ -29,27 +30,27 @@ export const CollateralRatio: React.FC<CollateralRatioProps> = ({ value, change 
           inputId="trove-collateral-ratio"
           amount={collateralRatioPct.prettify()}
           color={
-            value?.gt(CRITICAL_COLLATERAL_RATIO)
+            value1?.gt(CRITICAL_COLLATERAL_RATIO)
               ? "success"
-              : value?.gt(1.2)
-              ? "warning"
-              : value?.lte(1.2)
-              ? "danger"
-              : "muted"
+              : value1?.gt(1.2)
+                ? "warning"
+                : value1?.lte(1.2)
+                  ? "danger"
+                  : "muted"
           }
           pendingAmount={
             change?.positive?.absoluteValue?.gt(10)
               ? "++"
               : change?.negative?.absoluteValue?.gt(10)
-              ? "--"
-              : changePct?.nonZeroish(2)?.prettify()
+                ? "--"
+                : changePct?.nonZeroish(2)?.prettify()
           }
           pendingColor={change?.positive ? "success" : "danger"}
           infoIcon={
             <InfoIcon
               tooltip={
                 <Card variant="tooltip" sx={{ width: "220px" }}>
-                  The ratio between the dollar value of the collateral and the debt (in LUSD) you are
+                  The ratio between the dollar value1 of the collateral and the debt (in LUSD) you are
                   depositing. While the Minimum Collateral Ratio is 110% during normal operation, it
                   is recommended to keep the Collateral Ratio always above 150% to avoid liquidation
                   under Recovery Mode. A Collateral Ratio above 200% or 250% is recommended for
@@ -60,7 +61,7 @@ export const CollateralRatio: React.FC<CollateralRatioProps> = ({ value, change 
           }
         />
       </Flex>
-      {value?.lt(1.5) && (
+      {value1?.lt(1.5) && (
         <ActionDescription>
           Keeping your CR above 150% can help avoid liquidation under Recovery Mode.
         </ActionDescription>

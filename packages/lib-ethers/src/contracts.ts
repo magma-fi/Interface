@@ -72,8 +72,8 @@ export type _TypeSafeContract<T> = Pick<
   } extends {
     [_ in keyof T]: infer U;
   }
-    ? U
-    : never
+  ? U
+  : never
 >;
 
 type EstimatedContractFunction<R = unknown, A extends unknown[] = unknown[], O = Overrides> = (
@@ -88,31 +88,31 @@ type TypedContract<T extends Contract, U, V> = _TypeSafeContract<T> &
   U &
   {
     [P in keyof V]: V[P] extends (...args: infer A) => unknown
-      ? (...args: A) => Promise<ContractTransaction>
-      : never;
+    ? (...args: A) => Promise<ContractTransaction>
+    : never;
   } & {
     readonly callStatic: {
       [P in keyof V]: V[P] extends (...args: [...infer A, never]) => infer R
-        ? (...args: [...A, ...CallOverridesArg]) => R
-        : never;
+      ? (...args: [...A, ...CallOverridesArg]) => R
+      : never;
     };
 
     readonly estimateGas: {
       [P in keyof V]: V[P] extends (...args: infer A) => unknown
-        ? (...args: A) => Promise<BigNumber>
-        : never;
+      ? (...args: A) => Promise<BigNumber>
+      : never;
     };
 
     readonly populateTransaction: {
       [P in keyof V]: V[P] extends (...args: infer A) => unknown
-        ? (...args: A) => Promise<PopulatedTransaction>
-        : never;
+      ? (...args: A) => Promise<PopulatedTransaction>
+      : never;
     };
 
     readonly estimateAndPopulate: {
       [P in keyof V]: V[P] extends (...args: [...infer A, infer O | undefined]) => unknown
-        ? EstimatedContractFunction<PopulatedTransaction, A, O>
-        : never;
+      ? EstimatedContractFunction<PopulatedTransaction, A, O>
+      : never;
     };
   };
 
@@ -227,7 +227,11 @@ const mapLiquityContracts = <T, U>(
   f: (t: T, key: LiquityContractsKey) => U
 ) =>
   Object.fromEntries(
-    Object.entries(contracts).map(([key, t]) => [key, f(t, key as LiquityContractsKey)])
+    Object.entries(contracts).map(([key, t]) => {
+      const res = [key, f(t, key as LiquityContractsKey)];
+      console.debug("lib-ethers: mapLiquityContracts() res =", res);
+      return res;
+    })
   ) as Record<LiquityContractsKey, U>;
 
 /** @internal */
@@ -250,11 +254,19 @@ export const _connectToContracts = (
   signerOrProvider: EthersSigner | EthersProvider,
   { addresses, _priceFeedIsTestnet, _uniTokenIsMock }: _LiquityDeploymentJSON
 ): _LiquityContracts => {
+  console.debug("lib-ethers: 检查合约是否存在 _connectToContracts() 参数", addresses);
+
   const abi = getAbi(_priceFeedIsTestnet, _uniTokenIsMock);
 
   return mapLiquityContracts(
     addresses,
-    (address, key) =>
-      new _LiquityContract(address, abi[key], signerOrProvider) as _TypedLiquityContract
+    (address, key) => {
+      console.debug("lib-ethers: 检查合约是否存在 遍历", address, key, !!address, address === "");
+
+      if (address) {
+        const res = new _LiquityContract(address, abi[key], signerOrProvider) as _TypedLiquityContract;
+        return res;
+      }
+    }
   ) as _LiquityContracts;
 };

@@ -32,6 +32,8 @@ import {
 } from "./EthersLiquityConnection";
 
 import { BlockPolledLiquityStore } from "./BlockPolledLiquityStore";
+import { resolve } from "path";
+import { BigNumber } from "ethers";
 
 // TODO: these are constant in the contracts, so it doesn't make sense to make a call for them,
 // but to avoid having to update them here when we change them in the contracts, we could read
@@ -51,14 +53,14 @@ const userTroveStatusFrom = (backendStatus: BackendTroveStatus): UserTroveStatus
   backendStatus === BackendTroveStatus.nonExistent
     ? "nonExistent"
     : backendStatus === BackendTroveStatus.active
-    ? "open"
-    : backendStatus === BackendTroveStatus.closedByOwner
-    ? "closedByOwner"
-    : backendStatus === BackendTroveStatus.closedByLiquidation
-    ? "closedByLiquidation"
-    : backendStatus === BackendTroveStatus.closedByRedemption
-    ? "closedByRedemption"
-    : panic(new Error(`invalid backendStatus ${backendStatus}`));
+      ? "open"
+      : backendStatus === BackendTroveStatus.closedByOwner
+        ? "closedByOwner"
+        : backendStatus === BackendTroveStatus.closedByLiquidation
+          ? "closedByLiquidation"
+          : backendStatus === BackendTroveStatus.closedByRedemption
+            ? "closedByRedemption"
+            : panic(new Error(`invalid backendStatus ${backendStatus}`));
 
 const convertToDate = (timestamp: number) => new Date(timestamp * 1000);
 
@@ -307,6 +309,12 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     address ??= _requireAddress(this.connection);
     const { lqtyToken } = _getContracts(this.connection);
 
+    if (!lqtyToken) {
+      return new Promise((resolve, reject) => {
+        return resolve(Decimal.ZERO);
+      });
+    }
+
     return lqtyToken.balanceOf(address, { ...overrides }).then(decimalify);
   }
 
@@ -315,6 +323,12 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     address ??= _requireAddress(this.connection);
     const { uniToken } = _getContracts(this.connection);
 
+    if (!uniToken) {
+      return new Promise((resolve, reject) => {
+        return resolve(Decimal.ZERO);
+      });
+    }
+
     return uniToken.balanceOf(address, { ...overrides }).then(decimalify);
   }
 
@@ -322,6 +336,12 @@ export class ReadableEthersLiquity implements ReadableLiquity {
   getUniTokenAllowance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
     address ??= _requireAddress(this.connection);
     const { uniToken, unipool } = _getContracts(this.connection);
+
+    if (!uniToken || !unipool) {
+      return new Promise((resolve, reject) => {
+        return resolve(Decimal.ZERO);
+      });
+    }
 
     return uniToken.allowance(address, unipool.address, { ...overrides }).then(decimalify);
   }
@@ -332,11 +352,12 @@ export class ReadableEthersLiquity implements ReadableLiquity {
   ): Promise<(blockTimestamp: number) => Decimal> {
     const { unipool } = _getContracts(this.connection);
 
+    const zero = BigNumber.from(0);
     const [totalSupply, rewardRate, periodFinish, lastUpdateTime] = await Promise.all([
-      unipool.totalSupply({ ...overrides }),
-      unipool.rewardRate({ ...overrides }).then(decimalify),
-      unipool.periodFinish({ ...overrides }).then(numberify),
-      unipool.lastUpdateTime({ ...overrides }).then(numberify)
+      unipool?.totalSupply({ ...overrides }) || zero,
+      unipool?.rewardRate({ ...overrides }).then(decimalify) || zero,
+      unipool?.periodFinish({ ...overrides }).then(numberify) || zero,
+      unipool?.lastUpdateTime({ ...overrides }).then(numberify) || zero
     ]);
 
     return (blockTimestamp: number) =>
@@ -360,12 +381,24 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     address ??= _requireAddress(this.connection);
     const { unipool } = _getContracts(this.connection);
 
+    if (!unipool) {
+      return new Promise((resolve, reject) => {
+        return resolve(Decimal.ZERO);
+      });
+    }
+
     return unipool.balanceOf(address, { ...overrides }).then(decimalify);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTotalStakedUniTokens} */
   getTotalStakedUniTokens(overrides?: EthersCallOverrides): Promise<Decimal> {
     const { unipool } = _getContracts(this.connection);
+
+    if (!unipool?.address) {
+      return new Promise((resolve, reject) => {
+        return resolve(Decimal.ZERO);
+      });
+    }
 
     return unipool.totalSupply({ ...overrides }).then(decimalify);
   }
@@ -374,6 +407,12 @@ export class ReadableEthersLiquity implements ReadableLiquity {
   getLiquidityMiningLQTYReward(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
     address ??= _requireAddress(this.connection);
     const { unipool } = _getContracts(this.connection);
+
+    if (!unipool) {
+      return new Promise((resolve, reject) => {
+        return resolve(Decimal.ZERO);
+      });
+    }
 
     return unipool.earned(address, { ...overrides }).then(decimalify);
   }
@@ -672,6 +711,8 @@ class _BlockPolledReadableEthersLiquity
   }
 
   async getTotalStakedUniTokens(overrides?: EthersCallOverrides): Promise<Decimal> {
+    console.debug("lib-ethers: getTotalStakedUniTokens()");
+
     return this._blockHit(overrides)
       ? this.store.state.totalStakedUniTokens
       : this._readable.getTotalStakedUniTokens(overrides);
