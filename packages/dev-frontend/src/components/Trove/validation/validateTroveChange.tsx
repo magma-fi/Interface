@@ -10,7 +10,8 @@ import {
   CRITICAL_COLLATERAL_RATIO,
   LiquityStoreState,
   TroveClosureParams,
-  TroveCreationParams
+  TroveCreationParams,
+  Decimalish
 } from "@liquity/lib-base";
 
 import { COIN } from "../../../strings";
@@ -89,7 +90,18 @@ export const selectForTroveChangeValidation = ({
   accountBalance,
   lusdBalance,
   numberOfTroves
-}: LiquityStoreState) => ({ price, total, accountBalance, lusdBalance, numberOfTroves });
+}: LiquityStoreState) => {
+  const t = new Trove(Decimal.from(total.collateral.toString()), Decimal.from(total.debt.toString()));
+  const p = Decimal.from(price.toString())
+  console.debug("类型检查", t instanceof Trove, p instanceof Decimal);
+  return {
+    price: p,
+    total: t,
+    accountBalance,
+    lusdBalance,
+    numberOfTroves
+  };
+};
 
 type TroveChangeValidationSelectedState = ReturnType<typeof selectForTroveChangeValidation>;
 
@@ -106,9 +118,9 @@ export const validateTroveChange = (
   borrowingRate: Decimal,
   selectedState: TroveChangeValidationSelectedState
 ): [
-  validChange: Exclude<TroveChange<Decimal>, { type: "invalidCreation" }> | undefined,
-  description: JSX.Element | undefined
-] => {
+    validChange: Exclude<TroveChange<Decimal>, { type: "invalidCreation" }> | undefined,
+    description: JSX.Element | undefined
+  ] => {
   const { total, price } = selectedState;
   const change = originalTrove.whatChanged(adjustedTrove, borrowingRate);
 
@@ -119,8 +131,14 @@ export const validateTroveChange = (
   // Reapply change to get the exact state the Trove will end up in (which could be slightly
   // different from `edited` due to imprecision).
   const resultingTrove = originalTrove.apply(change, borrowingRate);
-  const recoveryMode = total.collateralRatioIsBelowCritical(price);
-  const wouldTriggerRecoveryMode = total
+
+  console.debug("测试数据 price =", price, price instanceof Decimal);
+  console.debug("测试数据 total =", total instanceof Trove, total.collateral instanceof Decimal);
+  const recoveryMode = total.collateralRatioIsBelowCritical(price.toString());
+
+  // console.debug("测试数据 originalTrove =", originalTrove.collateral instanceof Decimal);
+
+  const wouldTriggerRecoveryMode = (total as Trove)
     .subtract(originalTrove)
     .add(resultingTrove)
     .collateralRatioIsBelowCritical(price);
@@ -151,8 +169,8 @@ export const validateTroveChange = (
     change.type === "creation"
       ? validateTroveCreation(change.params, context)
       : change.type === "closure"
-      ? validateTroveClosure(change.params, context)
-      : validateTroveAdjustment(change.params, context);
+        ? validateTroveClosure(change.params, context)
+        : validateTroveAdjustment(change.params, context);
 
   if (errorDescription) {
     return [undefined, errorDescription];

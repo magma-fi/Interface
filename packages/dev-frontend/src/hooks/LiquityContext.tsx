@@ -41,8 +41,11 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   const [config, setConfig] = useState<LiquityFrontendConfig>();
 
   const connection = useMemo(() => {
+    console.debug("取得connection", chainId, config, provider, signer, account);
+
     if (config && provider && signer.data && account.address) {
       const batchedProvider = new BatchedProvider(provider, chainId);
+      console.debug("batchedProvider =", batchedProvider);
       // batchedProvider._debugLog = true;
 
       try {
@@ -56,6 +59,7 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
       }
     }
   }, [config, provider, signer.data, account.address, chainId]);
+  console.debug("connection =", connection);
 
   useEffect(() => {
     getConfig().then(setConfig);

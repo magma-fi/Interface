@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, Heading, Box, Flex, Input, Label, Paragraph, Button, Spinner } from "theme-ui";
 
-import { Decimal } from "@liquity/lib-base";
+import { Decimal, Decimalish } from "@liquity/lib-base";
 
 import { shortenAddress } from "../utils/shortenAddress";
 import { useLiquity } from "../hooks/LiquityContext";
@@ -27,7 +27,7 @@ const FrontendRegistrationAction: React.FC<FrontendRegistrationActionProps> = ({
     </Button>
   ) : myTransactionState.type !== "waitingForConfirmation" &&
     myTransactionState.type !== "confirmed" ? (
-    <Transaction id={myTransactionId} send={liquity.registerFrontend.bind(liquity, kickbackRate)}>
+    <Transaction id={myTransactionId} send={liquity.registerFrontend.bind(liquity, kickbackRate.toString())}>
       <Button>Register</Button>
     </Transaction>
   ) : null;
@@ -37,6 +37,7 @@ export const FrontendRegistration: React.FC = () => {
   const { account } = useLiquity();
 
   const [kickbackRate, setKickbackRate] = useState(Decimal.from(0.8));
+  console.debug("旧的kickbackRate =", kickbackRate, Decimal.from(kickbackRate));
   const [cut, setCut] = useState(Decimal.from(0.2));
   const [kickbackRateString, setKickbackRateString] = useState("80");
 
@@ -63,7 +64,7 @@ export const FrontendRegistration: React.FC = () => {
 
                   setKickbackRate(newKickbackRate);
                   setCut(newCut);
-                } catch {}
+                } catch { }
               }}
               onBlur={() => {
                 setKickbackRateString(kickbackRate.mul(100).toString());

@@ -44,7 +44,8 @@ const GAS_ROOM_ETH = Decimal.from(0.1);
 export const Opening: React.FC = () => {
   const { dispatchEvent } = useTroveView();
   const { fees, price, accountBalance, validationContext } = useLiquitySelector(selector);
-  const borrowingRate = fees.borrowingRate();
+  const priceDecimal = Decimal.from(price.toString());
+  const borrowingRate = Decimal.from(fees.borrowingRate().toString());
   const editingState = useState<string>();
 
   const [collateral, setCollateral] = useState<Decimal>(Decimal.ZERO);
@@ -57,12 +58,15 @@ export const Opening: React.FC = () => {
   const totalDebt = borrowAmount.add(LUSD_LIQUIDATION_RESERVE).add(fee);
   const isDirty = !collateral.isZero || !borrowAmount.isZero;
   const trove = isDirty ? new Trove(collateral, totalDebt) : EMPTY_TROVE;
-  const maxCollateral = accountBalance.gt(GAS_ROOM_ETH)
-    ? accountBalance.sub(GAS_ROOM_ETH)
+  const maxCollateral = accountBalance.gt(GAS_ROOM_ETH.toString())
+    ? accountBalance.sub(GAS_ROOM_ETH.toString())
     : Decimal.ZERO;
-  const collateralMaxedOut = collateral.eq(maxCollateral);
+  const collateralMaxedOut = collateral.eq(maxCollateral.toString());
+
+  console.debug("类型检查 trove", trove instanceof Trove, priceDecimal instanceof Decimal);
   const collateralRatio =
-    !collateral.isZero && !borrowAmount.isZero ? trove.collateralRatio(price) : undefined;
+    !collateral.isZero && !borrowAmount.isZero ? trove.collateralRatio(priceDecimal) : undefined;
+  console.debug("检查collateralRatio", collateral.isZero, borrowAmount.isZero, collateralRatio);
 
   const [troveChange, description] = validateTroveChange(
     EMPTY_TROVE,
@@ -89,10 +93,13 @@ export const Opening: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    console.debug("collateral改变了。");
     if (!collateral.isZero && borrowAmount.isZero) {
       setBorrowAmount(LUSD_MINIMUM_NET_DEBT);
     }
   }, [collateral, borrowAmount]);
+
+  console.debug("maxCollateral =", maxCollateral, maxCollateral.toString());
 
   return (
     <Card>
@@ -115,7 +122,11 @@ export const Opening: React.FC = () => {
           editingState={editingState}
           unit="ETH"
           editedAmount={collateral.toString(4)}
-          setEditedAmount={(amount: string) => setCollateral(Decimal.from(amount))}
+          setEditedAmount={(amount: string) => {
+            const d = Decimal.from(amount);
+            console.debug("amount =", amount, typeof amount, d, typeof d, d instanceof Decimal);
+            setCollateral(Decimal.from(amount));
+          }}
         />
 
         <EditableRow

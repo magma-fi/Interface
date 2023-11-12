@@ -5,7 +5,8 @@ import { defaultAbiCoder } from "@ethersproject/abi";
 
 import "react-circular-progressbar/dist/styles.css";
 
-import { EthersTransactionOverrides, EthersTransactionCancelledError } from "@liquity/lib-ethers";
+// import { EthersTransactionOverrides, EthersTransactionCancelledError } from "@liquity/lib-ethers";
+import { EthersTransactionOverrides } from "@liquity/lib-ethers";
 import { SentLiquityTransaction, LiquityReceipt } from "@liquity/lib-base";
 
 import { useLiquity } from "../hooks/LiquityContext";
@@ -127,7 +128,11 @@ export const useTransactionFunction = (
 ): [sendTransaction: () => Promise<void>, transactionState: TransactionState] => {
   const [transactionState, setTransactionState] = useTransactionState();
 
+  console.debug("transactionState", transactionState);
+
   const sendTransaction = useCallback(async () => {
+    console.debug("sendTransaction()");
+
     setTransactionState({ type: "waitingForApproval", id });
 
     try {
@@ -165,6 +170,8 @@ export function Transaction<C extends React.ReactElement<ButtonlikeProps>>({
   send,
   children
 }: TransactionProps<C>) {
+  console.debug("Transaction组件 send =", send);
+
   const [sendTransaction, transactionState] = useTransactionFunction(id, send);
   const trigger = React.Children.only<C>(children);
 
@@ -185,16 +192,16 @@ export function Transaction<C extends React.ReactElement<ButtonlikeProps>>({
   const clonedTrigger =
     showFailure === "asChildText"
       ? React.cloneElement(
-          trigger,
-          {
-            disabled: true,
-            variant: "danger"
-          },
-          failureReasons[0]
-        )
+        trigger,
+        {
+          disabled: true,
+          variant: "danger"
+        },
+        failureReasons[0]
+      )
       : showFailure === "asTooltip"
-      ? React.cloneElement(trigger, { disabled: true })
-      : React.cloneElement(trigger, { onClick: sendTransaction });
+        ? React.cloneElement(trigger, { disabled: true })
+        : React.cloneElement(trigger, { onClick: sendTransaction });
 
   if (showFailure === "asTooltip") {
     tooltip = failureReasons[0];
@@ -285,19 +292,19 @@ export const TransactionMonitor: React.FC = () => {
 
           finished = true;
 
-          if (rawError instanceof EthersTransactionCancelledError) {
-            console.log(`Cancelled tx ${txHash}`);
-            setTransactionState({ type: "cancelled", id });
-          } else {
-            console.error(`Failed to get receipt for tx ${txHash}`);
-            console.error(rawError);
+          // if (rawError instanceof EthersTransactionCancelledError) {
+          //   console.log(`Cancelled tx ${txHash}`);
+          //   setTransactionState({ type: "cancelled", id });
+          // } else {
+          //   console.error(`Failed to get receipt for tx ${txHash}`);
+          //   console.error(rawError);
 
-            setTransactionState({
-              type: "failed",
-              id,
-              error: new Error("Failed")
-            });
-          }
+          //   setTransactionState({
+          //     type: "failed",
+          //     id,
+          //     error: new Error("Failed")
+          //   });
+          // }
         }
       };
 

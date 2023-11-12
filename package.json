@@ -80,6 +80,7 @@
     "start-dev-chain:prepare-lib-ethers": "yarn prepare:lib-ethers",
     "stop-dev-chain": "docker kill openethereum",
     "start-dev-frontend": "yarn workspace @liquity/dev-frontend start",
+    "start": "yarn prepare:lib-ethers && yarn workspace @liquity/dev-frontend start",
     "start-demo": "run-s 'start-demo:*'",
     "start-demo:dev-chain": "yarn start-dev-chain",
     "start-demo:dev-frontend": "yarn workspace @liquity/dev-frontend start-demo",

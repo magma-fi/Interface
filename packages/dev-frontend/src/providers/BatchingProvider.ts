@@ -11,7 +11,8 @@ const multicallAddress = {
   3: "0x53C43764255c17BD724F74c4eF150724AC50a3ed",
   4: "0x42Ad527de7d4e9d9d011aC45B31D8551f8Fe9821",
   5: "0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e",
-  42: "0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A"
+  42: "0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A",
+  4690: "0x7B0338afA9b19973592e26E7ACcf077C556aaAC9"
 };
 
 const hasMulticall = (chainId: number): chainId is keyof typeof multicallAddress =>
@@ -162,14 +163,14 @@ export class BatchedProvider extends BaseProvider {
         calls.length > 1
           ? await this._multicall.callStatic.aggregate(calls, { blockTag }).then(x => x.returnData)
           : [
-              await this.underlyingProvider.perform("call", {
-                transaction: {
-                  to: calls[0].target,
-                  data: calls[0].callData
-                },
-                blockTag
-              })
-            ];
+            await this.underlyingProvider.perform("call", {
+              transaction: {
+                to: calls[0].target,
+                data: calls[0].callData
+              },
+              blockTag
+            })
+          ];
 
       callbacks.forEach(([resolve], i) => resolve(results[i]));
     } catch (error) {
@@ -203,8 +204,7 @@ export class BatchedProvider extends BaseProvider {
       if (timeSinceLastRatioCheck >= 10000 && this._numberOfActualCalls) {
         if (this._debugLog) {
           console.log(
-            `Call batching ratio: ${
-              Math.round((10 * this._numberOfBatchedCalls) / this._numberOfActualCalls) / 10
+            `Call batching ratio: ${Math.round((10 * this._numberOfBatchedCalls) / this._numberOfActualCalls) / 10
             }X`
           );
         }
@@ -253,7 +253,11 @@ export class BatchedProvider extends BaseProvider {
       return this.underlyingProvider.perform("getBalance", params);
     }
 
-    return this._multicall.getEthBalance(params.address, { blockTag: params.blockTag });
+    console.debug("_performGetBalance()", this._multicall, params);
+    const res = await this._multicall.getEthBalance(params.address, { blockTag: params.blockTag });
+    console.debug("结果", res);
+
+    return res;
   }
 
   async perform(method: string, params: unknown): Promise<unknown> {

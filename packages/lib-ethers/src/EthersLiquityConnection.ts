@@ -10,6 +10,7 @@ import rinkeby from "../deployments/rinkeby.json";
 import ropsten from "../deployments/ropsten.json";
 import mainnet from "../deployments/mainnet.json";
 import kiln from "../deployments/kiln.json";
+import iotexTestnet from "../deployments/iotexTestnet.json";
 
 import { numberify, panic } from "./_utils";
 import { EthersProvider, EthersSigner } from "./types";
@@ -34,6 +35,7 @@ const deployments: {
   [goerli.chainId]: goerli,
   [kovan.chainId]: kovan,
   [kiln.chainId]: kiln,
+  [iotexTestnet.chainId]: iotexTestnet,
 
   ...(dev !== null ? { [dev.chainId]: dev } : {})
 };
@@ -308,6 +310,8 @@ export function _connectByChainId(
   chainId: number,
   optionalParams?: EthersLiquityConnectionOptionalParams
 ): EthersLiquityConnection {
+  console.debug("lib-ethers: deployments =", deployments);
+
   const deployment: _LiquityDeploymentJSON =
     deployments[chainId] ?? panic(new UnsupportedNetworkError(chainId));
 

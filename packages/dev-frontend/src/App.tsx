@@ -1,6 +1,6 @@
 import React from "react";
 import { createClient, WagmiConfig } from "wagmi";
-import { mainnet, goerli, localhost } from "wagmi/chains";
+import { mainnet, goerli, localhost, iotexTestnet } from "wagmi/chains";
 import { ConnectKitProvider, getDefaultClient } from "connectkit";
 import { Flex, Heading, ThemeProvider, Paragraph, Link } from "theme-ui";
 
@@ -16,6 +16,7 @@ import { DisposableWalletProvider } from "./testUtils/DisposableWalletProvider";
 import { LiquityFrontend } from "./LiquityFrontend";
 import { AppLoader } from "./components/AppLoader";
 import { useAsyncValue } from "./hooks/AsyncValue";
+import { Decimal, Decimalish } from "@liquity/lib-base";
 
 const isDemoMode = import.meta.env.VITE_APP_DEMO_MODE === "true";
 
@@ -24,6 +25,7 @@ if (isDemoMode) {
     import.meta.env.VITE_APP_RPC_URL || `http://${window.location.hostname || "localhost"}:8545`,
     "0x4d5db4107d237df6a3d58ee5f70ae63d73d7658d4026f2eefd2f204c81682cb7"
   );
+  console.debug("ethereum =", ethereum);
 
   Object.assign(window, { ethereum });
 }
@@ -93,8 +95,8 @@ const App = () => {
                 isDemoMode || import.meta.env.MODE === "test"
                   ? [localhost]
                   : config.value.testnetOnly
-                  ? [goerli]
-                  : [mainnet, goerli],
+                    ? [goerli]
+                    : [mainnet, goerli, iotexTestnet],
               walletConnectProjectId: config.value.walletConnectProjectId,
               infuraId: config.value.infuraApiKey,
               alchemyId: config.value.alchemyApiKey

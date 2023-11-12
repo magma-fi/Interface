@@ -54,9 +54,12 @@ export const UserAccount: React.FC = () => {
 
         {([
           ["ETH", accountBalance],
-          [COIN, Decimal.from(lusdBalance || 0)],
-          [GT, Decimal.from(lqtyBalance)],
-          ["bLUSD", Decimal.from(bLusdBalance || 0)]
+          // [COIN, Decimal.from(lusdBalance || 0)],
+          [COIN, Decimal.from(0)],
+          // [GT, Decimal.from(lqtyBalance)],
+          [GT, Decimal.from(0)],
+          // ["bLUSD", Decimal.from(bLusdBalance || 0)]
+          ["bLUSD", Decimal.from(0)]
         ] as const).map(([currency, balance], i) => (
           <Flex key={i} sx={{ ml: 3, flexDirection: "column" }}>
             <Heading sx={{ fontSize: 1 }}>{currency}</Heading>
