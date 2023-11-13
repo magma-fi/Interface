@@ -109,6 +109,11 @@ export class Decimal {
   }
 
   static from(decimalish: Decimalish): Decimal {
+    if ((typeof decimalish) === "object" && decimalish instanceof BigNumber) {
+      console.debug("lib-base: 转换大数时传入了BigNumber", decimalish);
+      return Decimal.from(decimalish.toString());
+    }
+
     switch (typeof decimalish) {
       case "object":
         console.debug("lib-base: 转换大数时进行判断", decimalish instanceof Decimal)
