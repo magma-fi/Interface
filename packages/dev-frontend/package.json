@@ -58,7 +58,7 @@
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "start": "vite",
+    "start": "vite --force",
     "start-demo": "cross-env VITE_APP_DEMO_MODE=true vite --force",
     "build": "run-s 'build:*'",
     "build:set-version": "node scripts/set-version.cjs",
