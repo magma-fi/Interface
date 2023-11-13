@@ -111,9 +111,9 @@ export class Decimal {
   static from(decimalish: Decimalish): Decimal {
     switch (typeof decimalish) {
       case "object":
-        console.debug("lib-base: 转换大数时报错0", decimalish instanceof Decimal)
+        console.debug("lib-base: 转换大数时进行判断", decimalish instanceof Decimal)
         if (decimalish instanceof Decimal) {
-          return Decimal.from(decimalish.toString());
+          return decimalish;
         } else {
           console.debug("lib-base: 转换大数时报错0", decimalish, typeof decimalish);
           throw new Error("invalid Decimalish value");
