@@ -4,7 +4,6 @@ import React, { useContext, createContext } from "react";
 import mainnet from "@liquity/chicken-bonds/lusd/addresses/mainnet.json";
 import goerli from "@liquity/chicken-bonds/lusd/addresses/goerli.json";
 import { Addresses } from "./transitions";
-import { iotexTestnet } from "wagmi/dist/chains";
 
 const nullAddresses: Addresses = {
   BLUSD_AMM_ADDRESS: null,
