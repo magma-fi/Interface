@@ -2,7 +2,7 @@ import React from "react";
 import { createClient, WagmiConfig } from "wagmi";
 import { mainnet, goerli, localhost, iotexTestnet } from "wagmi/chains";
 import { ConnectKitProvider, getDefaultClient } from "connectkit";
-import { Flex, Heading, ThemeProvider, Paragraph, Link } from "theme-ui";
+import { Flex, Heading, Paragraph, Link, ThemeUIProvider } from "theme-ui";
 
 // import { BatchedWebSocketAugmentedWeb3Provider } from "@liquity/providers";
 import { LiquityProvider } from "./hooks/LiquityContext";
@@ -16,7 +16,6 @@ import { DisposableWalletProvider } from "./testUtils/DisposableWalletProvider";
 import { LiquityFrontend } from "./LiquityFrontend";
 import { AppLoader } from "./components/AppLoader";
 import { useAsyncValue } from "./hooks/AsyncValue";
-import { Decimal, Decimalish } from "@liquity/lib-base";
 
 const isDemoMode = import.meta.env.VITE_APP_DEMO_MODE === "true";
 
@@ -85,7 +84,7 @@ const App = () => {
   const loader = <AppLoader />;
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeUIProvider theme={theme}>
       {config.loaded && (
         <WagmiConfig
           client={createClient(
@@ -118,7 +117,7 @@ const App = () => {
           </ConnectKitProvider>
         </WagmiConfig>
       )}
-    </ThemeProvider>
+    </ThemeUIProvider>
   );
 };
 

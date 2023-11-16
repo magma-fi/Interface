@@ -18,8 +18,8 @@ import {
   BondNFT__factory,
   ChickenBondManager__factory
 } from "@liquity/chicken-bonds/lusd/types";
-import type { LUSDToken } from "@liquity/lib-ethers/dist/types";
-import LUSDTokenAbi from "@liquity/lib-ethers/abi/LUSDToken.json";
+import type { LUSDToken } from "lib-ethers/dist/types";
+import LUSDTokenAbi from "lib-ethers/abi/LUSDToken.json";
 import { useContract } from "../../../hooks/useContract";
 import { useLiquity } from "../../../hooks/LiquityContext";
 import { useCallback } from "react";

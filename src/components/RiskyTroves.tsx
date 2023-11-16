@@ -9,7 +9,7 @@ import {
   UserTrove,
   Decimal
 } from "@liquity/lib-base";
-import { BlockPolledLiquityStoreState } from "@liquity/lib-ethers";
+import { BlockPolledLiquityStoreState } from "lib-ethers";
 import { useLiquitySelector } from "@liquity/lib-react";
 
 import { shortenAddress } from "../utils/shortenAddress";
