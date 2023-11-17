@@ -9,7 +9,7 @@ import {
   Trove,
   LiquityStoreState,
   LUSD_LIQUIDATION_RESERVE
-} from "@liquity/lib-base";
+} from "lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
 import { COIN } from "../../strings";
@@ -45,7 +45,10 @@ export const TroveEditor: React.FC<TroveEditorProps> = ({
   const feePct = new Percent(borrowingRate);
 
   const originalCollateralRatio = !original.isEmpty ? original.collateralRatio(price) : undefined;
+  console.debug("edited.isEmpty =", edited.isEmpty);
   const collateralRatio = !edited.isEmpty ? edited.collateralRatio(price) : undefined;
+  console.debug("比较大数1", collateralRatio, collateralRatio instanceof Decimal);
+  console.debug("比较大数2", originalCollateralRatio, originalCollateralRatio instanceof Decimal);
   const collateralRatioChange = Difference.between(collateralRatio, originalCollateralRatio);
 
   return (

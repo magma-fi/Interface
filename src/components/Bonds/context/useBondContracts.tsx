@@ -1,4 +1,4 @@
-import { Decimal } from "@liquity/lib-base";
+import { Decimal } from "lib-base";
 import {
   BLUSDLPZap,
   BLUSDLPZap__factory,

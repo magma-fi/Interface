@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 import { Card, Heading, Box, Flex, Button } from "theme-ui";
 
-import { LiquityStoreState } from "@liquity/lib-base";
+import { LiquityStoreState } from "lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
 import { COIN, GT } from "../../strings";

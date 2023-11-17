@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { Flex, Button } from "theme-ui";
 
-import { LiquityStoreState, Decimal, Trove, Decimalish, LUSD_MINIMUM_DEBT } from "@liquity/lib-base";
+import { LiquityStoreState, Decimal, Trove, Decimalish, LUSD_MINIMUM_DEBT } from "lib-base";
 
 import { LiquityStoreUpdate, useLiquityReducer, useLiquitySelector } from "@liquity/lib-react";
 
@@ -40,10 +40,8 @@ const finishChange = reduceWith({ type: "finishChange" });
 const revert = reduceWith({ type: "revert" });
 
 const reduce = (state: TroveManagerState, action: TroveManagerAction): TroveManagerState => {
-  // console.log(state);
-  // console.log(action);
-
   const { original, edited, changePending, debtDirty, addedMinimumDebt } = state;
+  console.debug("检查edited前 edited", edited, edited.isEmpty);
 
   switch (action.type) {
     case "startChange": {
@@ -161,6 +159,7 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
 
   useEffect(() => {
     if (collateral !== undefined) {
+      console.debug("检查大数类型 collateral =", collateral, collateral instanceof Decimal);
       dispatch({ type: "setCollateral", newValue: collateral });
     }
     if (debt !== undefined) {
@@ -170,6 +169,8 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
 
   const borrowingRate = fees.borrowingRate();
   const maxBorrowingRate = borrowingRate.add(0.005); // WONT-FIX slippage tolerance
+
+  console.debug("检查大数类型 borrowingRate =", borrowingRate, borrowingRate instanceof Decimal);
 
   const [validChange, description] = validateTroveChange(
     original,

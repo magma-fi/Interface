@@ -1,7 +1,7 @@
 import React from "react";
 import { Flex, Box, Card } from "theme-ui";
 
-import { CRITICAL_COLLATERAL_RATIO, Decimal, Difference, Percent } from "@liquity/lib-base";
+import { CRITICAL_COLLATERAL_RATIO, Decimal, Difference, Percent } from "lib-base";
 
 import { Icon } from "../Icon";
 
@@ -15,7 +15,6 @@ type CollateralRatioProps = {
 };
 
 export const CollateralRatio: React.FC<CollateralRatioProps> = ({ value, change }) => {
-  const value1 = Decimal.from(value.toString());
   const collateralRatioPct = new Percent(value ?? { toString: () => "N/A" });
   const changePct = change && new Percent(change);
   return (
@@ -30,11 +29,11 @@ export const CollateralRatio: React.FC<CollateralRatioProps> = ({ value, change 
           inputId="trove-collateral-ratio"
           amount={collateralRatioPct.prettify()}
           color={
-            value1?.gt(CRITICAL_COLLATERAL_RATIO)
+            value?.gt(CRITICAL_COLLATERAL_RATIO)
               ? "success"
-              : value1?.gt(1.2)
+              : value?.gt(1.2)
                 ? "warning"
-                : value1?.lte(1.2)
+                : value?.lte(1.2)
                   ? "danger"
                   : "muted"
           }
@@ -50,7 +49,7 @@ export const CollateralRatio: React.FC<CollateralRatioProps> = ({ value, change 
             <InfoIcon
               tooltip={
                 <Card variant="tooltip" sx={{ width: "220px" }}>
-                  The ratio between the dollar value1 of the collateral and the debt (in LUSD) you are
+                  The ratio between the dollar value of the collateral and the debt (in WEN) you are
                   depositing. While the Minimum Collateral Ratio is 110% during normal operation, it
                   is recommended to keep the Collateral Ratio always above 150% to avoid liquidation
                   under Recovery Mode. A Collateral Ratio above 200% or 250% is recommended for
@@ -61,7 +60,7 @@ export const CollateralRatio: React.FC<CollateralRatioProps> = ({ value, change 
           }
         />
       </Flex>
-      {value1?.lt(1.5) && (
+      {value?.lt(1.5) && (
         <ActionDescription>
           Keeping your CR above 150% can help avoid liquidation under Recovery Mode.
         </ActionDescription>

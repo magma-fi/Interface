@@ -7,7 +7,7 @@ import "react-circular-progressbar/dist/styles.css";
 
 // import { EthersTransactionOverrides, EthersTransactionCancelledError } from "lib-ethers";
 import { EthersTransactionOverrides } from "lib-ethers";
-import { SentLiquityTransaction, LiquityReceipt } from "@liquity/lib-base";
+import { SentLiquityTransaction, LiquityReceipt } from "lib-base";
 
 import { useLiquity } from "../hooks/LiquityContext";
 

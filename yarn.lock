@@ -525,15 +525,6 @@
     "@ethersproject/bytes" "^5.7.0"
     "@ethersproject/properties" "^5.7.0"
 
-"@ethersproject/bignumber@5.0.15":
-  version "5.0.15"
-  resolved "https://registry.npmmirror.com/@ethersproject/bignumber/-/bignumber-5.0.15.tgz#b089b3f1e0381338d764ac1c10512f0c93b184ed"
-  integrity sha512-MTADqnyacvdRwtKh7o9ujwNDSM1SDJjYDMYAzjIgjoi9rh6TY4suMbhCa3i2vh3SUXiXSICyTI8ui+NPdrZ9Lw==
-  dependencies:
-    "@ethersproject/bytes" "^5.0.9"
-    "@ethersproject/logger" "^5.0.8"
-    bn.js "^4.4.0"
-
 "@ethersproject/bignumber@5.7.0", "@ethersproject/bignumber@^5.7.0":
   version "5.7.0"
   resolved "https://registry.npmmirror.com/@ethersproject/bignumber/-/bignumber-5.7.0.tgz#e2f03837f268ba655ffba03a57853e18a18dc9c2"
@@ -543,7 +534,7 @@
     "@ethersproject/logger" "^5.7.0"
     bn.js "^5.2.1"
 
-"@ethersproject/bytes@5.7.0", "@ethersproject/bytes@^5.0.9", "@ethersproject/bytes@^5.7.0":
+"@ethersproject/bytes@5.7.0", "@ethersproject/bytes@^5.7.0":
   version "5.7.0"
   resolved "https://registry.npmmirror.com/@ethersproject/bytes/-/bytes-5.7.0.tgz#a00f6ea8d7e7534d6d87f47188af1148d71f155d"
   integrity sha512-nsbxwgFXWh9NyYWo+U8atvmMsSdKJprTcICAkvbBffT75qDocbuggBU0SJiVK2MuTrp0q+xvLkTnGMPK1+uA9A==
@@ -642,7 +633,7 @@
     "@ethersproject/bytes" "^5.7.0"
     js-sha3 "0.8.0"
 
-"@ethersproject/logger@5.7.0", "@ethersproject/logger@^5.0.8", "@ethersproject/logger@^5.7.0":
+"@ethersproject/logger@5.7.0", "@ethersproject/logger@^5.7.0":
   version "5.7.0"
   resolved "https://registry.npmmirror.com/@ethersproject/logger/-/logger-5.7.0.tgz#6ce9ae168e74fecf287be17062b590852c311892"
   integrity sha512-0odtFdXu/XHtjQXJYA3u9G0G8btm0ND5Cu8M7i5vhEcE8/HmF4Lbdqanwyv4uQTr2tx6b7fQRmgLrsnpQlmnig==
@@ -953,13 +944,6 @@
 
 "@liquity/chicken-bonds@file:.yalc/@liquity/chicken-bonds":
   version "0.0.1"
-
-"@liquity/lib-base@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.npmmirror.com/@liquity/lib-base/-/lib-base-3.0.0.tgz#3a2c1ccf7d147d59ffc48e1b8eb775b363124735"
-  integrity sha512-iSSTb8eAK50zBEaM4bP48rFzARwlqohMXtNWKQZUrjqFvpTwZF4OZp1o0LxAU8CcbFAm7SLv4IVzSsmK4t3xFw==
-  dependencies:
-    "@ethersproject/bignumber" "5.0.15"
 
 "@liquity/lib-react@^1.0.0":
   version "1.0.0"
@@ -2908,7 +2892,7 @@ bn.js@4.11.8:
   resolved "https://registry.npmmirror.com/bn.js/-/bn.js-4.11.8.tgz#2cde09eb5ee341f484746bb0309b3253b1b1442f"
   integrity sha512-ItfYfPLkWHUjckQCk8xC+LwxgK8NYcXywGigJgSwOP8Y2iyWT4f2vsZnoOXTTbo+o5yXmIUJ4gn5538SO5S3gA==
 
-bn.js@^4.11.9, bn.js@^4.4.0:
+bn.js@^4.11.9:
   version "4.12.0"
   resolved "https://registry.npmmirror.com/bn.js/-/bn.js-4.12.0.tgz#775b3f278efbb9718eec7361f483fb36fbbfea88"
   integrity sha512-c98Bf3tPniI+scsdk237ku1Dc3ujXQTSgyiPUDEOe7tRkhrqridvh8klBv0HCEso1OLOYcHuCv/cS6DNxKH+ZA==
@@ -5117,9 +5101,15 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-"lib-ethers@https://github.com/siyushin/lib-ethers.git#b2e52d2cf37f640e7cebc403851f5840ea6ed733":
+"lib-base@https://github.com/siyushin/lib-base.git#f430f9da33a3a4ce35f32a660ad89fdb264d1aa8":
   version "1.0.0"
-  resolved "https://github.com/siyushin/lib-ethers.git#b2e52d2cf37f640e7cebc403851f5840ea6ed733"
+  resolved "https://github.com/siyushin/lib-base.git#f430f9da33a3a4ce35f32a660ad89fdb264d1aa8"
+  dependencies:
+    "@ethersproject/bignumber" "5.7.0"
+
+"lib-ethers@https://github.com/magma-fi/lib-ethers.git#8091a5d0a6e0183a2708adc1ad62e8c9735fc581":
+  version "1.0.0"
+  resolved "https://github.com/magma-fi/lib-ethers.git#8091a5d0a6e0183a2708adc1ad62e8c9735fc581"
 
 lines-and-columns@^1.1.6:
   version "1.2.4"

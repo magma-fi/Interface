@@ -12,7 +12,7 @@ import {
   TroveClosureParams,
   TroveCreationParams,
   Decimalish
-} from "@liquity/lib-base";
+} from "lib-base";
 
 import { COIN } from "../../../strings";
 
@@ -90,18 +90,7 @@ export const selectForTroveChangeValidation = ({
   accountBalance,
   lusdBalance,
   numberOfTroves
-}: LiquityStoreState) => {
-  const t = new Trove(Decimal.from(total.collateral.toString()), Decimal.from(total.debt.toString()));
-  const p = Decimal.from(price.toString())
-  console.debug("类型检查", t instanceof Trove, p instanceof Decimal);
-  return {
-    price: p,
-    total: t,
-    accountBalance,
-    lusdBalance,
-    numberOfTroves
-  };
-};
+}: LiquityStoreState) => ({ price, total, accountBalance, lusdBalance, numberOfTroves });
 
 type TroveChangeValidationSelectedState = ReturnType<typeof selectForTroveChangeValidation>;
 
@@ -134,7 +123,7 @@ export const validateTroveChange = (
 
   console.debug("测试数据 price =", price, price instanceof Decimal);
   console.debug("测试数据 total =", total instanceof Trove, total.collateral instanceof Decimal);
-  const recoveryMode = total.collateralRatioIsBelowCritical(price.toString());
+  const recoveryMode = total.collateralRatioIsBelowCritical(price);
 
   // console.debug("测试数据 originalTrove =", originalTrove.collateral instanceof Decimal);
 

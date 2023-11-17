@@ -1,4 +1,4 @@
-import { Decimal } from "@liquity/lib-base";
+import { Decimal } from "lib-base";
 import React from "react";
 import { Flex, Button, Spinner } from "theme-ui";
 import { StaticRow, StaticAmounts } from "../../../Trove/Editor";

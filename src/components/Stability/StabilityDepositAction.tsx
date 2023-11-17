@@ -1,5 +1,5 @@
 import { Button } from "theme-ui";
-import { Decimal, LiquityStoreState, StabilityDepositChange } from "@liquity/lib-base";
+import { Decimal, LiquityStoreState, StabilityDepositChange } from "lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
 import { useLiquity } from "../../hooks/LiquityContext";

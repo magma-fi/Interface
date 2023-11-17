@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, Heading, Box, Flex, Input, Label, Paragraph, Button, Spinner } from "theme-ui";
 
-import { Decimal, Decimalish } from "@liquity/lib-base";
+import { Decimal, Decimalish } from "lib-base";
 
 import { shortenAddress } from "../utils/shortenAddress";
 import { useLiquity } from "../hooks/LiquityContext";
@@ -27,7 +27,7 @@ const FrontendRegistrationAction: React.FC<FrontendRegistrationActionProps> = ({
     </Button>
   ) : myTransactionState.type !== "waitingForConfirmation" &&
     myTransactionState.type !== "confirmed" ? (
-    <Transaction id={myTransactionId} send={liquity.registerFrontend.bind(liquity, kickbackRate.toString())}>
+    <Transaction id={myTransactionId} send={liquity.registerFrontend.bind(liquity, kickbackRate)}>
       <Button>Register</Button>
     </Transaction>
   ) : null;

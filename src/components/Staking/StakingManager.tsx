@@ -7,7 +7,7 @@ import {
   LiquityStoreState,
   LQTYStake,
   LQTYStakeChange
-} from "@liquity/lib-base";
+} from "lib-base";
 
 import { LiquityStoreUpdate, useLiquityReducer, useLiquitySelector } from "@liquity/lib-react";
 

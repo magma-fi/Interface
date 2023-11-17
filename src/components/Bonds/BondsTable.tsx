@@ -6,7 +6,7 @@ import * as lexicon from "./lexicon";
 import { Empty } from "./views/idle/Empty";
 import { Link } from "../Link";
 import { useBondView } from "./context/BondViewContext";
-import { Decimal } from "@liquity/lib-base";
+import { Decimal } from "lib-base";
 import { InfiniteEstimate } from "./views/InfiniteEstimation";
 
 const {

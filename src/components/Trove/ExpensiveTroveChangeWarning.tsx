@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { Decimal, TroveChange } from "@liquity/lib-base";
+import { Decimal, TroveChange } from "lib-base";
 import { PopulatedEthersLiquityTransaction } from "lib-ethers";
 
 import { useLiquity } from "../../hooks/LiquityContext";
