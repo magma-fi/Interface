@@ -3,7 +3,7 @@ import { Card, Heading, Box, Flex, Input, Label, Paragraph, Button, Spinner } fr
 
 import { Decimal, Decimalish } from "lib-base";
 
-import { shortenAddress } from "../utils/shortenAddress";
+import { shortenAddress } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { Transaction, useMyTransactionState } from "../components/Transaction";
 import { Icon } from "../components/Icon";

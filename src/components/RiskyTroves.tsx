@@ -12,7 +12,7 @@ import {
 import { BlockPolledLiquityStoreState } from "lib-ethers";
 import { useLiquitySelector } from "@liquity/lib-react";
 
-import { shortenAddress } from "../utils/shortenAddress";
+import { shortenAddress } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { COIN } from "../strings";
 

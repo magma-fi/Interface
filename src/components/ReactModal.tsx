@@ -20,14 +20,15 @@ const modalStyle = {
 type ModalProps = {
   onDismiss: () => void;
   style?: React.CSSProperties;
+  isOpen: boolean;
 };
 
-export const ReactModal: React.FC<ModalProps> = ({ children, onDismiss, style }) => {
+export const ReactModal: React.FC<ModalProps> = ({ children, onDismiss, style, isOpen = true }) => {
   const handleDismiss = () => onDismiss();
 
   return (
     <Modal
-      isOpen={true}
+      isOpen={isOpen}
       onRequestClose={handleDismiss}
       style={{
         ...modalStyle,
