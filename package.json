@@ -19,7 +19,7 @@
     "ethers": "5.7.2",
     "lambert-w-function": "3.0.0",
     "lib-base": "https://github.com/siyushin/lib-base.git#f430f9da33a3a4ce35f32a660ad89fdb264d1aa8",
-    "lib-ethers": "https://github.com/magma-fi/lib-ethers.git#06151baa7beeef45481d3eeaefb49b3a4248ca7e",
+    "lib-ethers": "https://github.com/magma-fi/lib-ethers.git#51c1005879fb8f26f5ffdf6162674688f9a13258",
     "react": "17.0.2",
     "react-circular-progressbar": "2.0.3",
     "react-copy-to-clipboard": "5.0.3",
@@ -72,7 +72,8 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "test": "vitest",
-    "lk": "yarn unlink lib-ethers && cd /Users/Shane/Projects/Elastos/magma/lib-ethers && yarn unlink && yarn --registry=https://registry.npm.taobao.org && yarn link && cd /Users/Shane/Projects/Elastos/magma/ui && yarn link lib-ethers"
+    "lk": "yarn unlink lib-ethers && cd ../lib-ethers && yarn unlink && yarn build && yarn link && cd ../ui && yarn link lib-ethers",
+    "unlk": "yarn unlink lib-ethers && cd ../lib-ethers && yarn unlink && cd ../ui"
   },
   "eslintConfig": {
     "extends": "react-app"
