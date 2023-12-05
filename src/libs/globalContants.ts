@@ -78,6 +78,7 @@ export const globalContants = {
 	COINS: { WEN, IOTX, DAI, USDC } as Record<string, Coin>,
 	USD: "USD",
 	DEFAULT_NETWORK_ID: 4690,
+	default_NETWORK_RPC: "https://babel-api.testnet.iotex.io",
 	ADDRESS_PLACEHOLDER: "0x43D46D96157f497070BfD0725C34C4A9d1013292",
 	LIQUIDATION_AT: 0.8
 };

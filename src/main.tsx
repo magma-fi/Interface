@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 // import Modal from "react-modal";
 
-import "./index.css";
+import "./index.scss";
 import App from "./App";
 
 // Modal.setAppElement("#root");

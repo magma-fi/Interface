@@ -51,7 +51,7 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   let customSigner: VoidSigner | undefined;
   if (!isConnected) {
     // 在未连接钱包的情况下，强制连接默认网络。
-    customProvider = ethers.getDefaultProvider(chains.find(item => item.id === globalContants.DEFAULT_NETWORK_ID)?.rpcUrls.public.http[0]);
+    customProvider = ethers.getDefaultProvider(globalContants.default_NETWORK_RPC);
     customSigner = new ethers.VoidSigner(globalContants.ADDRESS_PLACEHOLDER, customProvider);
   }
   const provider = isConnected ? wagmiProvider : customProvider;
