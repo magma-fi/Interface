@@ -7,7 +7,7 @@ import { useLang } from "../hooks/useLang";
 import { Coin, ErrorMessage, ValidationContext } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { ExpandableView } from "./ExpandableView";
 import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
@@ -52,7 +52,7 @@ export const DepositeModal = ({
 	const previousBorrowedAmountNumber = Number(previousNetDebt.toString());
 	const [defaultBorrowAmount, setDefaultBorrowAmount] = useState(previousBorrowedAmountNumber);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
-	const txId = "deposit";
+	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId);
 
 	const isDirty = !previousTrove.current.collateral.eq(depositValue) || !previousNetDebt.eq(borrowValue);

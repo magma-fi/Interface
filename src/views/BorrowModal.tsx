@@ -7,7 +7,7 @@ import { useLang } from "../hooks/useLang";
 import { Coin, ErrorMessage, ValidationContext } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
@@ -42,15 +42,16 @@ export const BorrowModal = ({
 }) => {
 	const { t } = useLang();
 	const debt = Number(trove.debt);
-	const [valueForced, setValueForced] = useState(debt);
 	const [borrowAmount, setBorrowAmount] = useState(0);
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
+	const netDebtNumber = Number(netDebt.toString());
+	const [valueForced, setValueForced] = useState(netDebtNumber);
 	const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
 	const [forcedSlideValue, setForcedSlideValue] = useState(0);
 	const [slideValue, setSlideValue] = useState(0);
-	const txId = "borrow";
+	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId);
 
 	const isDirty = !netDebt.eq(borrowAmount);
@@ -169,7 +170,7 @@ export const BorrowModal = ({
 						warning={undefined}
 						error={description && t(errorMessages.key, errorMessages.values)}
 						allowReduce={false}
-						currentValue={debt}
+						currentValue={netDebtNumber}
 						allowIncrease={true} />
 				</div>
 
