@@ -52,7 +52,7 @@ export const DepositeModal = ({
 	const previousBorrowedAmountNumber = Number(previousNetDebt.toString());
 	const [defaultBorrowAmount, setDefaultBorrowAmount] = useState(previousBorrowedAmountNumber);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
-	const txId = "trove-adjustment";
+	const txId = "deposit";
 	const transactionState = useMyTransactionState(txId);
 
 	const isDirty = !previousTrove.current.collateral.eq(depositValue) || !previousNetDebt.eq(borrowValue);
@@ -366,7 +366,7 @@ export const DepositeModal = ({
 			</div>
 		</div>
 
-		{stableTroveChange && transactionState.type === "idle" ? <TroveAction
+		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
 			transactionId={txId}
 			change={stableTroveChange}
 			maxBorrowingRate={borrowingRate.add(0.005)}

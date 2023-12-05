@@ -62,6 +62,7 @@ export const MarketView = ({ market }: {
 	const [showDepositModal, setShowDepositModal] = useState(false);
 	const [showDepositDoneModal, setShowDepositDoneModal] = useState(false);
 	const [showBorrowModal, setShowBorrowModal] = useState(false);
+	const [showBorrowDoneModal, setShowBorrowDoneModal] = useState(false);
 	const [showRepayModal, setShowRepayModal] = useState(false);
 	const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 	// const borrowingRate =fees.borrowingRate();
@@ -71,7 +72,7 @@ export const MarketView = ({ market }: {
 	const recoveryMode = totalCollateralRatio.div(CRITICAL_COLLATERAL_RATIO);
 	const borrowingFeePct = new Percent(borrowingRate);
 	const currentPrice = trove.collateral.div(trove.debt);
-	const maxAvailableBorrow = trove.collateral.mul(price).div(MINIMUM_COLLATERAL_RATIO);
+	const maxAvailableBorrow = trove.collateral.mul(price).div(CRITICAL_COLLATERAL_RATIO);
 	const availableBorrow = maxAvailableBorrow.sub(trove.debt);
 
 	const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateral.mulDiv(price, trove.debt);
@@ -114,6 +115,12 @@ export const MarketView = ({ market }: {
 		setShowDepositDoneModal(true);
 	};
 
+	const handleBorrowDone = (tx: string) => {
+		setTxHash(tx);
+		setShowBorrowModal(false);
+		setShowBorrowDoneModal(true);
+	};
+
 	const handleBorrow = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		evt.preventDefault();
 		evt.stopPropagation();
@@ -146,6 +153,7 @@ export const MarketView = ({ market }: {
 
 	const handleGoBackVault = () => {
 		setShowDepositDoneModal(false);
+		setShowBorrowDoneModal(false);
 		setTxHash("");
 	};
 
@@ -182,8 +190,8 @@ export const MarketView = ({ market }: {
 					className="card"
 					style={{ paddingTop: "0.5rem" }}>
 					<div
-					className="flex-row-space-between"
-					style={{alignItems:"center"}}>
+						className="flex-row-space-between"
+						style={{ alignItems: "center" }}>
 						<h3>{t("yourVault")}</h3>
 
 						<DropdownMenu
@@ -477,7 +485,20 @@ export const MarketView = ({ market }: {
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={maxAvailableBorrow} />}
+			max={maxAvailableBorrow}
+			onDone={handleBorrowDone} />}
+
+		{showBorrowDoneModal && <TxDone
+			title={t("borrowedSuccessfully")}
+			onClose={handleGoBackVault}
+			illustration="images/borrow-successful.png"
+			whereGoBack={t("back2Vault")}>
+			<TxLabel
+				txHash={txHash}
+				title={t("borrowed")}
+				logo="images/wen.png"
+				amount={trove.debt.toString(2) + " " + WEN.symbol} />
+		</TxDone>}
 
 		{showRepayModal && <RepayModal
 			isOpen={showRepayModal}

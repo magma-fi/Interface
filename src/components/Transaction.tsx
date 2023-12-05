@@ -129,11 +129,7 @@ export const useTransactionFunction = (
 ): [sendTransaction: () => Promise<void>, transactionState: TransactionState] => {
   const [transactionState, setTransactionState] = useTransactionState();
 
-  console.debug("transactionState", transactionState);
-
   const sendTransaction = useCallback(async () => {
-    console.debug("sendTransaction()");
-
     setTransactionState({ type: "waitingForApproval", id });
 
     try {
@@ -171,8 +167,6 @@ export function Transaction<C extends React.ReactElement<ButtonlikeProps>>({
   send,
   children
 }: TransactionProps<C>) {
-  console.debug("Transaction组件 send =", send);
-
   const [sendTransaction, transactionState] = useTransactionFunction(id, send);
   const trigger = React.Children.only<C>(children);
 

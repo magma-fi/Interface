@@ -36,13 +36,21 @@ export const Slider = ({
 		}
 	}, [currentValue, forcedValue])
 
-	return (<div className="slider">
-		<input
-			type="range"
-			min={min}
-			max={max}
-			step={0.01}
-			onChange={handleChange}
-			value={value} />
+	return (<div
+		className="flex-row-space-between"
+		style={{ gap: "11px" }}>
+		<div className="slider">
+			<input
+				type="range"
+				min={min}
+				max={max}
+				step={0.01}
+				onChange={handleChange}
+				value={value} />
+		</div>
+
+		<div className="sliderValue label big fat">
+			{(value * 100).toFixed(2)}%
+		</div>
 	</div>);
 };

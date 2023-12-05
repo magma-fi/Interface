@@ -54,5 +54,8 @@
 	"depositing": "depositing",
 	"depositedSuccessfully": "Deposited successfully!",
 	"back2Vault": "Back to vault",
-	"viewInExplorer": "View in explorer"
+	"viewInExplorer": "View in explorer",
+	"borrowing": "borrowing",
+	"borrowedSuccessfully": "Borrowed successfully!",
+	"borrowed": "borrowed"
 }

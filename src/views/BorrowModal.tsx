@@ -8,7 +8,7 @@ import { Coin, ErrorMessage, ValidationContext } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect, useRef } from "react";
-import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, MINIMUM_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE } from "lib-base";
+import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
@@ -17,6 +17,7 @@ import { calculateAvailableBorrow, calculateAvailableWithdrawal } from "../utils
 import { Slider } from "../components/Slider";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { debounce } from "../libs/debounce";
+import { useMyTransactionState } from "../components/Transaction";
 
 export const BorrowModal = ({
 	isOpen = false,
@@ -26,7 +27,8 @@ export const BorrowModal = ({
 	market,
 	fees,
 	validationContext,
-	max
+	max,
+	onDone = () => { }
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -36,6 +38,7 @@ export const BorrowModal = ({
 	fees: Fees;
 	validationContext: ValidationContext;
 	max: Decimal;
+	onDone: (tx: string) => void;
 }) => {
 	const { t } = useLang();
 	const debt = Number(trove.debt);
@@ -43,10 +46,12 @@ export const BorrowModal = ({
 	const [borrowAmount, setBorrowAmount] = useState(0);
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	const maxSafe = Decimal.ONE.div(MINIMUM_COLLATERAL_RATIO);
+	const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
 	const [forcedSlideValue, setForcedSlideValue] = useState(0);
 	const [slideValue, setSlideValue] = useState(0);
+	const txId = "borrow";
+	const transactionState = useMyTransactionState(txId);
 
 	const isDirty = !netDebt.eq(borrowAmount);
 	const updatedTrove = isDirty ? new Trove(trove.collateral, Decimal.from(borrowAmount)) : trove;
@@ -92,21 +97,20 @@ export const BorrowModal = ({
 		const netDebt = Decimal.from(borrowAmount);
 		const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
 
+		setForcedSlideValue(Number(Decimal.ONE.div(trove.collateral.mulDiv(price, netDebt)).toString()));
+
 		if (!previousNetDebt.eq(netDebt)) {
 			const unsavedChanges = Difference.between(netDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
 			setBorrowAmount(Number(nextNetDebt.toString()));
 
-			setForcedSlideValue(Number(Decimal.ONE.div(trove.collateral.mulDiv(price, nextNetDebt)).toString()));
 		}
 	}, [trove, borrowAmount, price]);
 
 	useEffect(() => {
-		if (slideValue === 0) return;
-
 		debounce.run(() => {
 			const colRate = Decimal.ONE.div(slideValue);
-			if (colRate.lt(CRITICAL_COLLATERAL_RATIO)) {
+			if (colRate.gt(CRITICAL_COLLATERAL_RATIO)) {
 				const val = Number(trove.collateral.mul(price).mul(slideValue).toString());
 				setBorrowAmount(val);
 				setValueForced(val);
@@ -127,6 +131,13 @@ export const BorrowModal = ({
 	const handleSlideUtilRate = (val: number) => {
 		setSlideValue(val);
 	};
+
+	useEffect(() => {
+		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+			onDone(transactionState.tx.rawSentTransaction as unknown as string);
+			transactionState.resolved = true;
+		}
+	}, [transactionState.type])
 
 	return isOpen ? <Modal
 		title={t("borrow") + " " + WEN.symbol}
@@ -158,7 +169,8 @@ export const BorrowModal = ({
 						warning={undefined}
 						error={description && t(errorMessages.key, errorMessages.values)}
 						allowReduce={false}
-						currentValue={debt} />
+						currentValue={debt}
+						allowIncrease={true} />
 				</div>
 
 				<div className="flex-column-align-left">
@@ -179,7 +191,9 @@ export const BorrowModal = ({
 						max={Number(maxSafe.toString())}
 						currentValue={troveUtilizationRateNumber / 100}
 						onChange={handleSlideUtilRate}
-						forcedValue={forcedSlideValue} />
+						forcedValue={forcedSlideValue}
+						allowReduce={false}
+						allowIncrease={true} />
 				</div>
 			</div>
 
@@ -198,8 +212,8 @@ export const BorrowModal = ({
 					<div className="label">{t("liquidationPrice")}(1&nbsp;{market?.symbol})</div>
 
 					<ChangedValueLabel
-						previousValue={trove.collateral.gt(0) ? trove.collateral.mul(price).div(trove.debt).toString(2) : 0}
-						newValue={(updatedTrove.collateral.gt(0) ? updatedTrove.collateral.mul(price).div(updatedTrove.debt).toString(2) : 0) + " " + globalContants.USD} />
+						previousValue={trove.collateral.gt(0) ? trove.collateral.div(trove.debt).toString(2) : 0}
+						newValue={(updatedTrove.collateral.gt(0) ? updatedTrove.collateral.div(updatedTrove.debt).toString(2) : 0) + " " + globalContants.USD} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -258,8 +272,8 @@ export const BorrowModal = ({
 			</div>
 		</div>
 
-		{stableTroveChange ? <TroveAction
-			transactionId="trove-adjustment"
+		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
+			transactionId={txId}
 			change={stableTroveChange}
 			maxBorrowingRate={borrowingRate.add(0.005)}
 			borrowingFeeDecayToleranceMinutes={60}>
@@ -277,7 +291,7 @@ export const BorrowModal = ({
 			disabled>
 			<img src="images/borrow-dark.png" />
 
-			{t("borrow")}
+			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("borrowing") + "...") : t("borrow")}
 		</button>}
 	</Modal> : <></>
 };
