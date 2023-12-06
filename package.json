@@ -85,6 +85,7 @@
     "opera >= 54",
     "safari >= 14"
   ],
+  "engineStrict": true,
   "engines": {
     "node": "16.20.2"
   }

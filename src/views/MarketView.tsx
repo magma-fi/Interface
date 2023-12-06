@@ -240,7 +240,7 @@ export const MarketView = ({ market }: {
 							</div>
 
 							<div className="flex-column-align-left">
-								<div>{price.sub(currentPrice).div(currentPrice).mul(100).toString(2)}%</div>
+								<div>{price.sub(currentPrice).div(price).mul(100).toString(2)}%</div>
 								<div className="label labelSmall">{t("belowCurrentPrice")}</div>
 							</div>
 
