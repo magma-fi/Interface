@@ -7,16 +7,17 @@ import { useLang } from "../hooks/useLang";
 import { Coin, ErrorMessage, ValidationContext } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useRef } from "react";
-import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, MINIMUM_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE } from "lib-base";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
 import { TroveAction } from "../components/Trove/TroveAction";
-import { calculateAvailableBorrow, calculateAvailableWithdrawal } from "../utils";
+import { calculateAvailableBorrow, calculateAvailableWithdrawal, calculateUtilizationRate } from "../utils";
 import { Slider } from "../components/Slider";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { debounce } from "../libs/debounce";
+import { useMyTransactionState } from "../components/Transaction";
 
 export const WithdrawModal = ({
 	isOpen = false,
@@ -26,7 +27,8 @@ export const WithdrawModal = ({
 	market,
 	fees,
 	validationContext,
-	max
+	max,
+	onDone = () => { }
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -36,17 +38,20 @@ export const WithdrawModal = ({
 	fees: Fees;
 	validationContext: ValidationContext;
 	max: Decimal;
+	onDone: (tx: string, withdrawAmount: number) => void;
 }) => {
+	const maxNumber = Number(max.toString());
 	const { t } = useLang();
-	const debt = Number(trove.debt);
 	const [valueForced, setValueForced] = useState(0);
 	const [withdrawAmount, setWithdrawAmount] = useState(0);
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	const maxSafe = Decimal.ONE.div(MINIMUM_COLLATERAL_RATIO);
+	// const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
-	const [forcedSlideValue, setForcedSlideValue] = useState(0);
-	const [slideValue, setSlideValue] = useState(0);
+	const [utilRate, setUtilRate] = useState(Decimal.ZERO);
+	// const [slideValue, setSlideValue] = useState(0);
+	const txId = useMemo(() => String(new Date().getTime()), []);
+	const transactionState = useMyTransactionState(txId);
 
 	const isDirty = !netDebt.eq(withdrawAmount);
 	const updatedTrove = isDirty ? new Trove(trove.collateral, trove.netDebt.sub(withdrawAmount)) : trove;
@@ -68,7 +73,7 @@ export const WithdrawModal = ({
 	useEffect(init, []);
 
 	const handleMax = () => {
-		setValueForced(Number(max.toString()));
+		setValueForced(maxNumber);
 	};
 
 	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -96,21 +101,21 @@ export const WithdrawModal = ({
 			const unsavedChanges = Difference.between(netDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
 			setWithdrawAmount(Number(trove.netDebt.sub(nextNetDebt).toString()));
-
-			// setForcedSlideValue(Number(trove.collateral.mulDiv(price, nextNetDebt).div(trove.collateralRatio(price)).toString()));
 		}
+
+		setUtilRate(calculateUtilizationRate(updatedTrove, price));
 	}, [trove, withdrawAmount, price]);
 
-	useEffect(() => {
-		if (slideValue === 0) return;
+	// useEffect(() => {
+	// 	if (slideValue === 0) return;
 
-		debounce.run(() => {
-			const toReduce = trove.debt.mul((troveUtilizationRateNumber - slideValue * 100) / troveUtilizationRateNumber)
-			const val = Number(toReduce.toString());
-			setWithdrawAmount(val);
-			setValueForced(val);
-		}, 1000);
-	}, [slideValue]);
+	// 	debounce.run(() => {
+	// 		const toReduce = trove.collateral.mul((troveUtilizationRateNumber - slideValue * 100) / troveUtilizationRateNumber)
+	// 		const val = Number(toReduce.toString());
+	// 		setWithdrawAmount(val);
+	// 		setValueForced(val);
+	// 	}, 1000);
+	// }, [slideValue]);
 
 	const handleInputWithdraw = (val: number) => {
 		setValueForced(0);
@@ -122,9 +127,16 @@ export const WithdrawModal = ({
 		onClose();
 	};
 
-	const handleSlideUtilRate = (val: number) => {
-		setSlideValue(val);
-	};
+	// const handleSlideUtilRate = (val: number) => {
+	// 	setSlideValue(val);
+	// };
+
+	useEffect(() => {
+		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+			onDone(transactionState.tx.rawSentTransaction as unknown as string, withdrawAmount);
+			transactionState.resolved = true;
+		}
+	}, [transactionState.type])
 
 	return isOpen ? <Modal
 		title={t("withdraw") + " " + market.symbol}
@@ -152,15 +164,15 @@ export const WithdrawModal = ({
 						allowSwap={false}
 						valueForced={valueForced}
 						onInput={handleInputWithdraw}
-						max={Number(max.toString())}
+						max={maxNumber}
 						warning={undefined}
 						error={description && t(errorMessages.key, errorMessages.values)}
 						allowReduce={true}
-						currentValue={0}
+						currentValue={maxNumber}
 						allowIncrease={false} />
 				</div>
 
-				<div className="flex-column-align-left">
+				{/* <div className="flex-column-align-left">
 					<div
 						className="flex-row-space-between"
 						style={{ alignItems: "center" }}>
@@ -176,12 +188,12 @@ export const WithdrawModal = ({
 					<Slider
 						min={0}
 						max={Number(maxSafe.toString())}
-						currentValue={troveUtilizationRateNumber / 100}
 						onChange={handleSlideUtilRate}
-						forcedValue={forcedSlideValue}
+						forcedValue={Number(utilRate.toString())}
 						allowReduce={true}
+						currentValue={troveUtilizationRateNumber / 100}
 						allowIncrease={false} />
-				</div>
+				</div> */}
 			</div>
 
 			<div
@@ -192,7 +204,7 @@ export const WithdrawModal = ({
 
 					<ChangedValueLabel
 						previousValue={troveUtilizationRateNumber.toFixed(2) + "%"}
-						newValue={((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(updatedTrove.collateralRatio(price)).mul(100).toString(2) : 0) + "%"} />
+						newValue={utilRate.mul(100).toString(2) + "%"} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -223,8 +235,8 @@ export const WithdrawModal = ({
 			</div>
 		</div>
 
-		{stableTroveChange ? <TroveAction
-			transactionId="trove-adjustment"
+		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
+			transactionId={txId}
 			change={stableTroveChange}
 			maxBorrowingRate={borrowingRate.add(0.005)}
 			borrowingFeeDecayToleranceMinutes={60}>
@@ -242,7 +254,7 @@ export const WithdrawModal = ({
 			disabled>
 			<img src="images/repay-dark.png" />
 
-			{t("repay")}
+			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("withdrawing") + "...") : t("withdraw")}
 		</button>}
 	</Modal> : <></>
 };

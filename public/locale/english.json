@@ -60,5 +60,8 @@
 	"borrowed": "borrowed",
 	"repaidSuccessfully": "Debt repaid successfully!",
 	"debtRepaid": "Debt repaid",
-	"repaying": "repaying"
+	"repaying": "repaying",
+	"withdrawing": "withdrawing",
+	"withdrawnSuccessfully": "Withdrawn successfully!",
+	"withdrawn": "Withdrawn"
 }

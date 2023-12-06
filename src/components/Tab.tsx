@@ -21,7 +21,9 @@ export const Tab = ({
 
 	return <div className="tab">
 		{options.map((option, index) => {
-			return <div className="tabItem">
+			return <div
+			key={option.title}
+			className="tabItem">
 				<input
 					type="radio"
 					name={name}

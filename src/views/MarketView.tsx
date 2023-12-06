@@ -67,6 +67,8 @@ export const MarketView = ({ market }: {
 	const [showRepayDoneModal, setShowRepayDoneModal] = useState(false);
 	const [repaidAmount, setRepaidAmount] = useState(0);
 	const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+	const [showWithdrawDoneModal, setShowWithdrawDoneModal] = useState(false);
+	const [withdrawnAmount, setWithdrawnAmount] = useState(0);
 	// const borrowingRate =fees.borrowingRate();
 	const feePct = new Percent(borrowingRate);
 	const totalCollateralRatio = total.collateralRatio(price);
@@ -130,6 +132,13 @@ export const MarketView = ({ market }: {
 		setRepaidAmount(repayAmount);
 	};
 
+	const handleWithdrawDone = (tx: string, withdrawAmount: number) => {
+		setTxHash(tx);
+		setShowWithdrawModal(false);
+		setShowWithdrawDoneModal(true);
+		setWithdrawnAmount(withdrawAmount);
+	};
+
 	const handleBorrow = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		evt.preventDefault();
 		evt.stopPropagation();
@@ -165,6 +174,8 @@ export const MarketView = ({ market }: {
 		setShowBorrowDoneModal(false);
 		setShowRepayDoneModal(false);
 		setRepaidAmount(0);
+		setShowWithdrawDoneModal(false);
+		setWithdrawnAmount(0);
 		setTxHash("");
 	};
 
@@ -542,6 +553,19 @@ export const MarketView = ({ market }: {
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={availableWithdrawal} />}
+			max={availableWithdrawal}
+			onDone={handleWithdrawDone} />}
+
+		{showWithdrawDoneModal && <TxDone
+			title={t("withdrawnSuccessfully")}
+			onClose={handleGoBackVault}
+			illustration="images/withdraw-success.png"
+			whereGoBack={t("back2Vault")}>
+			<TxLabel
+				txHash={txHash}
+				title={t("withdrawn")}
+				logo="images/iotx.png"
+				amount={withdrawnAmount.toFixed(2) + " " + WEN.symbol} />
+		</TxDone>}
 	</>
 };

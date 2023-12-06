@@ -22,11 +22,13 @@ export const Slider = ({
 	const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
 		const val = Number(evt.currentTarget.value);
 		if (
-			(!allowIncrease && val < currentValue)
-			|| (!allowReduce && val > currentValue)
+			(!allowIncrease && val <= currentValue)
+			|| (!allowReduce && val >= currentValue)
 		) {
 			setValue(val);
 			onChange && onChange(val);
+		} else {
+			setValue(currentValue);
 		}
 	};
 

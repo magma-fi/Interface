@@ -8,7 +8,7 @@ import { Coin, ErrorMessage, ValidationContext } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, MINIMUM_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE } from "lib-base";
+import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
@@ -41,7 +41,6 @@ export const RepayModal = ({
 	onDone: (tx: string, repayAmount: number) => void;
 }) => {
 	const { t } = useLang();
-	const debt = Number(trove.debt);
 	const [valueForced, setValueForced] = useState(0);
 	const [repayAmount, setRepayAmount] = useState(0);
 	const previousTrove = useRef<Trove>(trove);

@@ -39,19 +39,17 @@ export const AmountInput = ({
 			(!allowIncrease && val <= currentValue)
 			|| (!allowReduce && val >= currentValue)
 		) {
-			onInput(val);
-		} else {
-			setInputValue(String(currentValue));
-			setFiatValue(price.mul(currentValue).toString(2));
+			// onInput(val);
+			debounce.run(onInput, 1000, val);
 		}
-	}, [allowIncrease, allowReduce, currentValue, onInput, price])
+	}, [allowIncrease, allowReduce, currentValue, onInput])
 
 	const updateValue = useCallback(val => {
 		setInputValue(String(val));
 		setFiatValue(price.mul(val).toString(2));
 
-		debounce.run(sendBack, 1000, val);
-	}, [price, sendBack]);
+		sendBack(val);
+	}, [sendBack, price]);
 
 	useEffect(() => {
 		if (valueForced > 0) {
