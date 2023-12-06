@@ -73,14 +73,15 @@ export const MarketView = ({ market }: {
 	const feePct = new Percent(borrowingRate);
 	const totalCollateralRatio = total.collateralRatio(price);
 	const totalCollateralRatioPct = new Percent(totalCollateralRatio);
-	const recoveryMode = totalCollateralRatio.div(CRITICAL_COLLATERAL_RATIO);
+	// const recoveryMode = totalCollateralRatio.div(CRITICAL_COLLATERAL_RATIO);
+	const recoveryMode = Decimal.ONE.div(MINIMUM_COLLATERAL_RATIO);
 	const borrowingFeePct = new Percent(borrowingRate);
 	const currentPrice = trove.collateral.div(trove.debt);
 	const maxAvailableBorrow = trove.collateral.mul(price).div(CRITICAL_COLLATERAL_RATIO);
 	const availableBorrow = maxAvailableBorrow.sub(trove.debt);
-
 	const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateral.mulDiv(price, trove.debt);
-	const troveUtilizationRate = troveCollateralRatio.div(CRITICAL_COLLATERAL_RATIO).mul(100);
+	// const troveUtilizationRate = troveCollateralRatio.div(CRITICAL_COLLATERAL_RATIO).mul(100);
+	const troveUtilizationRate = trove.debt.gt(1) ? trove.netDebt.div(trove.collateral.mul(price)).mul(100) : Decimal.ZERO;
 	const troveUtilizationRateNumber = Number(troveUtilizationRate.toString());
 	const chartData = [
 		{ name: '', value: troveUtilizationRateNumber },
@@ -435,7 +436,7 @@ export const MarketView = ({ market }: {
 						<div className="description">{t("totalUtilizationRate")}</div>
 
 						<div className="flex-column-align-right">
-							<div>{totalCollateralRatioPct.prettify()}</div>
+							<div>{troveUtilizationRate.prettify()}%</div>
 							<div className="comments">{t("recoveryModeAt", { recovery: recoveryMode.mul(100).toString(2) })}</div>
 						</div>
 					</div>
