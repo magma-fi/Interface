@@ -19,7 +19,7 @@ import { WithdrawModal } from "./WithdrawModal";
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 
-export const MarketView = ({ market }: {
+export const PoolView = ({ market }: {
 	market: Coin;
 }) => {
 	const selector = useMemo(() => {

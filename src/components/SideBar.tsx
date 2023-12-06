@@ -1,13 +1,4 @@
 import React from "react";
-import { LiquityStoreState } from "lib-base";
-import { useLiquitySelector } from "@liquity/lib-react";
-import { Container, Flex, Box } from "theme-ui";
-import { AddressZero } from "@ethersproject/constants";
-import { useLiquity } from "../hooks/LiquityContext";
-
-import { LiquityLogo } from "./LiquityLogo";
-import { Nav } from "./Nav";
-import { SideNav } from "./SideNav";
 import { NavLink } from "./NavLink";
 import { useLang } from "../hooks/useLang";
 import { WEN } from "../libs/globalContants";
@@ -15,11 +6,11 @@ import { useLocation } from "react-router-dom";
 import { LangSelect } from "./LangSelect";
 import { StyleModeSelect } from "./StyleModeSelect";
 
-const logoHeight = "32px";
+// const logoHeight = "32px";
 
-const select = ({ frontend }: LiquityStoreState) => ({
-  frontend
-});
+// const select = ({ frontend }: LiquityStoreState) => ({
+//   frontend
+// });
 
 export const SideBar: React.FC = ({ children }) => {
   const { t } = useLang();
@@ -41,7 +32,7 @@ export const SideBar: React.FC = ({ children }) => {
       <NavLink
         label={t("borrow") + " " + WEN.symbol}
         icon="images/borrow.png"
-        url=""
+        url="/"
         fullWidth={true}
         showExternalLink={false}
         active={pathname === "/"} />
@@ -49,7 +40,7 @@ export const SideBar: React.FC = ({ children }) => {
       <NavLink
         label={t("stake") + " " + WEN.symbol}
         icon="images/stake.png"
-        url=""
+        url="/stake"
         fullWidth={true}
         showExternalLink={false}
         active={pathname === "/stake"} />
@@ -73,10 +64,11 @@ export const SideBar: React.FC = ({ children }) => {
       <NavLink
         label={t("docs")}
         icon="images/docs.png"
-        url=""
+        url="https://docs.magma.finance/"
         fullWidth={true}
         showExternalLink={true}
-        active={pathname === "/docs"} />
+        active={false}
+        target="_blank" />
 
       <NavLink
         label={t("twitter")}

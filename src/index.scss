@@ -153,6 +153,7 @@ h3 {
   display: flex;
   flex-direction: row;
   gap: var(--flex-gap-larger);
+  position: relative;
 }
 
 .sider {

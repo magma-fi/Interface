@@ -2,8 +2,9 @@ import { useState } from "react";
 import { ConnectWalletModal } from "./ConnectWalletModal";
 import { SideBar } from "../components/SideBar";
 import { UserAccount } from "../components/UserAccount";
-import { Route, HashRouter as Router, Switch } from "react-router-dom";
+import { Route, BrowserRouter, Switch } from "react-router-dom";
 import { BorrowView } from "./BorrowView";
+import { StakeView } from "./StakeView";
 
 export const MainView = () => {
 	const [showConnectModal, setShowConnectModal] = useState(false);
@@ -17,8 +18,8 @@ export const MainView = () => {
 	};
 
 	return <>
-		<Router>
-			<div className="app">
+		<div className="app">
+			<BrowserRouter>
 				<SideBar>
 					<UserAccount onConnect={handleConnectWallet} />
 					{/* <SystemStatsPopup /> */}
@@ -31,10 +32,15 @@ export const MainView = () => {
 					alignItems: "center"
 				}}>
 					<Switch>
-						<Route path="/" exact>
+						<Route path="/stake">
+							<StakeView />
+						</Route>
+
+						<Route path="/">
 							{/* <PageSwitcher /> */}
 							<BorrowView />
 						</Route>
+
 						{/* <Route path="/bonds">
 							<Bonds />
 						</Route>
@@ -43,8 +49,8 @@ export const MainView = () => {
 						</Route> */}
 					</Switch>
 				</div>
-			</div>
-		</Router>
+			</BrowserRouter>
+		</div>
 
 		<ConnectWalletModal
 			isOpen={showConnectModal}

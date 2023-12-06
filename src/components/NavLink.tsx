@@ -5,6 +5,7 @@ type NavLinkProps = {
 	fullWidth: boolean;
 	showExternalLink: boolean;
 	active: boolean;
+	target: string;
 };
 
 export function NavLink({
@@ -13,12 +14,14 @@ export function NavLink({
 	url = "#",
 	fullWidth = true,
 	showExternalLink = true,
-	active = false
+	active = false,
+	target = "_self"
 }: NavLinkProps) {
 	return <a
 		className={"navLink" + (active ? " active" : "")}
 		href={url}
-		style={{ width: fullWidth ? "calc(100% - 32px)" : "fit-content" }}>
+		style={{ width: fullWidth ? "calc(100% - 32px)" : "fit-content" }}
+		target={target}>
 		{icon && <img src={icon} />}
 
 		{label}

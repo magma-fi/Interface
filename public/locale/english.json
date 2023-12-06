@@ -63,5 +63,6 @@
 	"repaying": "repaying",
 	"withdrawing": "withdrawing",
 	"withdrawnSuccessfully": "Withdrawn successfully!",
-	"withdrawn": "Withdrawn"
+	"withdrawn": "Withdrawn",
+	"stabilityPool": "Stability Pool"
 }
