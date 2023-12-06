@@ -57,5 +57,8 @@
 	"viewInExplorer": "View in explorer",
 	"borrowing": "borrowing",
 	"borrowedSuccessfully": "Borrowed successfully!",
-	"borrowed": "borrowed"
+	"borrowed": "borrowed",
+	"repaidSuccessfully": "Debt repaid successfully!",
+	"debtRepaid": "Debt repaid",
+	"repaying": "repaying"
 }

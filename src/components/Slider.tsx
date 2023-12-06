@@ -31,10 +31,10 @@ export const Slider = ({
 	};
 
 	useEffect(() => {
-		if (forcedValue > currentValue) {
+		if (forcedValue > 0) {
 			setValue(forcedValue);
 		}
-	}, [currentValue, forcedValue])
+	}, [forcedValue])
 
 	return (<div
 		className="flex-row-space-between"

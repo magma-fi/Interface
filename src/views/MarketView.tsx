@@ -64,6 +64,8 @@ export const MarketView = ({ market }: {
 	const [showBorrowModal, setShowBorrowModal] = useState(false);
 	const [showBorrowDoneModal, setShowBorrowDoneModal] = useState(false);
 	const [showRepayModal, setShowRepayModal] = useState(false);
+	const [showRepayDoneModal, setShowRepayDoneModal] = useState(false);
+	const [repaidAmount, setRepaidAmount] = useState(0);
 	const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 	// const borrowingRate =fees.borrowingRate();
 	const feePct = new Percent(borrowingRate);
@@ -121,6 +123,13 @@ export const MarketView = ({ market }: {
 		setShowBorrowDoneModal(true);
 	};
 
+	const handleRepayDone = (tx: string, repayAmount: number) => {
+		setTxHash(tx);
+		setShowRepayModal(false);
+		setShowRepayDoneModal(true);
+		setRepaidAmount(repayAmount);
+	};
+
 	const handleBorrow = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		evt.preventDefault();
 		evt.stopPropagation();
@@ -154,6 +163,8 @@ export const MarketView = ({ market }: {
 	const handleGoBackVault = () => {
 		setShowDepositDoneModal(false);
 		setShowBorrowDoneModal(false);
+		setShowRepayDoneModal(false);
+		setRepaidAmount(0);
 		setTxHash("");
 	};
 
@@ -508,7 +519,20 @@ export const MarketView = ({ market }: {
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={trove.debt} />}
+			max={trove.debt}
+			onDone={handleRepayDone} />}
+
+		{showRepayDoneModal && <TxDone
+			title={t("repaidSuccessfully")}
+			onClose={handleGoBackVault}
+			illustration="images/repay-debt.png"
+			whereGoBack={t("back2Vault")}>
+			<TxLabel
+				txHash={txHash}
+				title={t("debtRepaid")}
+				logo="images/wen.png"
+				amount={repaidAmount.toFixed(2) + " " + WEN.symbol} />
+		</TxDone>}
 
 		{showWithdrawModal && <WithdrawModal
 			isOpen={showWithdrawModal}

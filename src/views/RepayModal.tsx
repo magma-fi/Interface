@@ -7,16 +7,17 @@ import { useLang } from "../hooks/useLang";
 import { Coin, ErrorMessage, ValidationContext } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, MINIMUM_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
 import { TroveAction } from "../components/Trove/TroveAction";
-import { calculateAvailableBorrow, calculateAvailableWithdrawal } from "../utils";
+import { calculateAvailableBorrow, calculateAvailableWithdrawal, calculateUtilizationRate } from "../utils";
 import { Slider } from "../components/Slider";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { debounce } from "../libs/debounce";
+import { useMyTransactionState } from "../components/Transaction";
 
 export const RepayModal = ({
 	isOpen = false,
@@ -26,7 +27,8 @@ export const RepayModal = ({
 	market,
 	fees,
 	validationContext,
-	max
+	max,
+	onDone = () => { }
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -36,6 +38,7 @@ export const RepayModal = ({
 	fees: Fees;
 	validationContext: ValidationContext;
 	max: Decimal;
+	onDone: (tx: string, repayAmount: number) => void;
 }) => {
 	const { t } = useLang();
 	const debt = Number(trove.debt);
@@ -43,10 +46,13 @@ export const RepayModal = ({
 	const [repayAmount, setRepayAmount] = useState(0);
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	const maxSafe = Decimal.ONE.div(MINIMUM_COLLATERAL_RATIO);
+	const netDebtNumber = Number(netDebt.toString());
+	const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
-	const [forcedSlideValue, setForcedSlideValue] = useState(0);
+	const [utilRate, setUtilRate] = useState(Decimal.ZERO);
 	const [slideValue, setSlideValue] = useState(0);
+	const txId = useMemo(() => String(new Date().getTime()), []);
+	const transactionState = useMyTransactionState(txId);
 
 	const isDirty = !netDebt.eq(repayAmount);
 	const updatedTrove = isDirty ? new Trove(trove.collateral, trove.netDebt.sub(repayAmount)) : trove;
@@ -96,13 +102,14 @@ export const RepayModal = ({
 			const unsavedChanges = Difference.between(netDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
 			setRepayAmount(Number(trove.netDebt.sub(nextNetDebt).toString()));
-
-			// setForcedSlideValue(Number(trove.collateral.mulDiv(price, nextNetDebt).div(trove.collateralRatio(price)).toString()));
 		}
+
+		setUtilRate(calculateUtilizationRate(updatedTrove, price));
 	}, [trove, repayAmount, price]);
 
 	useEffect(() => {
 		if (slideValue === 0) return;
+
 
 		debounce.run(() => {
 			const toReduce = trove.debt.mul((troveUtilizationRateNumber - slideValue * 100) / troveUtilizationRateNumber)
@@ -125,6 +132,13 @@ export const RepayModal = ({
 	const handleSlideUtilRate = (val: number) => {
 		setSlideValue(val);
 	};
+
+	useEffect(() => {
+		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+			onDone(transactionState.tx.rawSentTransaction as unknown as string, repayAmount);
+			transactionState.resolved = true;
+		}
+	}, [transactionState.type])
 
 	return isOpen ? <Modal
 		title={t("repayDebt")}
@@ -156,7 +170,7 @@ export const RepayModal = ({
 						warning={undefined}
 						error={description && t(errorMessages.key, errorMessages.values)}
 						allowReduce={true}
-						currentValue={debt}
+						currentValue={netDebtNumber}
 						allowIncrease={false} />
 				</div>
 
@@ -178,7 +192,7 @@ export const RepayModal = ({
 						max={Number(maxSafe.toString())}
 						currentValue={troveUtilizationRateNumber / 100}
 						onChange={handleSlideUtilRate}
-						forcedValue={forcedSlideValue}
+						forcedValue={Number(utilRate.toString())}
 						allowReduce={true}
 						allowIncrease={false} />
 				</div>
@@ -192,7 +206,7 @@ export const RepayModal = ({
 
 					<ChangedValueLabel
 						previousValue={troveUtilizationRateNumber.toFixed(2) + "%"}
-						newValue={((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(updatedTrove.collateralRatio(price)).mul(100).toString(2) : 0) + "%"} />
+						newValue={utilRate.mul(100).toString(2) + "%"} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -223,8 +237,8 @@ export const RepayModal = ({
 			</div>
 		</div>
 
-		{stableTroveChange ? <TroveAction
-			transactionId="trove-adjustment"
+		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
+			transactionId={txId}
 			change={stableTroveChange}
 			maxBorrowingRate={borrowingRate.add(0.005)}
 			borrowingFeeDecayToleranceMinutes={60}>
@@ -242,7 +256,7 @@ export const RepayModal = ({
 			disabled>
 			<img src="images/repay-dark.png" />
 
-			{t("repay")}
+			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("repaying") + "...") : t("repay")}
 		</button>}
 	</Modal> : <></>
 };
