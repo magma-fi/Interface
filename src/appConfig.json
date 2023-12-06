@@ -1,0 +1,7 @@
+{
+	"subgraph": {
+		"4690": {
+			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet"
+		}
+	}
+}

@@ -16,6 +16,7 @@
     "@liquity/lib-react": "^1.0.0",
     "@metamask/eth-sig-util": "5.0.1",
     "@tippyjs/react": "4.2.5",
+    "apollo-fetch": "^0.7.0",
     "connectkit": "1.3.0",
     "lambert-w-function": "3.0.0",
     "lib-base": "https://github.com/siyushin/lib-base.git#f430f9da33a3a4ce35f32a660ad89fdb264d1aa8",

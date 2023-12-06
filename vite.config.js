@@ -7,7 +7,7 @@ import RollupPluginPolyfillNode from "rollup-plugin-polyfill-node";
 export default defineConfig({
     base: "./",
     plugins: [react()],
-    define: { "process.env": {} },
+    define: { "process.env": {} }, // Coinbase SDK wants this
     optimizeDeps: {
         esbuildOptions: {
             plugins: [NodeModulesPolyfillPlugin()]
@@ -33,7 +33,7 @@ export default defineConfig({
         setupFiles: "./src/setupTests.ts",
         deps: {
             inline: [
-                "connectkit",
+                "connectkit", // fixes import of "react/jsx-runtime"
                 "rollup-plugin-node-polyfills"
             ]
         },

@@ -23,3 +23,7 @@ export type ErrorMessage = {
 	key: string;
 	values: Record<string, string>
 }
+
+export type TroveChangeTx = {
+	id: string;
+}

@@ -1,7 +1,7 @@
 import { useLiquitySelector } from "@liquity/lib-react";
 import { useLang } from "../hooks/useLang";
-import { Coin } from "../libs/types";
-import { useMemo, useState } from "react";
+import { Coin, TroveChangeTx } from "../libs/types";
+import { useEffect, useMemo, useState } from "react";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
 import { selectForTroveChangeValidation } from "../components/Trove/validation/validateTroveChange";
 import { Percent } from "lib-base";
@@ -18,6 +18,8 @@ import { RepayModal } from "./RepayModal";
 import { WithdrawModal } from "./WithdrawModal";
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
+import { graphqlAsker } from "../libs/graphqlAsker";
+import { useChainId } from "wagmi";
 
 export const MarketView = ({ market }: {
 	market: Coin;
@@ -91,6 +93,17 @@ export const MarketView = ({ market }: {
 
 	const availableWithdrawal = calculateAvailableWithdrawal(trove, price);
 	const availableWithdrawalFiat = availableWithdrawal.mul(price);
+	const chainId = useChainId();
+	const [txs, setTxs] = useState<TroveChangeTx[]>();
+
+	useEffect(() => {
+		if (!trove.ownerAddress) return;
+
+		const query = graphqlAsker.requestTroveChanges("0x")
+		graphqlAsker.ask(chainId, query, data => {
+			setTxs(data as TroveChangeTx[]);
+		});
+	}, [chainId, trove.ownerAddress]);
 
 	if (market?.symbol === "DAI" || market?.symbol === "USDC") {
 		return <div className="marketView">
