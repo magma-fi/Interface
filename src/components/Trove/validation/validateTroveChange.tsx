@@ -340,7 +340,7 @@ const validateTroveClosure = (
     numberOfTroves,
     lusdBalance
   }: TroveChangeValidationContext
-): JSX.Element | null => {
+): JSX.Element | ErrorMessage | null => {
   if (numberOfTroves === 1) {
     return (
       <ErrorDescription>
@@ -358,15 +358,19 @@ const validateTroveClosure = (
   }
 
   if (repayLUSD?.gt(lusdBalance)) {
-    return (
-      <ErrorDescription>
-        You need{" "}
-        <Amount>
-          {repayLUSD.sub(lusdBalance).prettify()} {COIN}
-        </Amount>{" "}
-        more to close your Trove.
-      </ErrorDescription>
-    );
+    // return (
+    //   <ErrorDescription>
+    //     You need{" "}
+    //     <Amount>
+    //       {repayLUSD.sub(lusdBalance).prettify()} {COIN}
+    //     </Amount>{" "}
+    //     more to close your Trove.
+    //   </ErrorDescription>
+    // );
+    return {
+      key: "needMoreToClose",
+      values: { amount: repayLUSD.sub(lusdBalance).prettify() + " " + WEN.symbol }
+    } as ErrorMessage;
   }
 
   if (wouldTriggerRecoveryMode) {

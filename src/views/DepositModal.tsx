@@ -44,7 +44,7 @@ export const DepositeModal = ({
 	const [valueForced, setValueForced] = useState(amountDeposited);
 	const [depositValue, setDepositValue] = useState(0);
 	const [borrowValue, setBorrowValue] = useState(0);
-	const [showExpandBorrowView, setShowExpandBorrowView] = useState(false);
+	const [showExpandBorrowView, setShowExpandBorrowView] = useState(true);
 	const previousTrove = useRef<Trove>(trove);
 	const previousAvailableBorrow = previousTrove.current.collateral.mul(price).div(CRITICAL_COLLATERAL_RATIO);
 	const [newAvailableBorrow, setNewAvailableBorrow] = useState(previousAvailableBorrow);
@@ -71,7 +71,7 @@ export const DepositeModal = ({
 		setValueForced(amountDeposited);
 		setDepositValue(0);
 		setBorrowValue(0);
-		setShowExpandBorrowView(false);
+		setShowExpandBorrowView(true);
 		setNewAvailableBorrow(previousAvailableBorrow);
 		setDefaultBorrowAmount(previousBorrowedAmountNumber);
 	};

@@ -69,7 +69,7 @@ export const Troves: OptionItem[] = [
 
 export const TroveOptions: OptionItem[] = [
 	{
-		key: "close"
+		key: "closeVault"
 	}
 ];
 

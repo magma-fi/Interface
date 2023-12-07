@@ -64,5 +64,8 @@
 	"withdrawing": "withdrawing",
 	"withdrawnSuccessfully": "Withdrawn successfully!",
 	"withdrawn": "Withdrawn",
-	"stabilityPool": "Stability Pool"
+	"stabilityPool": "Stability Pool",
+	"closeVault": "Close Vault",
+	"closing": "closing",
+	"needMoreToClose": "You need {amount} more to close your trove."
 }

@@ -20,6 +20,7 @@ import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { graphqlAsker } from "../libs/graphqlAsker";
 import { useChainId } from "wagmi";
+import { CloseModal } from "./CloseModal";
 
 export const MarketView = ({ market }: {
 	market: Coin;
@@ -71,6 +72,7 @@ export const MarketView = ({ market }: {
 	const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 	const [showWithdrawDoneModal, setShowWithdrawDoneModal] = useState(false);
 	const [withdrawnAmount, setWithdrawnAmount] = useState(0);
+	const [showCloseModal, setShowCloseModal] = useState(false);
 	// const borrowingRate =fees.borrowingRate();
 	const feePct = new Percent(borrowingRate);
 	// const totalCollateralRatio = total.collateralRatio(price);
@@ -80,7 +82,7 @@ export const MarketView = ({ market }: {
 	const borrowingFeePct = new Percent(borrowingRate);
 	const currentPrice = trove.collateral.div(trove.debt);
 	const maxAvailableBorrow = trove.collateral.mul(price).div(CRITICAL_COLLATERAL_RATIO);
-	const availableBorrow = maxAvailableBorrow.sub(trove.debt);
+	const availableBorrow = maxAvailableBorrow.gt(trove.debt) ? maxAvailableBorrow.sub(trove.debt) : Decimal.ZERO;
 	// const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateral.mulDiv(price, trove.debt);
 	// const troveUtilizationRate = troveCollateralRatio.div(CRITICAL_COLLATERAL_RATIO).mul(100);
 	const troveUtilizationRate = trove.debt.gt(1) ? trove.netDebt.div(trove.collateral.mul(price)).mul(100) : Decimal.ZERO;
@@ -112,8 +114,8 @@ export const MarketView = ({ market }: {
 	}
 
 	const handleTroveAction = (idx: number) => {
-		if (TroveOptions[idx].key === "close") {
-			// 
+		if (TroveOptions[idx].key === "closeVault") {
+			setShowCloseModal(true);
 		}
 	};
 
@@ -181,6 +183,10 @@ export const MarketView = ({ market }: {
 
 	const handleCloseWithdrawModal = () => {
 		setShowWithdrawModal(false);
+	};
+
+	const handleCloseClosureModal = () => {
+		setShowCloseModal(false);
 	};
 
 	const handleGoBackVault = () => {
@@ -582,5 +588,12 @@ export const MarketView = ({ market }: {
 				logo="images/iotx.png"
 				amount={withdrawnAmount.toFixed(2) + " " + WEN.symbol} />
 		</TxDone>}
+
+		{showCloseModal && <CloseModal
+			isOpen={showCloseModal}
+			onClose={handleCloseClosureModal}
+			trove={trove}
+			fees={fees}
+			validationContext={validationContext} />}
 	</>
 };

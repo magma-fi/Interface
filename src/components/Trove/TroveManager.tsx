@@ -159,7 +159,6 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
 
   useEffect(() => {
     if (collateral !== undefined) {
-      console.debug("检查大数类型 collateral =", collateral, collateral instanceof Decimal);
       dispatch({ type: "setCollateral", newValue: collateral });
     }
     if (debt !== undefined) {
@@ -169,8 +168,6 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
 
   const borrowingRate = fees.borrowingRate();
   const maxBorrowingRate = borrowingRate.add(0.005); // WONT-FIX slippage tolerance
-
-  console.debug("检查大数类型 borrowingRate =", borrowingRate, borrowingRate instanceof Decimal);
 
   const [validChange, description] = validateTroveChange(
     original,

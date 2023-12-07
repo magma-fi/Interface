@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { MouseEvent, ReactNode, useState } from "react";
+import { MouseEvent, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { OptionItem } from "../libs/types";
 import { useLang } from "../hooks/useLang";
+
+let dropdownMenuTimer: NodeJS.Timeout | null = null;
 
 export const DropdownMenu = ({
 	defaultValue = 0,
@@ -18,7 +20,7 @@ export const DropdownMenu = ({
 	const { t } = useLang();
 	const [idx, setIdx] = useState(defaultValue);
 	const currentOption = options[idx];
-	const [expanded, setExpanded] = useState(false)
+	const [expanded, setExpanded] = useState(false);
 
 	const handleExpand = () => {
 		if (options.length >= 1) {
@@ -31,6 +33,29 @@ export const DropdownMenu = ({
 		setIdx(val);
 		onChange(val);
 		setExpanded(false);
+	};
+
+	const clearTimer = () => {
+		if (dropdownMenuTimer) {
+			clearTimeout(dropdownMenuTimer!);
+			dropdownMenuTimer = null;
+		}
+	};
+
+	const setTimer = useCallback(() => {
+		if (expanded) {
+			dropdownMenuTimer = setTimeout(() => {
+				setExpanded(false);
+			}, 1000);
+		}
+	}, [expanded]);
+
+	const handleMouseEnter = () => {
+		clearTimer();
+	};
+
+	const handleMouseLeave = () => {
+		setTimer();
 	};
 
 	return <div>
@@ -55,14 +80,17 @@ export const DropdownMenu = ({
 		</div>
 
 		<div style={{ position: "relative" }}>
-			{expanded && <div className="dropdownMenuOptions">
+			{expanded && <div
+				className="dropdownMenuOptions"
+				onMouseLeave={handleMouseLeave}
+				onMouseEnter={handleMouseEnter}>
 				{options.map((option, index) => {
 					return <div
 						key={option.title || option.key}
 						id={String(index)}
 						className={"option" + (idx === index ? " active" : "")}
 						onClick={handleClickOption}>
-						<img src={option.icon} />
+						{option.icon && <img src={option.icon} />}
 
 						<div>{option.title ?? t(option.key!)}</div>
 					</div>
