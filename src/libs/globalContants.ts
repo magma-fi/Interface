@@ -17,7 +17,7 @@ export enum StyleModes {
 
 export const WEN: Coin = {
 	symbol: "WEN",
-	logo: "images/WEN.png"
+	logo: "images/wen.png"
 }
 
 export const IOTX: Coin = {
