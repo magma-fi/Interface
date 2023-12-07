@@ -21,7 +21,7 @@ import { TxLabel } from "../components/TxLabel";
 import { validateStabilityDepositChange } from "../components/Stability/validation/validateStabilityDepositChange";
 import { StabilityDepositAction } from "../components/Stability/StabilityDepositAction";
 
-export const StakeModal = ({
+export const UnstakeModal = ({
 	isOpen = false,
 	onClose = () => { },
 	accountBalance = Decimal.ZERO,
@@ -33,7 +33,7 @@ export const StakeModal = ({
 	isOpen: boolean;
 	onClose: () => void;
 	accountBalance: Decimal;
-	onDone: (tx: string, depositAmount: number) => void;
+	onDone: (tx: string, unstakeAmount: number) => void;
 	stabilityDeposit: StabilityDeposit;
 	validationContext: ValidationContextForStabilityPool;
 	lusdInStabilityPool: Decimal;
@@ -41,17 +41,17 @@ export const StakeModal = ({
 	const { t } = useLang();
 	const amountDeposited = 0;
 	const [valueForced, setValueForced] = useState(amountDeposited);
-	const [depositAmount, setDepositAmount] = useState(0);
+	const [unstakeAmount, setUnstakeAmount] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId);
 
 	const handleMax = () => {
-		setValueForced(Number(accountBalance.toString()));
+		setValueForced(Number(stabilityDeposit.currentLUSD.toString()));
 	};
 
 	const handleInputDeposit = (val: number) => {
 		setValueForced(0);
-		setDepositAmount(val);
+		setUnstakeAmount(val);
 	};
 
 	const handleCloseModal = () => {
@@ -60,19 +60,21 @@ export const StakeModal = ({
 
 	const [validChange, description] = validateStabilityDepositChange(
 		stabilityDeposit,
-		stabilityDeposit.currentLUSD.add(depositAmount),
+		stabilityDeposit.currentLUSD.sub(unstakeAmount),
 		validationContext
 	);
 
+	console.debug("description =", validChange, description);
+
 	useEffect(() => {
 		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string, depositAmount);
+			onDone(transactionState.tx.rawSentTransaction as unknown as string, unstakeAmount);
 			transactionState.resolved = true;
 		}
 	}, [transactionState.type])
 
 	return isOpen ? <Modal
-		title={t("stake") + " " + WEN.symbol}
+		title={t("unstake") + " " + WEN.symbol}
 		onClose={handleCloseModal}>
 		<div
 			className="flex-column"
@@ -80,23 +82,22 @@ export const StakeModal = ({
 				gap: "1rem",
 				maxWidth: "372px"
 			}}>
-			<div className="description">{t("withdrawAnytime")}</div>
 
 			<TxLabel
-				title={t("currentInterest") + "(APY)"}
-				logo="images/chart.png"
-				amount={"0"} />
+				title={t("currentlyStaked")}
+				logo="images/stake-orange.png"
+				amount={stabilityDeposit.currentLUSD.toString(2) + " " + WEN.symbol} />
 
 			<div className="flex-column-align-left">
 				<div
 					className="flex-row-space-between"
 					style={{ alignItems: "center" }}>
-					<div className="label fat">{t("stakeAmount")}</div>
+					<div className="label fat">{t("unstakeAmount")}</div>
 
 					<button
 						className="textButton smallTextButton"
 						onClick={handleMax}>
-						{t("max")}:&nbsp;{accountBalance.toString(2)}&nbsp;{WEN.symbol}
+						{t("max")}:&nbsp;{stabilityDeposit.currentLUSD.toString(2)}&nbsp;{WEN.symbol}
 					</button>
 				</div>
 
@@ -122,7 +123,7 @@ export const StakeModal = ({
 
 					<ChangedValueLabel
 						previousValue={stabilityDeposit.currentLUSD.toString(2)}
-						newValue={stabilityDeposit.currentLUSD.add(depositAmount).toString(2) + " " + WEN.symbol} />
+						newValue={stabilityDeposit.currentLUSD.sub(unstakeAmount).toString(2) + " " + WEN.symbol} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -130,7 +131,7 @@ export const StakeModal = ({
 
 					<ChangedValueLabel
 						previousValue={accountBalance.toString(2)}
-						newValue={accountBalance.sub(depositAmount).toString(2) + " " + WEN.symbol} />
+						newValue={accountBalance.add(unstakeAmount).toString(2) + " " + WEN.symbol} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -138,7 +139,7 @@ export const StakeModal = ({
 
 					<ChangedValueLabel
 						previousValue={stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool).toString(2) + "%"}
-						newValue={stabilityDeposit.currentLUSD.add(depositAmount).mulDiv(100, lusdInStabilityPool.add(depositAmount)).toString(2) + "%"} />
+						newValue={stabilityDeposit.currentLUSD.sub(unstakeAmount).mulDiv(100, lusdInStabilityPool.add(unstakeAmount)).toString(2) + "%"} />
 				</div>
 			</div>
 		</div>
@@ -149,18 +150,14 @@ export const StakeModal = ({
 			<button
 				className="primaryButton bigButton"
 				style={{ width: "100%" }}
-				disabled={depositAmount === 0}>
-				<img src="images/stake-dark.png" />
-
-				{t("stake") + " " + WEN.symbol}
+				disabled={unstakeAmount === 0}>
+				{t("unstake") + " " + WEN.symbol}
 			</button>
 		</StabilityDepositAction> : <button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
 			disabled>
-			<img src="images/stake-dark.png" />
-
-			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("staking") + "...") : (t("stake") + " " + WEN.symbol)}
+			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("unstaking") + "...") : (t("unstake") + " " + WEN.symbol)}
 		</button>}
 	</Modal> : <></>
 };

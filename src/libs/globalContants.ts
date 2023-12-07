@@ -1,7 +1,8 @@
 import { Coin, OptionItem } from "./types";
 
 export enum ModalAction {
-	Stake = "stake"
+	Stake = "stake",
+	Unstake = "unstake"
 }
 
 export enum Langs {

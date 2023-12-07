@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useLang } from "../hooks/useLang";
-import { ModalAction, WEN } from "../libs/globalContants";
+import { ModalAction, WEN, globalContants } from "../libs/globalContants";
 import { Coin } from "../libs/types";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
 import { selectForTroveChangeValidation } from "../components/Trove/validation/validateTroveChange";
@@ -9,6 +9,7 @@ import { StakeModal } from "./StakeModal";
 import { selectForStabilityDepositChangeValidation } from "../components/Stability/validation/validateStabilityDepositChange";
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
+import { UnstakeModal } from "./UnstakeModal";
 
 type ModalOpenning = {
 	action: ModalAction;
@@ -65,24 +66,15 @@ export const PoolView = ({ market }: {
 	};
 
 	const handleModalDone = (tx: string, arg: number) => {
-		if (showModal) {
-			switch (showModal.action) {
-				case ModalAction.Stake:
-					handleCloseModal();
+		setTxHash(tx);
+		setAmountInTx(arg);
 
-					setTxHash(tx);
-					setAmountInTx(arg);
-					setTxResult({
-						action: ModalAction.Stake,
-						isShow: true
-					} as ModalOpenning);
-					break;
+		setTxResult({
+			action: showModal?.action,
+			isShow: true
+		} as ModalOpenning);
 
-				default:
-					handleCloseModal();
-					break;
-			}
-		}
+		handleCloseModal();
 	};
 
 	if (market?.symbol === "DAI" || market?.symbol === "USDC") {
@@ -91,12 +83,24 @@ export const PoolView = ({ market }: {
 		</div>
 	}
 
+	const handleUnstake = () => {
+		setShowModal({
+			action: ModalAction.Unstake,
+			isShow: true
+		} as ModalOpenning)
+	};
+
 	return <>
 		<div className="marketView">
-			<div>
+			<div
+				className="flex-column"
+				style={{ gap: "24px" }}>
 				<div
 					className="flex-column"
-					style={{ alignItems: "center" }}>
+					style={{
+						alignItems: "center",
+						gap: "0.5rem"
+					}}>
 					<div className="flex-column">
 						<button
 							id={ModalAction.Stake}
@@ -107,7 +111,9 @@ export const PoolView = ({ market }: {
 							{t("stake")}
 						</button>
 
-						<button className="secondaryButton">
+						<button
+							className="secondaryButton"
+							disabled>
 							<img src="images/swap-orange.png" />
 
 							{t("swapWen2Iotx")}
@@ -115,6 +121,40 @@ export const PoolView = ({ market }: {
 					</div>
 
 					<div className="label">{t("walletBalance") + " " + lusdBalance.toString(2) + " " + WEN.symbol}</div>
+				</div>
+
+				<div className="card">
+					<div className="flex-row-space-between">
+						<h4 className="fat">{t("staked")}</h4>
+
+						<div>
+							<span className="label">{t("shareOfPool")}&nbsp;&nbsp;</span>
+
+							<span>{stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool).toString(4) + "%"}</span>
+						</div>
+					</div>
+
+					<div
+						className="flex-row-space-between"
+						style={{ alignItems: "center" }}>
+						<div className="flex-row-align-left">
+							<img
+								src={WEN.logo}
+								width="40px" />
+
+							<div className="flex-column-align-left">
+								<div>{stabilityDeposit.currentLUSD.toString(2)}&nbsp;{globalContants.USD}</div>
+
+								<div className="label labelSmall">{stabilityDeposit.currentLUSD.toString(2)}&nbsp;{WEN.symbol}</div>
+							</div>
+						</div>
+
+						<button
+							className="secondaryButton"
+							onClick={handleUnstake}>
+							{t("unstake")}
+						</button>
+					</div>
 				</div>
 			</div>
 
@@ -140,6 +180,27 @@ export const PoolView = ({ market }: {
 			<TxLabel
 				txHash={txHash}
 				title={t("stakedAmount")}
+				logo={WEN.logo}
+				amount={amountInTx + " " + WEN.symbol} />
+		</TxDone>}
+
+		{showModal?.action === ModalAction.Unstake && showModal.isShow && <UnstakeModal
+			isOpen={showModal.isShow}
+			onClose={handleCloseModal}
+			accountBalance={lusdBalance}
+			onDone={handleModalDone}
+			stabilityDeposit={stabilityDeposit}
+			validationContext={validationContext}
+			lusdInStabilityPool={lusdInStabilityPool} />}
+
+		{showTxResult?.action === ModalAction.Unstake && showTxResult.isShow && <TxDone
+			title={t("unstakedSuccessfully")}
+			onClose={handleCloseTxResult}
+			illustration="images/unstake-successful.png"
+			whereGoBack={t("back2StabilityPool")}>
+			<TxLabel
+				txHash={txHash}
+				title={t("unstakedAmount")}
 				logo={WEN.logo}
 				amount={amountInTx + " " + WEN.symbol} />
 		</TxDone>}

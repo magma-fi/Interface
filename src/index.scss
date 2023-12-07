@@ -91,6 +91,14 @@ h3 {
   padding: 0;
 }
 
+h4 {
+  font-family: metropolis700;
+  font-size: 1.25rem;
+  text-transform: capitalize;
+  margin: 0;
+  padding: 0;
+}
+
 #root {
   width: 100vw;
   min-height: 100vh;
@@ -731,7 +739,7 @@ h3 {
   align-items: center;
   flex-direction: row;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--flex-gap-larger);
   align-self: stretch;
   border-radius: 12px;
   border: 1px solid var(--button-secondary-stroke);

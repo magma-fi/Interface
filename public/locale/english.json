@@ -76,5 +76,13 @@
 	"shareOfStabilityPool": "Share of Stability Pool",
 	"stakedSuccessfully": "Staked successfully",
 	"back2StabilityPool": "Back to Stability Pool",
-	"stakedAmount": "Staked amount"
+	"stakedAmount": "Staked amount",
+	"unstake": "unstake",
+	"shareOfPool": "Share of Pool",
+	"currentlyStaked": "Currently staked",
+	"unstakeAmount": "Unstake amount",
+	"unstaking": "unstaking",
+	"unstakedSuccessfully": "Unstaked successfully",
+	"unstakedAmount": "unstaked Amount",
+	"staking": "staking"
 }
