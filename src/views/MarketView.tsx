@@ -346,7 +346,7 @@ export const MarketView = ({ market }: {
 
 							<div className="flex-row-align-left">
 								<img
-									src="images/wen.png"
+									src="images/WEN.png"
 									width="40px" />
 
 								<div className="flex-column-align-left">
@@ -383,7 +383,7 @@ export const MarketView = ({ market }: {
 
 							<div className="flex-row-align-left">
 								<img
-									src="images/wen.png"
+									src="images/WEN.png"
 									width="40px" />
 
 								<div className="flex-column-align-left">
@@ -539,7 +539,7 @@ export const MarketView = ({ market }: {
 			<TxLabel
 				txHash={txHash}
 				title={t("borrowed")}
-				logo="images/wen.png"
+				logo="images/WEN.png"
 				amount={trove.debt.toString(2) + " " + WEN.symbol} />
 		</TxDone>}
 
@@ -562,7 +562,7 @@ export const MarketView = ({ market }: {
 			<TxLabel
 				txHash={txHash}
 				title={t("debtRepaid")}
-				logo="images/wen.png"
+				logo="images/WEN.png"
 				amount={repaidAmount.toFixed(2) + " " + WEN.symbol} />
 		</TxDone>}
 

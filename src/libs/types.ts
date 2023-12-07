@@ -1,4 +1,4 @@
-import { Decimal, Trove } from "lib-base";
+import { Decimal, Trove, FrontendStatus, UserTrove } from "lib-base";
 
 export type OptionItem = {
 	icon?: string;
@@ -17,6 +17,13 @@ export type ValidationContext = {
 	accountBalance: Decimal;
 	lusdBalance: Decimal;
 	numberOfTroves: number;
+};
+
+export type ValidationContextForStabilityPool = {
+	trove: UserTrove;
+	lusdBalance: Decimal;
+	haveOwnFrontend: boolean;
+	haveUndercollateralizedTroves: boolean;
 };
 
 export type ErrorMessage = {

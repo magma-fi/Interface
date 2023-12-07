@@ -127,8 +127,6 @@ h3 {
 .flex-column {
   display: flex;
   flex-direction: column;
-  /* justify-content: center;
-  align-items: center; */
   gap: 0.5rem;
   width: 100%;
 }
@@ -315,7 +313,7 @@ h3 {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: fit-content;
+  width: 100%;
   height: fit-content;
   border: 1px solid var(--button-primary-stroke);
   background: var(--button-primary-fill);
@@ -487,7 +485,7 @@ h3 {
   display: grid;
   grid-template-columns: auto auto;
   gap: var(--flex-gap-larger);
-  width: fit-content;
+  width: 100%;
 
   .card {
     flex: 1 1;
@@ -631,7 +629,7 @@ h3 {
 
 .amountInputLayout {
   width: calc(100% - 2rem);
-  max-width: 300px;
+  // max-width: 300px;
 
   .amountInputBox {
     background-color: black;

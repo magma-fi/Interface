@@ -8,7 +8,7 @@ export const TxLabel = ({
 	logo,
 	amount
 }: {
-	txHash: string;
+	txHash?: string;
 	title: string;
 	logo: string;
 	amount: string;
@@ -30,13 +30,13 @@ export const TxLabel = ({
 			</div>
 		</div>
 
-		<a
+		{txHash && <a
 			className="textButton"
 			href={client.chain?.blockExplorers?.default.url + "/tx/" + txHash}
 			target="_blank">
 			{t("viewInExplorer")}
 
 			<img src="images/external-orange.png" />
-		</a>
+		</a>}
 	</div>
 };

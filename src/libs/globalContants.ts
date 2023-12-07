@@ -1,5 +1,9 @@
 import { Coin, OptionItem } from "./types";
 
+export enum ModalAction {
+	Stake = "stake"
+}
+
 export enum Langs {
 	English = "english",
 	Chinese = "中文"
@@ -12,7 +16,7 @@ export enum StyleModes {
 
 export const WEN: Coin = {
 	symbol: "WEN",
-	logo: "images/wen.png"
+	logo: "images/WEN.png"
 }
 
 export const IOTX: Coin = {
