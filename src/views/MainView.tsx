@@ -5,9 +5,12 @@ import { UserAccount } from "../components/UserAccount";
 import { Route, BrowserRouter, Switch } from "react-router-dom";
 import { BorrowView } from "./BorrowView";
 import { StakeView } from "./StakeView";
+import { useNetwork } from "wagmi";
 
 export const MainView = () => {
 	const [showConnectModal, setShowConnectModal] = useState(false);
+	const { chain, chains } = useNetwork();
+	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
 
 	const handleConnectWallet = () => {
 		setShowConnectModal(true);
@@ -21,7 +24,10 @@ export const MainView = () => {
 		<div className="app">
 			<BrowserRouter>
 				<SideBar>
-					<UserAccount onConnect={handleConnectWallet} />
+					<UserAccount
+						onConnect={handleConnectWallet}
+						isSupportedNetwork={isSupportedNetwork}
+						chains={chains} />
 					{/* <SystemStatsPopup /> */}
 				</SideBar>
 

@@ -84,5 +84,6 @@
 	"unstaking": "unstaking",
 	"unstakedSuccessfully": "Unstaked successfully",
 	"unstakedAmount": "unstaked Amount",
-	"staking": "staking"
+	"staking": "staking",
+	"switchNetwork": "switch network"
 }

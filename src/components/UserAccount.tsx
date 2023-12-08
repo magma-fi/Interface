@@ -1,38 +1,38 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import React from "react";
-import { Text, Flex, Box, Heading, Button } from "theme-ui";
-
-import { Decimal, LiquityStoreState } from "lib-base";
-import { useLiquitySelector } from "@liquity/lib-react";
-
-import { COIN, GT } from "../strings";
-import { useLiquity } from "../hooks/LiquityContext";
 import { shortenAddress } from "../utils";
-
-import { Icon } from "./Icon";
-import { useBondView } from "./Bonds/context/BondViewContext";
-import { useBondAddresses } from "./Bonds/context/BondAddressesContext";
-import { ConnectKitButton } from "connectkit";
 import { useLang } from "../hooks/useLang";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { Chain, useAccount, useDisconnect, useSwitchNetwork } from "wagmi";
+import { DropdownMenu } from "./DropdownMenu";
+import { useMemo } from "react";
+import { OptionItem } from "../libs/types";
 
-const select = ({ accountBalance, lusdBalance, lqtyBalance }: LiquityStoreState) => ({
-  accountBalance,
-  lusdBalance,
-  lqtyBalance
-});
+// const select = ({ accountBalance, lusdBalance, lqtyBalance }: LiquityStoreState) => ({
+//   accountBalance,
+//   lusdBalance,
+//   lqtyBalance
+// });
 
-export const UserAccount = ({ onConnect = () => { } }) => {
+export const UserAccount = ({
+  onConnect = () => { },
+  isSupportedNetwork = true,
+  chains = []
+}) => {
   const { t } = useLang();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const { connect, connectors } = useConnect();
+  const { switchNetwork } = useSwitchNetwork();
+  // const { connect, connectors } = useConnect();
   // const { account } = useLiquity();
   // const { accountBalance, lusdBalance: realLusdBalance, lqtyBalance } = useLiquitySelector(select);
   // const { bLusdBalance, lusdBalance: customLusdBalance } = useBondView();
   // const { LUSD_OVERRIDE_ADDRESS } = useBondAddresses();
-
   // const lusdBalance = LUSD_OVERRIDE_ADDRESS === null ? realLusdBalance : customLusdBalance;
+
+  const chainOptions = useMemo(() => {
+    return chains.map((item: Chain) => {
+      return { title: item.name } as OptionItem;
+    })
+  }, [chains]);
 
   const handleConnectWallet = () => {
     onConnect();
@@ -40,6 +40,10 @@ export const UserAccount = ({ onConnect = () => { } }) => {
 
   const handleDisconnect = () => {
     disconnect();
+  };
+
+  const handleSwitchNetwork = (idx: number) => {
+    switchNetwork && switchNetwork((chains[idx] as Chain).id);
   };
 
   return (
@@ -79,11 +83,15 @@ export const UserAccount = ({ onConnect = () => { } }) => {
 
         <div className="propertyText">{shortenAddress(address)}</div>
 
-        <button
+        {isSupportedNetwork ? <button
           className="textButton"
           onClick={handleDisconnect}>
           {t("disconnect")}
-        </button>
+        </button> : <DropdownMenu
+          options={chainOptions}
+          onChange={handleSwitchNetwork}>
+          <button className="textButton">{t("switchNetwork")}</button>
+        </DropdownMenu>}
 
         {/* {([
           ["ETH", accountBalance],
