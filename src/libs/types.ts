@@ -9,6 +9,7 @@ export type OptionItem = {
 export type Coin = {
 	symbol: string;
 	logo: string;
+	decimals?: number;
 };
 
 export type ValidationContext = {

@@ -85,5 +85,7 @@
 	"unstakedSuccessfully": "Unstaked successfully",
 	"unstakedAmount": "unstaked Amount",
 	"staking": "staking",
-	"switchNetwork": "switch network"
+	"switchNetwork": "switch network",
+	"totalValueLocked":"Total value locked",
+	"wenTotalSupply":"WEN total supply"
 }

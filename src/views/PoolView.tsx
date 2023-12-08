@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLang } from "../hooks/useLang";
 import { ModalAction, WEN, globalContants } from "../libs/globalContants";
 import { Coin } from "../libs/types";
@@ -10,6 +10,13 @@ import { selectForStabilityDepositChangeValidation } from "../components/Stabili
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { UnstakeModal } from "./UnstakeModal";
+import { ChangedValueLabel } from "../components/ChangedValueLabel";
+import { useContract } from "../hooks/useContract";
+import { LUSDToken } from "lib-ethers/dist/types";
+import { useLiquity } from "../hooks/LiquityContext";
+import LUSDTokenAbi from "lib-ethers/abi/LUSDToken.json";
+import { BigNumber } from "@ethersproject/bignumber";
+import { Decimal } from "lib-base"
 
 type ModalOpenning = {
 	action: ModalAction;
@@ -26,13 +33,15 @@ export const PoolView = ({ market }: {
 			const {
 				lusdBalance,
 				stabilityDeposit,
-				lusdInStabilityPool
+				lusdInStabilityPool,
+				numberOfTroves
 			} = state;
 
 			return {
 				lusdBalance,
 				stabilityDeposit,
 				lusdInStabilityPool,
+				numberOfTroves,
 				validationContext: selectForStabilityDepositChangeValidation(state)
 			};
 		};
@@ -42,6 +51,7 @@ export const PoolView = ({ market }: {
 		lusdBalance,
 		stabilityDeposit,
 		lusdInStabilityPool,
+		numberOfTroves,
 		validationContext
 	} = useLiquitySelector(selector);
 
@@ -49,6 +59,24 @@ export const PoolView = ({ market }: {
 	const [showTxResult, setTxResult] = useState<ModalOpenning | null>(null);
 	const [amountInTx, setAmountInTx] = useState(0);
 	const [txHash, setTxHash] = useState("");
+	const { liquity } = useLiquity();
+	const [wenTotalSupply, setWENTotalSupply] = useState(Decimal.ZERO)
+
+	const [lusdTokenDefault, lusdTokenDefaultStatus] = useContract<LUSDToken>(
+		liquity.connection.addresses.lusdToken,
+		LUSDTokenAbi
+	);
+
+	useEffect(() => {
+		const read = async () => {
+			if (lusdTokenDefault && lusdTokenDefaultStatus === "LOADED") {
+				const res = await lusdTokenDefault.totalSupply();
+				setWENTotalSupply(Decimal.from(res.toString()).div(Math.pow(10, WEN.decimals ?? 0)));
+			}
+		};
+
+		read();
+	}, [lusdTokenDefault, lusdTokenDefaultStatus]);
 
 	const handleShowModal = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		setShowModal({
@@ -91,7 +119,12 @@ export const PoolView = ({ market }: {
 	};
 
 	return <>
-		<div className="marketView">
+		<div
+			className="two-columns-grid"
+			style={{
+				width: "100%",
+				gap: "40px"
+			}}>
 			<div
 				className="flex-column"
 				style={{ gap: "24px" }}>
@@ -99,7 +132,7 @@ export const PoolView = ({ market }: {
 					className="flex-column"
 					style={{
 						alignItems: "center",
-						gap: "0.5rem"
+						gap: "1rem"
 					}}>
 					<div className="flex-column">
 						<button
@@ -123,43 +156,71 @@ export const PoolView = ({ market }: {
 					<div className="label">{t("walletBalance") + " " + lusdBalance.toString(2) + " " + WEN.symbol}</div>
 				</div>
 
-				<div className="card">
-					<div className="flex-row-space-between">
-						<h4 className="fat">{t("staked")}</h4>
+				<div className="panel">
+					<div className="flex-column">
+						<div className="flex-row-space-between">
+							<h4 className="fat">{t("staked")}</h4>
 
-						<div>
-							<span className="label">{t("shareOfPool")}&nbsp;&nbsp;</span>
+							<div>
+								<span className="label">{t("shareOfPool")}&nbsp;&nbsp;</span>
 
-							<span>{stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool).toString(4) + "%"}</span>
-						</div>
-					</div>
-
-					<div
-						className="flex-row-space-between"
-						style={{ alignItems: "center" }}>
-						<div className="flex-row-align-left">
-							<img
-								src={WEN.logo}
-								width="40px" />
-
-							<div className="flex-column-align-left">
-								<div>{stabilityDeposit.currentLUSD.toString(2)}&nbsp;{globalContants.USD}</div>
-
-								<div className="label labelSmall">{stabilityDeposit.currentLUSD.toString(2)}&nbsp;{WEN.symbol}</div>
+								<span>{stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool).toString(4) + "%"}</span>
 							</div>
 						</div>
 
-						<button
-							className="secondaryButton"
-							onClick={handleUnstake}>
-							{t("unstake")}
-						</button>
+						<div
+							className="flex-row-space-between"
+							style={{ alignItems: "center" }}>
+							<div className="flex-row-align-left">
+								<img
+									src={WEN.logo}
+									width="40px" />
+
+								<div className="flex-column-align-left">
+									<div>{stabilityDeposit.currentLUSD.toString(2)}&nbsp;{globalContants.USD}</div>
+
+									<div className="label labelSmall">{stabilityDeposit.currentLUSD.toString(2)}&nbsp;{WEN.symbol}</div>
+								</div>
+							</div>
+
+							<button
+								className="secondaryButton"
+								onClick={handleUnstake}>
+								{t("unstake")}
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
 
 			<div>
-				Coming soon...
+				<div
+					className="panel"
+					style={{ gap: "12px" }}>
+					<div className="flex-row-space-between">
+						<div className="label">{t("totalValueLocked")}</div>
+
+						<div>{lusdInStabilityPool.toString(2) + " " + WEN.symbol}</div>
+					</div>
+
+					<div className="flex-row-space-between">
+						<div className="label">{t("wenTotalSupply")}</div>
+
+						<div>{wenTotalSupply.toString(2) + " " + WEN.symbol}</div>
+					</div>
+
+					<div className="flex-row-space-between">
+						<div className="label">{t("totalUtilizationRate")}</div>
+
+						<div style={{ color: "#F25454" }}>{lusdInStabilityPool.div(wenTotalSupply).mul(100).toString(2) + "%"}</div>
+					</div>
+
+					<div className="flex-row-space-between">
+						<div className="label">{t("numberOfVaults")}</div>
+
+						<div>{numberOfTroves}</div>
+					</div>
+				</div>
 			</div>
 		</div>
 

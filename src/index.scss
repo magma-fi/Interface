@@ -18,7 +18,7 @@
   --button-primary-fill-hover: linear-gradient(0deg, rgba(255, 255, 255, 0.17) 0%, rgba(255, 255, 255, 0.17) 100%), linear-gradient(267deg, #FFA600 0%, #FF9407 23.42%, #FF7D11 53.74%, #FF6A19 79.79%, #FF5B1F 99.77%);
   --button-primary-fill-pressed: linear-gradient(0deg, rgba(0, 0, 0, 0.13) 0%, rgba(0, 0, 0, 0.13) 100%), linear-gradient(267deg, #FFA600 0%, #FF9407 23.42%, #FF7D11 53.74%, #FF6A19 79.79%, #FF5B1F 99.77%), linear-gradient(267deg, #FE8C00 0%, #F83600 99.77%);
   --surface-text-input-stroke: rgba(255, 255, 255, 0.05);
-  --surface-card: rgba(18, 15, 21, 0.70);
+  --surface-card: radial-gradient(206.57% 72.46% at 14.41% 0%, rgba(248, 54, 0, 0.03) 0%, rgba(248, 54, 0, 0.00) 100%), radial-gradient(206.57% 72.46% at 14.41% 0%, rgba(254, 140, 0, 0.02) 0%, rgba(248, 54, 0, 0.00) 100%), linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.00) 100%), rgba(18, 15, 21, 0.70);
   --surface-card-horizontal: radial-gradient(234.33% 62.47% at 0.77% 0%, rgba(248, 54, 0, 0.03) 0%, rgba(248, 54, 0, 0.00) 100%), radial-gradient(207.57% 24.94% at 23.99% 54.98%, rgba(254, 140, 0, 0.02) 0%, rgba(248, 54, 0, 0.00) 100%), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.00) 100%), rgba(18, 15, 21, 0.70);
   --surface-card-stroke: #201c21;
   --surface-text-input: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, rgba(255, 255, 255, 0.02) 100%), #06020B;
@@ -745,6 +745,20 @@ h4 {
   border: 1px solid var(--button-secondary-stroke);
   background: var(--button-secondary-fill);
   box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.05), 0px 10px 10px -3px rgba(0, 0, 0, 0.05);
+}
+
+.panel {
+  display: flex;
+  padding: 24px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  align-self: stretch;
+  border-radius: 16px;
+  border: 1px solid var(--surface-card-stroke);
+  background: var(--surface-card);
+  box-shadow: 19px 24px 72px 0px rgba(5, 2, 7, 0.40);
+  backdrop-filter: blur(7px);
 }
 
 @media (prefers-color-scheme: dark) {
