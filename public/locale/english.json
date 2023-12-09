@@ -86,6 +86,10 @@
 	"unstakedAmount": "unstaked Amount",
 	"staking": "staking",
 	"switchNetwork": "switch network",
-	"totalValueLocked":"Total value locked",
-	"wenTotalSupply":"WEN total supply"
+	"totalValueLocked": "Total value locked",
+	"wenTotalSupply": "WEN total supply",
+	"riskyTroves": "Risky Troves",
+	"owner": "owner",
+	"collateral": "Collateral",
+	"liquidate": "Liquidate"
 }

@@ -32,10 +32,15 @@ export const graphqlAsker = {
 					}
 				}
 				troveOperation
+				collateralBefore
+				collateralAfter
+				debtBefore
+				debtAfter
 				sequenceNumber
 				transaction {
 					id
-				},
+					timestamp
+				}
 			}
 		}
 		`;

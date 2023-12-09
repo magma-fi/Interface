@@ -12,11 +12,15 @@ import { TxLabel } from "../components/TxLabel";
 import { UnstakeModal } from "./UnstakeModal";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { useContract } from "../hooks/useContract";
-import { LUSDToken } from "lib-ethers/dist/types";
+import { HintHelpers, LUSDToken, SortedTroves, TroveManager } from "lib-ethers/dist/types";
 import { useLiquity } from "../hooks/LiquityContext";
 import LUSDTokenAbi from "lib-ethers/abi/LUSDToken.json";
+import TroveManagerAbi from "lib-ethers/abi/TroveManager.json";
+import HintHelpersAbi from "lib-ethers/abi/HintHelpers.json";
+import SortedTrovesAbi from "lib-ethers/abi/SortedTroves.json";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Decimal } from "lib-base"
+import { useAccount } from "wagmi";
 
 type ModalOpenning = {
 	action: ModalAction;
@@ -34,7 +38,8 @@ export const PoolView = ({ market }: {
 				lusdBalance,
 				stabilityDeposit,
 				lusdInStabilityPool,
-				numberOfTroves
+				numberOfTroves,
+				price
 			} = state;
 
 			return {
@@ -42,6 +47,7 @@ export const PoolView = ({ market }: {
 				stabilityDeposit,
 				lusdInStabilityPool,
 				numberOfTroves,
+				price,
 				validationContext: selectForStabilityDepositChangeValidation(state)
 			};
 		};
@@ -52,6 +58,7 @@ export const PoolView = ({ market }: {
 		stabilityDeposit,
 		lusdInStabilityPool,
 		numberOfTroves,
+		price,
 		validationContext
 	} = useLiquitySelector(selector);
 
@@ -61,11 +68,49 @@ export const PoolView = ({ market }: {
 	const [txHash, setTxHash] = useState("");
 	const { liquity } = useLiquity();
 	const [wenTotalSupply, setWENTotalSupply] = useState(Decimal.ZERO)
+	// const { address } = useAccount();
 
 	const [lusdTokenDefault, lusdTokenDefaultStatus] = useContract<LUSDToken>(
 		liquity.connection.addresses.lusdToken,
 		LUSDTokenAbi
 	);
+
+	const [hintHelpersDefault, hintHelpersDefaultStatus] = useContract<HintHelpers>(
+		liquity.connection.addresses.hintHelpers,
+		HintHelpersAbi
+	);
+
+	const [troveManagerDefault, troveManagerDefaultStatus] = useContract<TroveManager>(
+		liquity.connection.addresses.troveManager,
+		TroveManagerAbi
+	);
+
+	// const [sortedTrovesDefault, sortedTrovesDefaultStatus] = useContract<SortedTroves>(
+	// 	liquity.connection.addresses.sortedTroves,
+	// 	SortedTrovesAbi
+	// );
+
+	// const handleRedeemCollateral = async () => {
+	// 	if (!hintHelpersDefault || !troveManagerDefault || !sortedTrovesDefault || !address) return;
+
+	// 	// const wenAmount = stabilityDeposit.currentLUSD.toString();
+	// 	// const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault.getRedemptionHints(wenAmount, price.toString(), 0);
+	// 	// const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault.findInsertPosition(
+	// 	// 	partialRedemptionHintNICR,
+	// 	// 	address,
+	// 	// 	address
+	// 	// )
+	// 	// const redemptionTx = await troveManagerDefault.redeemCollateral(
+	// 	// 	wenAmount,
+	// 	// 	firstRedemptionHint,
+	// 	// 	upperPartialRedemptionHint,
+	// 	// 	lowerPartialRedemptionHint,
+	// 	// 	partialRedemptionHintNICR,
+	// 	// 	0,
+	// 	// 	"1000000000000000000"
+	// 	// )
+	// 	// liquity.populate.redeemLUSD()
+	// };
 
 	useEffect(() => {
 		const read = async () => {
@@ -145,8 +190,14 @@ export const PoolView = ({ market }: {
 						</button>
 
 						<button
-							className="secondaryButton"
-							disabled>
+							disabled={
+								!hintHelpersDefault
+								|| hintHelpersDefaultStatus !== "LOADED"
+								|| !troveManagerDefault
+								|| troveManagerDefaultStatus !== "LOADED"
+							}
+							// onClick={handleRedeemCollateral}
+							className="secondaryButton">
 							<img src="images/swap-orange.png" />
 
 							{t("swapWen2Iotx")}

@@ -56,7 +56,7 @@ export const SideBar: React.FC = ({ children }) => {
       <NavLink
         label={t("liquidations")}
         icon="images/liquidations.png"
-        url=""
+        url="/liquidations"
         fullWidth={true}
         showExternalLink={false}
         active={pathname === "/liquidations"} />

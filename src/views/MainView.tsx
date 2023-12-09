@@ -6,6 +6,7 @@ import { Route, BrowserRouter, Switch } from "react-router-dom";
 import { BorrowView } from "./BorrowView";
 import { StakeView } from "./StakeView";
 import { useNetwork } from "wagmi";
+import { LiquidationsView } from "./liquidationsView";
 
 export const MainView = () => {
 	const [showConnectModal, setShowConnectModal] = useState(false);
@@ -40,6 +41,10 @@ export const MainView = () => {
 					<Switch>
 						<Route path="/stake">
 							<StakeView />
+						</Route>
+
+						<Route path="/liquidations">
+							<LiquidationsView />
 						</Route>
 
 						<Route path="/">
