@@ -114,14 +114,17 @@ export const MarketView = ({ market }: {
 		const getContants = async () => {
 			let minNetDebt;
 			let wenGasGompensation;
+			let mcr;
 			if (borrowerOperationsStatus === "LOADED") {
 				minNetDebt = await borrowerOperationsDefault?.MIN_NET_DEBT()
 				wenGasGompensation = await borrowerOperationsDefault?.LUSD_GAS_COMPENSATION();
+				mcr = await borrowerOperationsDefault?.MCR();
 			}
 
 			setConstants({
 				MIN_NET_DEBT: Decimal.from(minNetDebt?.toString() || 0),
-				LUSD_GAS_COMPENSATION: Decimal.from(wenGasGompensation?.toString() || 0)
+				LUSD_GAS_COMPENSATION: Decimal.from(wenGasGompensation?.toString() || 0),
+				MCR: Decimal.from(mcr?.toString() || 0)
 			});
 		};
 
@@ -536,7 +539,8 @@ export const MarketView = ({ market }: {
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			onDone={handleDepositDone} />}
+			onDone={handleDepositDone}
+			constants={constants} />}
 
 		{showDepositDoneModal && <TxDone
 			title={t("depositedSuccessfully")}

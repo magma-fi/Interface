@@ -27,7 +27,8 @@ export const DepositeModal = ({
 	market,
 	fees,
 	validationContext,
-	onDone = () => { }
+	onDone = () => { },
+	constants
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -38,6 +39,7 @@ export const DepositeModal = ({
 	fees: Fees;
 	validationContext: ValidationContext;
 	onDone: (tx: string) => void;
+	constants?: Record<string, unknown>
 }) => {
 	const { t } = useLang();
 	const amountDeposited = Number(trove.collateral);
@@ -62,7 +64,8 @@ export const DepositeModal = ({
 		trove!,
 		updatedTrove!,
 		borrowingRate,
-		validationContext
+		validationContext,
+		constants
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
@@ -79,7 +82,9 @@ export const DepositeModal = ({
 	useEffect(init, []);
 
 	const handleMax = () => {
-		setValueForced(Number(accountBalance.toString()));
+		const val = Number(accountBalance.toString());
+		setValueForced(val);
+		setBorrowValue(val);
 	};
 
 	const handleExpandBorrow = () => {
@@ -123,12 +128,14 @@ export const DepositeModal = ({
 	</div>
 
 	const handleInputBorrow = (val: number) => {
-		setDefaultBorrowAmount(0);
+		setDefaultBorrowAmount(-1);
 		setBorrowValue(val);
 	}
 
 	const handleMaxBorrow = () => {
-		setDefaultBorrowAmount(Number(newAvailableBorrow?.toString()));
+		const val = Number(newAvailableBorrow?.toString());
+		setDefaultBorrowAmount(val);
+		setBorrowValue(val);
 	};
 
 	const borrowView = <div
@@ -214,7 +221,7 @@ export const DepositeModal = ({
 	}, [trove, depositValue, price, borrowValue]);
 
 	const handleInputDeposit = (val: number) => {
-		setValueForced(0);
+		setValueForced(-1);
 		setDepositValue(val);
 	};
 

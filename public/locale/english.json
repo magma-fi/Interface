@@ -91,5 +91,6 @@
 	"riskyTroves": "Risky Troves",
 	"owner": "owner",
 	"collateral": "Collateral",
-	"liquidate": "Liquidate"
+	"liquidate": "Liquidate",
+	"collateralRatioMustBeAtLeast": "Collateral ratio must be at least {percent}"
 }

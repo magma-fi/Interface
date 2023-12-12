@@ -151,7 +151,7 @@ export const validateTroveChange = (
 
   const errorDescription =
     change.type === "creation"
-      ? validateTroveCreation(change.params, context)
+      ? validateTroveCreation(change.params, context, constants)
       : change.type === "closure"
         ? validateTroveClosure(change.params, context)
         : validateTroveAdjustment(change.params, context, constants);
@@ -171,7 +171,8 @@ const validateTroveCreation = (
     wouldTriggerRecoveryMode,
     accountBalance,
     price
-  }: TroveChangeValidationContext
+  }: TroveChangeValidationContext,
+  constants: Record<string, Decimal>
 ): JSX.Element | ErrorMessage | null => {
   if (borrowLUSD.lt(LUSD_MINIMUM_NET_DEBT)) {
     // return (
@@ -199,12 +200,20 @@ const validateTroveCreation = (
       );
     }
   } else {
-    if (resultingTrove.collateralRatioIsBelowMinimum(price)) {
-      return (
-        <ErrorDescription>
-          Collateral ratio must be at least <Amount>{mcrPercent}</Amount>.
-        </ErrorDescription>
-      );
+    const mcr = constants?.MCR.div(Math.pow(10, WEN.decimals || 18)) || MINIMUM_COLLATERAL_RATIO;
+
+    // return this.collateralRatio(price).lt(MINIMUM_COLLATERAL_RATIO);
+    // if (resultingTrove.collateralRatioIsBelowMinimum(price)) {
+    if (resultingTrove.collateralRatio(price).lt(mcr)) {
+      // return (
+      //   <ErrorDescription>
+      //     Collateral ratio must be at least <Amount>{mcrPercent}</Amount>.
+      //   </ErrorDescription>
+      // );
+      return {
+        key: "collateralRatioMustBeAtLeast",
+        values: { percent: mcr.mul(100).toString(2) + "%" }
+      } as ErrorMessage;
     }
 
     if (wouldTriggerRecoveryMode) {

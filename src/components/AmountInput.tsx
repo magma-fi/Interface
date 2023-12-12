@@ -40,7 +40,13 @@ export const AmountInput = ({
 			|| (!allowReduce && val >= currentValue)
 			|| (allowReduce && allowIncrease)
 		) {
-			debounce.run(onInput, 1500, val);
+			// debounce.run(onInput, 1500, val);
+			onInput(val);
+		} else {
+			setInputValue(String(currentValue));
+			setFiatValue(price.mul(currentValue).toString(2));
+			// debounce.run(onInput, 1500, currentValue);
+			onInput(currentValue);
 		}
 	}, [allowIncrease, allowReduce, currentValue, onInput])
 
@@ -49,7 +55,8 @@ export const AmountInput = ({
 		setFiatValue(price.mul(val).toString(2));
 
 		if (send) {
-			sendBack(val);
+			// sendBack(val);
+			debounce.run(sendBack, 1500, val);
 		}
 	}, [sendBack, price]);
 
