@@ -28,7 +28,8 @@ export const RepayModal = ({
 	fees,
 	validationContext,
 	max,
-	onDone = () => { }
+	onDone = () => { },
+	constants
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -39,31 +40,37 @@ export const RepayModal = ({
 	validationContext: ValidationContext;
 	max: Decimal;
 	onDone: (tx: string, repayAmount: number) => void;
+	constants?: Record<string, unknown>
 }) => {
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(0);
 	const [repayAmount, setRepayAmount] = useState(0);
+	const [desireDebt, setDesireDebt] = useState(max)
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
 	const netDebtNumber = Number(netDebt.toString());
-	const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
-	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
-	const [utilRate, setUtilRate] = useState(Decimal.ZERO);
-	const [slideValue, setSlideValue] = useState(0);
+	// const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
+	const troveUR = Decimal.ONE.div(trove.collateralRatio(price));
+	const troveUtilizationRateNumber = Number(troveUR.mul(100));
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId);
+	// const [slideValue, setSlideValue] = useState(0);
 
-	const isDirty = !netDebt.eq(repayAmount);
-	const updatedTrove = isDirty ? new Trove(trove.collateral, trove.netDebt.sub(repayAmount)) : trove;
+	const isDirty = !netDebt.eq(desireDebt);
+	const updatedTrove = isDirty ? new Trove(trove.collateral, desireDebt) : trove;
 	const borrowingRate = fees.borrowingRate();
 	const [troveChange, description] = validateTroveChange(
 		trove!,
 		updatedTrove!,
 		borrowingRate,
-		validationContext
+		validationContext,
+		constants
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
+
+	const utilRate = Decimal.ONE.div(updatedTrove.collateralRatio(price));
+	// const [sliderForcedValue, setSliderForcedValue] = useState(Number(utilRate.toString()));
 
 	const init = () => {
 		setValueForced(0);
@@ -73,7 +80,9 @@ export const RepayModal = ({
 	useEffect(init, []);
 
 	const handleMax = () => {
-		setValueForced(Number(max.toString()));
+		const val = Number(max.toString());
+		setValueForced(val);
+		setRepayAmount(val);
 	};
 
 	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -82,7 +91,7 @@ export const RepayModal = ({
 				return netDebt.add(unsavedChanges.absoluteValue);
 			}
 			if (unsavedChanges.negative) {
-				if (unsavedChanges.absoluteValue.lt(netDebt)) {
+				if (unsavedChanges.absoluteValue.lte(netDebt)) {
 					return netDebt.sub(unsavedChanges.absoluteValue);
 				}
 			}
@@ -100,26 +109,19 @@ export const RepayModal = ({
 		if (!previousNetDebt.eq(netDebt)) {
 			const unsavedChanges = Difference.between(netDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
-			setRepayAmount(Number(trove.netDebt.sub(nextNetDebt).toString()));
+			setDesireDebt(nextNetDebt);
 		}
-
-		setUtilRate(calculateUtilizationRate(updatedTrove, price));
 	}, [trove, repayAmount, price]);
 
-	useEffect(() => {
-		if (slideValue === 0) return;
-
-
-		debounce.run(() => {
-			const toReduce = trove.debt.mul((troveUtilizationRateNumber - slideValue * 100) / troveUtilizationRateNumber)
-			const val = Number(toReduce.toString());
-			setRepayAmount(val);
-			setValueForced(val);
-		}, 1000);
-	}, [slideValue]);
+	// useEffect(() => {
+	// 	const toReduce = trove.netDebt.mul((troveUtilizationRateNumber - slideValue * 100) / troveUtilizationRateNumber)
+	// 	const val = Number(toReduce.toString());
+	// 	setRepayAmount(val);
+	// 	setValueForced(val);
+	// }, [slideValue]);
 
 	const handleInputRepay = (val: number) => {
-		setValueForced(0);
+		setValueForced(-1);
 		setRepayAmount(val);
 	};
 
@@ -128,9 +130,10 @@ export const RepayModal = ({
 		onClose();
 	};
 
-	const handleSlideUtilRate = (val: number) => {
-		setSlideValue(val);
-	};
+	// const handleSlideUtilRate = (val: number) => {
+	// 	setSliderForcedValue(-1);
+	// 	setSlideValue(val);
+	// };
 
 	useEffect(() => {
 		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
@@ -173,7 +176,7 @@ export const RepayModal = ({
 						allowIncrease={false} />
 				</div>
 
-				<div className="flex-column-align-left">
+				{/* <div className="flex-column-align-left">
 					<div
 						className="flex-row-space-between"
 						style={{ alignItems: "center" }}>
@@ -191,10 +194,10 @@ export const RepayModal = ({
 						max={Number(maxSafe.toString())}
 						currentValue={troveUtilizationRateNumber / 100}
 						onChange={handleSlideUtilRate}
-						forcedValue={Number(utilRate.toString())}
+						forcedValue={sliderForcedValue}
 						allowReduce={true}
 						allowIncrease={false} />
-				</div>
+				</div> */}
 			</div>
 
 			<div

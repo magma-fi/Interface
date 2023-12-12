@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useLiquitySelector } from "@liquity/lib-react";
 import { useLang } from "../hooks/useLang";
 import { Coin, TroveChangeTx } from "../libs/types";
@@ -21,6 +22,10 @@ import { TxLabel } from "../components/TxLabel";
 import { graphqlAsker } from "../libs/graphqlAsker";
 import { useChainId } from "wagmi";
 import { CloseModal } from "./CloseModal";
+import { useContract } from "../hooks/useContract";
+import { BorrowerOperations } from "lib-ethers/dist/types";
+import { useLiquity } from "../hooks/LiquityContext";
+import BorrowerOperationsAbi from "lib-ethers/abi/BorrowerOperations.json";
 
 export const MarketView = ({ market }: {
 	market: Coin;
@@ -97,6 +102,31 @@ export const MarketView = ({ market }: {
 	const availableWithdrawalFiat = availableWithdrawal.mul(price);
 	const chainId = useChainId();
 	const [txs, setTxs] = useState<TroveChangeTx[]>();
+	const { liquity } = useLiquity();
+	const [constants, setConstants] = useState<Record<string, unknown>>();
+
+	const [borrowerOperationsDefault, borrowerOperationsStatus] = useContract<BorrowerOperations>(
+		liquity.connection.addresses.borrowerOperations,
+		BorrowerOperationsAbi
+	);
+
+	useEffect(() => {
+		const getContants = async () => {
+			let minNetDebt;
+			let wenGasGompensation;
+			if (borrowerOperationsStatus === "LOADED") {
+				minNetDebt = await borrowerOperationsDefault?.MIN_NET_DEBT()
+				wenGasGompensation = await borrowerOperationsDefault?.LUSD_GAS_COMPENSATION();
+			}
+
+			setConstants({
+				MIN_NET_DEBT: Decimal.from(minNetDebt?.toString() || 0),
+				LUSD_GAS_COMPENSATION: Decimal.from(wenGasGompensation?.toString() || 0)
+			});
+		};
+
+		getContants();
+	}, [borrowerOperationsDefault, borrowerOperationsStatus]);
 
 	useEffect(() => {
 		if (!trove.ownerAddress) return;
@@ -551,8 +581,9 @@ export const MarketView = ({ market }: {
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={trove.debt}
-			onDone={handleRepayDone} />}
+			max={trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO}
+			onDone={handleRepayDone}
+			constants={constants} />}
 
 		{showRepayDoneModal && <TxDone
 			title={t("repaidSuccessfully")}

@@ -1,42 +1,54 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { debounce } from "../libs/debounce";
 
 export const Slider = ({
 	min,
 	max,
 	currentValue,
 	onChange,
-	forcedValue = 0,
+	forcedValue = -1,
 	allowReduce = true,
 	allowIncrease = true
 }: {
 	min: number;
 	max: number;
 	currentValue: number;
-	onChange: (val: number) => void;
+	onChange?: (val: number) => void;
 	forcedValue: number;
 	allowReduce: boolean;
 	allowIncrease: boolean;
 }) => {
 	const [value, setValue] = useState(currentValue);
 
-	const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-		const val = Number(evt.currentTarget.value);
+	const sendBack = useCallback((val: number) => {
+		if (onChange) {
+			debounce.run(onChange, 1000, val);
+		}
+	}, [onChange]);
+
+	const updateValue = useCallback((val: number) => {
 		if (
 			(!allowIncrease && val <= currentValue)
 			|| (!allowReduce && val >= currentValue)
 		) {
 			setValue(val);
-			onChange && onChange(val);
+			sendBack(val);
 		} else {
 			setValue(currentValue);
 		}
+	}, [allowIncrease, allowReduce, currentValue, sendBack]);
+
+	const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+		const val = Number(evt.currentTarget.value);
+		updateValue(val);
 	};
 
 	useEffect(() => {
-		if (forcedValue > 0) {
+		if (forcedValue >= 0) {
 			setValue(forcedValue);
+			updateValue(forcedValue);
 		}
-	}, [forcedValue])
+	}, [forcedValue, updateValue])
 
 	return (<div
 		className="flex-row-space-between"
@@ -48,7 +60,8 @@ export const Slider = ({
 				max={max}
 				step={0.01}
 				onChange={handleChange}
-				value={value} />
+				value={value}
+				defaultValue={value} />
 		</div>
 
 		<div className="sliderValue label big fat">

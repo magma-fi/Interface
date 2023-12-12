@@ -10,7 +10,7 @@ export const AmountInput = ({
 	coin = null,
 	price = Decimal.ZERO,
 	allowSwap = false,
-	valueForced = 0,
+	valueForced = -1,
 	onInput = () => { },
 	max = 0,
 	error,
@@ -40,20 +40,22 @@ export const AmountInput = ({
 			|| (!allowReduce && val >= currentValue)
 		) {
 			// onInput(val);
-			debounce.run(onInput, 1000, val);
+			debounce.run(onInput, 1500, val);
 		}
 	}, [allowIncrease, allowReduce, currentValue, onInput])
 
-	const updateValue = useCallback(val => {
+	const updateValue = useCallback((val, send = true) => {
 		setInputValue(String(val));
 		setFiatValue(price.mul(val).toString(2));
 
-		sendBack(val);
+		if (send) {
+			sendBack(val);
+		}
 	}, [sendBack, price]);
 
 	useEffect(() => {
-		if (valueForced > 0) {
-			updateValue(valueForced);
+		if (valueForced >= 0) {
+			updateValue(valueForced, false);
 		}
 	}, [updateValue, valueForced]);
 

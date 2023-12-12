@@ -107,7 +107,8 @@ export const validateTroveChange = (
   originalTrove: Trove,
   adjustedTrove: Trove,
   borrowingRate: Decimal,
-  selectedState: TroveChangeValidationSelectedState
+  selectedState: TroveChangeValidationSelectedState,
+  constants?: Record<string, unknown>
 ): [
     validChange: Exclude<TroveChange<Decimal>, { type: "invalidCreation" }> | undefined,
     description: JSX.Element | ErrorMessage | undefined
@@ -153,7 +154,7 @@ export const validateTroveChange = (
       ? validateTroveCreation(change.params, context)
       : change.type === "closure"
         ? validateTroveClosure(change.params, context)
-        : validateTroveAdjustment(change.params, context);
+        : validateTroveAdjustment(change.params, context, constants);
 
   if (errorDescription) {
     return [undefined, errorDescription];
@@ -238,7 +239,8 @@ const validateTroveAdjustment = (
     price,
     accountBalance,
     lusdBalance
-  }: TroveChangeValidationContext
+  }: TroveChangeValidationContext,
+  constants?: Record<string, Decimal>
 ): JSX.Element | ErrorMessage | null => {
   if (recoveryMode) {
     if (withdrawCollateral) {
@@ -291,7 +293,8 @@ const validateTroveAdjustment = (
   }
 
   if (repayLUSD) {
-    if (resultingTrove.debt.lt(LUSD_MINIMUM_DEBT)) {
+    const lusdMinimumDebt = constants?.MIN_NET_DEBT.add(constants?.LUSD_GAS_COMPENSATION).div(Math.pow(10, WEN.decimals || 18)) || LUSD_MINIMUM_DEBT;
+    if (resultingTrove.debt.lt(lusdMinimumDebt)) {
       // return (
       //   <ErrorDescription>
       //     Total debt must be at least{" "}
@@ -303,7 +306,7 @@ const validateTroveAdjustment = (
       // );
       return {
         key: "debtMustBe",
-        values: { amount: LUSD_MINIMUM_DEBT.toString() + " " + WEN.symbol }
+        values: { amount: lusdMinimumDebt.toString() + " " + WEN.symbol }
       } as ErrorMessage;
     }
 

@@ -41,7 +41,7 @@ const liquidatableInRecoveryMode = (
   if (collateralRatio.gte(MINIMUM_COLLATERAL_RATIO) && collateralRatio.lt(totalCollateralRatio)) {
     return [
       trove.debt.lte(lusdInStabilityPool),
-      "There's not enough LUSD in the Stability pool to cover the debt"
+      "There's not enough WEN in the Stability pool to cover the debt"
     ] as const;
   } else {
     return liquidatableInNormalMode(trove, price);
@@ -264,17 +264,14 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize }) => {
                       id={`liquidate-${trove.ownerAddress}`}
                       tooltip="Liquidate"
                       requires={[
-                        recoveryMode
-                          ? liquidatableInRecoveryMode(
-                            trove,
-                            price,
-                            totalCollateralRatio,
-                            lusdInStabilityPool
-                          )
-                          : liquidatableInNormalMode(trove, price)
+                        recoveryMode ? liquidatableInRecoveryMode(
+                          trove,
+                          price,
+                          totalCollateralRatio,
+                          lusdInStabilityPool
+                        ) : liquidatableInNormalMode(trove, price)
                       ]}
-                      send={liquity.send.liquidate.bind(liquity.send, trove.ownerAddress)}
-                    >
+                      send={liquity.send.liquidate.bind(liquity.send, trove.ownerAddress)}>
                       <button className="secondaryButton">{t("liquidate")}</button>
                     </Transaction>
                   </div>

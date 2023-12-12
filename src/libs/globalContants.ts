@@ -1,4 +1,5 @@
 import { Coin, OptionItem } from "./types";
+import { BigNumber } from "@ethersproject/bignumber";
 
 export enum ModalAction {
 	Stake = "stake",
@@ -86,5 +87,6 @@ export const globalContants = {
 	DEFAULT_NETWORK_ID: 4690,
 	default_NETWORK_RPC: "https://babel-api.testnet.iotex.io",
 	ADDRESS_PLACEHOLDER: "0x43D46D96157f497070BfD0725C34C4A9d1013292",
-	LIQUIDATION_AT: 0.8
+	LIQUIDATION_AT: 0.8,
+	BIG_NUMBER_0: BigNumber.from(0)
 };
