@@ -28,7 +28,8 @@ export const WithdrawModal = ({
 	fees,
 	validationContext,
 	max,
-	onDone = () => { }
+	onDone = () => { },
+	constants
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -39,11 +40,13 @@ export const WithdrawModal = ({
 	validationContext: ValidationContext;
 	max: Decimal;
 	onDone: (tx: string, withdrawAmount: number) => void;
+	constants?: Record<string, unknown>;
 }) => {
 	const maxNumber = Number(max.toString());
 	const { t } = useLang();
-	const [valueForced, setValueForced] = useState(0);
+	const [valueForced, setValueForced] = useState(-1);
 	const [withdrawAmount, setWithdrawAmount] = useState(0);
+	const [desireCollateral, setDesireCollateral] = useState(trove.collateral);
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
 	// const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
@@ -53,20 +56,22 @@ export const WithdrawModal = ({
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId);
 
-	const isDirty = !netDebt.eq(withdrawAmount);
-	const updatedTrove = isDirty ? new Trove(trove.collateral, trove.netDebt.sub(withdrawAmount)) : trove;
+	const isDirty = !trove.collateral.eq(desireCollateral);
+	const updatedTrove = isDirty ? new Trove(desireCollateral, trove.netDebt) : trove;
 	const borrowingRate = fees.borrowingRate();
 	const [troveChange, description] = validateTroveChange(
 		trove!,
 		updatedTrove!,
 		borrowingRate,
-		validationContext
+		validationContext,
+		constants
 	);
+	console.debug("xxx handleInputWithdraw() desireCollateral =", desireCollateral.toString(), troveChange);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
 
 	const init = () => {
-		setValueForced(0);
+		setValueForced(-1);
 		setWithdrawAmount(0);
 	};
 
@@ -74,33 +79,35 @@ export const WithdrawModal = ({
 
 	const handleMax = () => {
 		setValueForced(maxNumber);
+		setWithdrawAmount(maxNumber);
 	};
 
 	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
 		if (unsavedChanges.absoluteValue) {
 			if (unsavedChanges.positive) {
-				return netDebt.add(unsavedChanges.absoluteValue);
+				return trove.collateral.add(unsavedChanges.absoluteValue);
 			}
 			if (unsavedChanges.negative) {
 				if (unsavedChanges.absoluteValue.lt(netDebt)) {
-					return netDebt.sub(unsavedChanges.absoluteValue);
+					return trove.collateral.sub(unsavedChanges.absoluteValue);
 				}
 			}
-			return netDebt;
+			return trove.collateral;
 		}
-		return netDebt;
+		return trove.collateral;
 	};
 
 	useEffect(() => {
 		if (!trove) return;
 
-		const netDebt = trove.netDebt.sub(withdrawAmount);
-		const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
+		const col = trove.collateral.sub(withdrawAmount);
+		const previousCol = previousTrove.current?.collateral;
 
-		if (!previousNetDebt.eq(netDebt)) {
-			const unsavedChanges = Difference.between(netDebt, previousNetDebt);
-			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
-			setWithdrawAmount(Number(trove.netDebt.sub(nextNetDebt).toString()));
+		if (!previousCol.eq(col)) {
+			const unsavedChanges = Difference.between(col, previousCol);
+			const nextCol = applyUnsavedNetDebtChanges(unsavedChanges, trove);
+			// setWithdrawAmount(Number(trove.collateral.sub(withdrawAmount).toString()));
+			setDesireCollateral(nextCol);
 		}
 
 		setUtilRate(calculateUtilizationRate(updatedTrove, price));
@@ -118,7 +125,7 @@ export const WithdrawModal = ({
 	// }, [slideValue]);
 
 	const handleInputWithdraw = (val: number) => {
-		setValueForced(0);
+		setValueForced(-1);
 		setWithdrawAmount(val);
 	};
 

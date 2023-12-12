@@ -563,7 +563,8 @@ export const MarketView = ({ market }: {
 			fees={fees}
 			validationContext={validationContext}
 			max={maxAvailableBorrow}
-			onDone={handleBorrowDone} />}
+			onDone={handleBorrowDone}
+			constants={constants} />}
 
 		{showBorrowDoneModal && <TxDone
 			title={t("borrowedSuccessfully")}
@@ -610,7 +611,8 @@ export const MarketView = ({ market }: {
 			fees={fees}
 			validationContext={validationContext}
 			max={availableWithdrawal}
-			onDone={handleWithdrawDone} />}
+			onDone={handleWithdrawDone}
+			constants={constants} />}
 
 		{showWithdrawDoneModal && <TxDone
 			title={t("withdrawnSuccessfully")}

@@ -115,6 +115,7 @@ export const validateTroveChange = (
   ] => {
   const { total, price } = selectedState;
   const change = originalTrove.whatChanged(adjustedTrove, borrowingRate);
+  console.debug("xxx change =", change);
 
   if (!change) {
     return [undefined, undefined];
