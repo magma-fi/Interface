@@ -27,9 +27,9 @@ export const AmountInput = ({
 	max: number;
 	warning: string | undefined;
 	error: string | undefined;
-	allowReduce: boolean;
-	currentValue: number;
-	allowIncrease: boolean;
+	allowReduce?: boolean;
+	currentValue?: number;
+	allowIncrease?: boolean;
 }) => {
 	const [inputValue, setInputValue] = useState<string>("");
 	const [fiatValue, setFiatValue] = useState("0");
@@ -38,8 +38,8 @@ export const AmountInput = ({
 		if (
 			(!allowIncrease && val <= currentValue)
 			|| (!allowReduce && val >= currentValue)
+			|| (allowReduce && allowIncrease)
 		) {
-			// onInput(val);
 			debounce.run(onInput, 1500, val);
 		}
 	}, [allowIncrease, allowReduce, currentValue, onInput])

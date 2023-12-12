@@ -38,7 +38,8 @@ export const CloseModal = ({
 		borrowingRate,
 		validationContext
 	);
-	console.debug("zzz", description, troveChange);
+	console.debug("关仓 troveChange =", troveChange);
+	console.debug("关仓 description =", description);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
 

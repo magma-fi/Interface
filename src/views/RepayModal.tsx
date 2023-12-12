@@ -48,7 +48,7 @@ export const RepayModal = ({
 	const [desireDebt, setDesireDebt] = useState(max)
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	const netDebtNumber = Number(netDebt.toString());
+	// const netDebtNumber = Number(netDebt.toString());
 	// const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
 	const troveUR = Decimal.ONE.div(trove.collateralRatio(price));
 	const troveUtilizationRateNumber = Number(troveUR.mul(100));
@@ -75,9 +75,8 @@ export const RepayModal = ({
 	const init = () => {
 		setValueForced(0);
 		setRepayAmount(0);
+		setDesireDebt(max);
 	};
-
-	useEffect(init, []);
 
 	const handleMax = () => {
 		const val = Number(max.toString());
@@ -170,10 +169,7 @@ export const RepayModal = ({
 						onInput={handleInputRepay}
 						max={Number(max.toString())}
 						warning={undefined}
-						error={description && t(errorMessages.key, errorMessages.values)}
-						allowReduce={true}
-						currentValue={netDebtNumber}
-						allowIncrease={false} />
+						error={description && t(errorMessages.key, errorMessages.values)} />
 				</div>
 
 				{/* <div className="flex-column-align-left">
