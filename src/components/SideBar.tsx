@@ -45,13 +45,13 @@ export const SideBar: React.FC = ({ children }) => {
         showExternalLink={false}
         active={pathname === "/stake"} />
 
-      <NavLink
+      {/* <NavLink
         label={t("governance")}
         icon="images/governance.png"
         url=""
         fullWidth={true}
         showExternalLink={false}
-        active={pathname === "/governance"} />
+        active={pathname === "/governance"} /> */}
 
       <NavLink
         label={t("liquidations")}
@@ -73,10 +73,11 @@ export const SideBar: React.FC = ({ children }) => {
       <NavLink
         label={t("twitter")}
         icon="images/x.png"
-        url=""
+        url="https://twitter.com/"
         fullWidth={true}
         showExternalLink={true}
-        active={false} />
+        active={false}
+        target="_blank" />
 
       <hr className="division" />
 
