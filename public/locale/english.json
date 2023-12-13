@@ -13,7 +13,7 @@
 	"connecting": "connecting",
 	"depositAndGet": "Deposit {symbol} and get WEN (1 WEN = 1 USD)",
 	"letsGetStarted": "Let's get started!",
-	"letsGetStartedDEscription": "Secure a WEN loan at {percent} interest with your initial deposit",
+	"letsGetStartedDEscription": "Secure a {interest} interest WEN loan for just {percent} deposit fee.",
 	"walletBalance": "Wallet Balance",
 	"marketOverview": "market overview",
 	"totalUtilizationRate": "Total Utilization Rate",

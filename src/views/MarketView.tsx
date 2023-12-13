@@ -240,7 +240,10 @@ export const MarketView = ({ market }: {
 					<div>
 						<h3>{t("letsGetStarted")}</h3>
 
-						<p className="description">{t("letsGetStartedDEscription", { percent: feePct.toString(2) })}</p>
+						<p className="description">{t("letsGetStartedDEscription", {
+							interest: "0%",
+							percent: feePct.toString(2)
+						})}</p>
 					</div>
 
 					<button
