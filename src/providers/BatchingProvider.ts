@@ -253,9 +253,7 @@ export class BatchedProvider extends BaseProvider {
       return this.underlyingProvider.perform("getBalance", params);
     }
 
-    console.debug("_performGetBalance()", this._multicall, params);
     const res = await this._multicall.getEthBalance(params.address, { blockTag: params.blockTag });
-    console.debug("结果", res);
 
     return res;
   }

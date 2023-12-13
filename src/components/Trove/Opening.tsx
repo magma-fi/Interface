@@ -62,10 +62,8 @@ export const Opening: React.FC = () => {
     : Decimal.ZERO;
   const collateralMaxedOut = collateral.eq(maxCollateral);
 
-  console.debug("类型检查 trove", trove instanceof Trove, price instanceof Decimal);
   const collateralRatio =
     !collateral.isZero && !borrowAmount.isZero ? trove.collateralRatio(price) : undefined;
-  console.debug("检查collateralRatio", collateral.isZero, borrowAmount.isZero, collateralRatio instanceof Decimal);
 
   const [troveChange, description] = validateTroveChange(
     EMPTY_TROVE,
@@ -92,7 +90,6 @@ export const Opening: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.debug("collateral改变了。");
     if (!collateral.isZero && borrowAmount.isZero) {
       setBorrowAmount(LUSD_MINIMUM_NET_DEBT);
     }
@@ -121,7 +118,6 @@ export const Opening: React.FC = () => {
           editedAmount={collateral.toString(4)}
           setEditedAmount={(amount: string) => {
             const d = Decimal.from(amount);
-            console.debug("amount =", amount, typeof amount, d, typeof d, d instanceof Decimal);
             setCollateral(Decimal.from(amount));
           }}
         />

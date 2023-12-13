@@ -41,7 +41,6 @@ const revert = reduceWith({ type: "revert" });
 
 const reduce = (state: TroveManagerState, action: TroveManagerAction): TroveManagerState => {
   const { original, edited, changePending, debtDirty, addedMinimumDebt } = state;
-  console.debug("检查edited前 edited", edited, edited.isEmpty);
 
   switch (action.type) {
     case "startChange": {

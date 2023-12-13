@@ -37,7 +37,6 @@ export const FrontendRegistration: React.FC = () => {
   const { account } = useLiquity();
 
   const [kickbackRate, setKickbackRate] = useState(Decimal.from(0.8));
-  console.debug("旧的kickbackRate =", kickbackRate, Decimal.from(kickbackRate));
   const [cut, setCut] = useState(Decimal.from(0.2));
   const [kickbackRateString, setKickbackRateString] = useState("80");
 

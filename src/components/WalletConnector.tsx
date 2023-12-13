@@ -30,9 +30,6 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children }) =>
   //   </ConnectKitButton.Custom>
   // );
 
-  console.debug("connectors =", connectors);
-  console.debug("address =", address);
-
   return <>
     {isConnected ? children : <div>
       {connectors.map((connector) => (

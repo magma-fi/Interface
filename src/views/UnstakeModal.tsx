@@ -64,8 +64,6 @@ export const UnstakeModal = ({
 		validationContext
 	);
 
-	console.debug("description =", validChange, description);
-
 	useEffect(() => {
 		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, unstakeAmount);
