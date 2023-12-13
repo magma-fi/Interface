@@ -51,7 +51,6 @@ export const WithdrawModal = ({
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
 	// const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
-	const [utilRate, setUtilRate] = useState(Decimal.ZERO);
 	// const [slideValue, setSlideValue] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId);
@@ -68,6 +67,8 @@ export const WithdrawModal = ({
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
+
+	const utilRate = Decimal.ONE.div(updatedTrove.collateralRatio(price));
 
 	const init = () => {
 		setValueForced(-1);
@@ -108,8 +109,6 @@ export const WithdrawModal = ({
 			// setWithdrawAmount(Number(trove.collateral.sub(withdrawAmount).toString()));
 			setDesireCollateral(nextCol);
 		}
-
-		setUtilRate(calculateUtilizationRate(updatedTrove, price));
 	}, [trove, withdrawAmount, price]);
 
 	// useEffect(() => {
@@ -252,7 +251,7 @@ export const WithdrawModal = ({
 				disabled={withdrawAmount === 0}>
 				<img src="images/repay-dark.png" />
 
-				{t("repay")}
+				{t("withdraw")}
 			</button>
 		</TroveAction> : <button
 			className="primaryButton bigButton"
