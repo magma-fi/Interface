@@ -92,5 +92,6 @@
 	"owner": "owner",
 	"collateral": "Collateral",
 	"liquidate": "Liquidate",
-	"collateralRatioMustBeAtLeast": "Collateral ratio must be at least {percent}"
+	"collateralRatioMustBeAtLeast": "Collateral ratio must be at least {percent}",
+	"depositAndBorrow": "Deposit and Borrow"
 }
