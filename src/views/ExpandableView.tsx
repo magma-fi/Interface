@@ -18,7 +18,9 @@ export const ExpandableView = ({
 		{coverView}
 
 		{expand && <>
-			<hr className="division" />
+			<hr
+			className="division"
+			style={{width:"calc(100% - 2rem)"}}/>
 
 			{hiddenView}
 		</>}

@@ -806,6 +806,14 @@ h4 {
   }
 }
 
+.depositModal {
+  width: 752px;
+
+  .subContainer{
+    width: 50%;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   /*  */
 }

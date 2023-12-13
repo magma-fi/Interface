@@ -239,9 +239,9 @@ export const DepositeModal = ({
 	return isOpen ? <Modal
 		title={t("deposit") + " " + market?.symbol}
 		onClose={handleCloseModal}>
-		<div className="flex-row-space-between">
+		<div className="flex-row-space-between depositModal">
 			<div
-				className="flex-column"
+				className="flex-column subContainer"
 				style={{ gap: "24px" }}>
 				<div className="flex-column-align-left">
 					<div
@@ -281,8 +281,7 @@ export const DepositeModal = ({
 			</div>
 
 			<div
-				className="subCard"
-				style={{ minWidth: "fit-content" }}>
+				className="subContainer subCard">
 				<div className="flex-row-space-between">
 					<div className="label">{t("utilizationRate")}</div>
 

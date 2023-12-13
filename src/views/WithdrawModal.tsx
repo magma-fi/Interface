@@ -66,7 +66,6 @@ export const WithdrawModal = ({
 		validationContext,
 		constants
 	);
-	console.debug("xxx handleInputWithdraw() desireCollateral =", desireCollateral.toString(), troveChange);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
 

@@ -40,15 +40,14 @@ export const AmountInput = ({
 			|| (!allowReduce && val >= currentValue)
 			|| (allowReduce && allowIncrease)
 		) {
-			// debounce.run(onInput, 1500, val);
 			onInput(val);
 		} else {
 			setInputValue(String(currentValue));
 			setFiatValue(price.mul(currentValue).toString(2));
-			// debounce.run(onInput, 1500, currentValue);
+
 			onInput(currentValue);
 		}
-	}, [allowIncrease, allowReduce, currentValue, onInput])
+	}, [allowIncrease, allowReduce, currentValue, onInput, price])
 
 	const updateValue = useCallback((val, send = true) => {
 		setInputValue(String(val));

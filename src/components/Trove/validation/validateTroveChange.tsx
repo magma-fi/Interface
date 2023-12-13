@@ -115,7 +115,6 @@ export const validateTroveChange = (
   ] => {
   const { total, price } = selectedState;
   const change = originalTrove.whatChanged(adjustedTrove, borrowingRate);
-  console.debug("xxx change =", change);
 
   if (!change) {
     return [undefined, undefined];
@@ -175,7 +174,8 @@ const validateTroveCreation = (
   }: TroveChangeValidationContext,
   constants: Record<string, Decimal>
 ): JSX.Element | ErrorMessage | null => {
-  if (borrowLUSD.lt(LUSD_MINIMUM_NET_DEBT)) {
+  const wenMinimumNetDebt = constants?.MIN_NET_DEBT.div(Math.pow(10, WEN.decimals || 18)) || LUSD_MINIMUM_NET_DEBT;
+  if (borrowLUSD.lt(wenMinimumNetDebt)) {
     // return (
     //   <ErrorDescription>
     //     You must borrow at least{" "}
@@ -187,7 +187,7 @@ const validateTroveCreation = (
     // );
     return {
       key: "mustBorrowAtLeast",
-      values: { amount: LUSD_MINIMUM_NET_DEBT.toString() + " " + WEN.symbol }
+      values: { amount: wenMinimumNetDebt.toString() + " " + WEN.symbol }
     } as ErrorMessage;
   }
 
