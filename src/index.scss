@@ -476,6 +476,17 @@ h4 {
       }
     }
   }
+
+  .disabled {
+    // pointer-events: none;
+    opacity: 0.5;
+    filter: grayscale(1);
+    z-index: 100;
+
+    .label {
+      cursor: not-allowed;
+    }
+  }
 }
 
 .description {

@@ -15,15 +15,18 @@ export const Tab = ({
 
 	const handleSelect = (evt: ChangeEvent<HTMLInputElement>) => {
 		const idx = parseInt(evt.target.value);
-		setIndexSelected(idx);
-		onSelect(idx);
+		if (!options[idx].disabled) {
+			setIndexSelected(idx);
+			onSelect(idx);
+		}
 	};
 
 	return <div className="tab">
 		{options.map((option, index) => {
 			return <div
-			key={option.title}
-			className="tabItem">
+				key={option.title}
+				className={"tabItem" + (option.disabled ? " disabled" : "")}
+				title={option.disabled ? "Coming soon..." : ""}>
 				<input
 					type="radio"
 					name={name}

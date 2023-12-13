@@ -66,11 +66,13 @@ export const Troves: OptionItem[] = [
 	},
 	{
 		title: DAI.symbol,
-		icon: DAI.logo
+		icon: DAI.logo,
+		disabled: true
 	},
 	{
 		title: USDC.symbol,
-		icon: USDC.logo
+		icon: USDC.logo,
+		disabled: true
 	}
 ];
 

@@ -4,6 +4,7 @@ export type OptionItem = {
 	icon?: string;
 	title?: string;
 	key?: string;
+	disabled?: boolean;
 };
 
 export type Coin = {
