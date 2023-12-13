@@ -65,7 +65,6 @@ export const MarketView = ({ market }: {
 		trove,
 		fees
 	} = useLiquitySelector(selector);
-	console.debug("xxx", trove.netDebt.toString());
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
 	const [showDepositDoneModal, setShowDepositDoneModal] = useState(false);
@@ -532,7 +531,7 @@ export const MarketView = ({ market }: {
 					<div className="flex-row-space-between">
 						<div className="description">{t("loanToValue")}(LTV)</div>
 
-						<div>{total.debt.div(total.collateral.mul(price)).mul(100).toString(2)}%</div>
+						<div>{total.collateral.gt(0) ? total.debt.div(total.collateral.mul(price)).mul(100).toString(2) : 0}%</div>
 					</div>
 				</div>
 			</div>

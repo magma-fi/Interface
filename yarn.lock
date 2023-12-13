@@ -5235,9 +5235,9 @@ levn@^0.4.1:
   dependencies:
     "@ethersproject/bignumber" "5.7.0"
 
-"lib-ethers@https://github.com/magma-fi/lib-ethers.git#212f0b3f2ea617755fb10adf7f47eff35113c255":
+"lib-ethers@https://github.com/magma-fi/lib-ethers.git#1a5443f6519e22a7f2d11e3716b499084b003056":
   version "1.0.0"
-  resolved "https://github.com/magma-fi/lib-ethers.git#212f0b3f2ea617755fb10adf7f47eff35113c255"
+  resolved "https://github.com/magma-fi/lib-ethers.git#1a5443f6519e22a7f2d11e3716b499084b003056"
 
 lines-and-columns@^1.1.6:
   version "1.2.4"

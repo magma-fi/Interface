@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
-import { iotexTestnet } from "wagmi/chains";
+import { iotexTestnet, iotex } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
@@ -84,7 +84,7 @@ getConfig().then(config => {
 // );
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [iotexTestnet],
+  [iotexTestnet, iotex],
   [publicProvider()]
 );
 

@@ -15,7 +15,13 @@ import { OptionItem } from "../libs/types";
 export const UserAccount = ({
   onConnect = () => { },
   isSupportedNetwork = true,
+  chainId = 0,
   chains = []
+}: {
+  onConnect: () => void;
+  isSupportedNetwork: boolean;
+  chainId: number;
+  chains: Chain[]
 }) => {
   const { t } = useLang();
   const { address, isConnected } = useAccount();
@@ -71,27 +77,35 @@ export const UserAccount = ({
 
       {address && <div style={{
         display: "flex",
-        flexDirection: "row",
-        gap: "8px",
+        flexDirection: "column",
+        gap: "0.5rem",
         justifyContent: "flex-start",
-        alignItems: "center"
+        alignItems: "flex-start"
       }}>
-        <img
-          src="images/wallet.png"
-          width="21px"
-          height="18px" />
+        <div>
+          <span>
+            <img
+              src="images/wallet.png"
+              width="21px"
+              height="18px" />
+            &nbsp;
+          </span>
 
-        <div className="propertyText">{shortenAddress(address)}</div>
+          <span className="propertyText">{shortenAddress(address)}</span>
+        </div>
 
-        {isSupportedNetwork ? <button
+        <button
           className="textButton"
           onClick={handleDisconnect}>
           {t("disconnect")}
-        </button> : <DropdownMenu
+        </button>
+
+        <DropdownMenu
+          defaultValue={chains.findIndex(item => item.id === chainId)}
           options={chainOptions}
           onChange={handleSwitchNetwork}>
           <button className="textButton">{t("switchNetwork")}</button>
-        </DropdownMenu>}
+        </DropdownMenu>
 
         {/* {([
           ["ETH", accountBalance],

@@ -4,6 +4,11 @@ import appConfig from "../appConfig.json";
 export const graphqlAsker = {
 	ask: function (chainId: number, query: string, doneCallback: (data: unknown) => void) {
 		const uri = this._getGraph(chainId);
+
+		if (!uri) {
+			return doneCallback(null);
+		}
+
 		const fetcher = createApolloFetch({ uri });
 		fetcher({ query }).then(result => {
 			const { data, errors } = result;
@@ -47,6 +52,6 @@ export const graphqlAsker = {
 	},
 
 	_getGraph: function (chainId: number) {
-		return appConfig.subgraph[String(chainId)].graphql;
+		return appConfig.subgraph[String(chainId)]?.graphql;
 	}
 };
