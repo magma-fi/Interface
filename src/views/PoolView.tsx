@@ -190,12 +190,13 @@ export const PoolView = ({ market }: {
 						</button>
 
 						<button
-							disabled={
-								!hintHelpersDefault
-								|| hintHelpersDefaultStatus !== "LOADED"
-								|| !troveManagerDefault
-								|| troveManagerDefaultStatus !== "LOADED"
-							}
+							disabled
+							// {
+							// 	!hintHelpersDefault
+							// 	|| hintHelpersDefaultStatus !== "LOADED"
+							// 	|| !troveManagerDefault
+							// 	|| troveManagerDefaultStatus !== "LOADED"
+							// }
 							// onClick={handleRedeemCollateral}
 							className="secondaryButton">
 							<img src="images/swap-orange.png" />
@@ -263,7 +264,7 @@ export const PoolView = ({ market }: {
 					<div className="flex-row-space-between">
 						<div className="label">{t("totalUtilizationRate")}</div>
 
-						<div style={{ color: "#F25454" }}>{lusdInStabilityPool.div(wenTotalSupply).mul(100).toString(2) + "%"}</div>
+						<div style={{ color: "#F25454" }}>{(wenTotalSupply.gt(0) ? lusdInStabilityPool.div(wenTotalSupply).mul(100).toString(2) : 0) + "%"}</div>
 					</div>
 
 					<div className="flex-row-space-between">
