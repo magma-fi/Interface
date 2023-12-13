@@ -84,7 +84,7 @@ export const DepositeModal = ({
 	const handleMax = () => {
 		const val = Number(accountBalance.toString());
 		setValueForced(val);
-		setBorrowValue(val);
+		setDepositValue(val);
 	};
 
 	const handleExpandBorrow = () => {
