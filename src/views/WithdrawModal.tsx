@@ -57,6 +57,7 @@ export const WithdrawModal = ({
 
 	const isDirty = !trove.collateral.eq(desireCollateral);
 	const updatedTrove = isDirty ? new Trove(desireCollateral, trove.netDebt) : trove;
+	console.debug("xxx 交易前", desireCollateral.toString(), trove.netDebt.toString(), updatedTrove);
 	const borrowingRate = fees.borrowingRate();
 	const [troveChange, description] = validateTroveChange(
 		trove!,
@@ -65,6 +66,7 @@ export const WithdrawModal = ({
 		validationContext,
 		constants
 	);
+	// console.debug("xxx", troveChange, description);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
 
@@ -82,13 +84,13 @@ export const WithdrawModal = ({
 		setWithdrawAmount(maxNumber);
 	};
 
-	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
+	const applyUnsavedCollateralChanges = (unsavedChanges: Difference, trove: Trove) => {
 		if (unsavedChanges.absoluteValue) {
 			if (unsavedChanges.positive) {
 				return trove.collateral.add(unsavedChanges.absoluteValue);
 			}
 			if (unsavedChanges.negative) {
-				if (unsavedChanges.absoluteValue.lt(netDebt)) {
+				if (unsavedChanges.absoluteValue.lt(trove.collateral)) {
 					return trove.collateral.sub(unsavedChanges.absoluteValue);
 				}
 			}
@@ -105,7 +107,7 @@ export const WithdrawModal = ({
 
 		if (!previousCol.eq(col)) {
 			const unsavedChanges = Difference.between(col, previousCol);
-			const nextCol = applyUnsavedNetDebtChanges(unsavedChanges, trove);
+			const nextCol = applyUnsavedCollateralChanges(unsavedChanges, trove);
 			// setWithdrawAmount(Number(trove.collateral.sub(withdrawAmount).toString()));
 			setDesireCollateral(nextCol);
 		}

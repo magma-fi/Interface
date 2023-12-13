@@ -303,8 +303,8 @@ const validateTroveAdjustment = (
   }
 
   if (repayLUSD) {
-    const lusdMinimumDebt = constants?.MIN_NET_DEBT.add(constants?.LUSD_GAS_COMPENSATION).div(Math.pow(10, WEN.decimals || 18)) || LUSD_MINIMUM_DEBT;
-    if (resultingTrove.debt.lt(lusdMinimumDebt)) {
+    const wenMinimumDebt = constants?.MIN_NET_DEBT.add(constants?.LUSD_GAS_COMPENSATION).div(Math.pow(10, WEN.decimals || 18)) || LUSD_MINIMUM_DEBT;
+    if (resultingTrove.debt.lt(wenMinimumDebt)) {
       // return (
       //   <ErrorDescription>
       //     Total debt must be at least{" "}
@@ -316,7 +316,7 @@ const validateTroveAdjustment = (
       // );
       return {
         key: "debtMustBe",
-        values: { amount: lusdMinimumDebt.toString() + " " + WEN.symbol }
+        values: { amount: wenMinimumDebt.toString() + " " + WEN.symbol }
       } as ErrorMessage;
     }
 

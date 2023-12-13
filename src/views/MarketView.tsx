@@ -5,8 +5,7 @@ import { Coin, TroveChangeTx } from "../libs/types";
 import { useEffect, useMemo, useState } from "react";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
 import { selectForTroveChangeValidation } from "../components/Trove/validation/validateTroveChange";
-import { Percent } from "lib-base";
-import { CRITICAL_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE, MINIMUM_COLLATERAL_RATIO } from "lib-base/dist/src/constants";
+import { CRITICAL_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE, MINIMUM_COLLATERAL_RATIO, Percent } from "lib-base";
 import { IOTX, TroveOptions, WEN, globalContants } from "../libs/globalContants";
 import { IconButton } from "../components/IconButton";
 import { DropdownMenu } from "../components/DropdownMenu";
@@ -66,6 +65,7 @@ export const MarketView = ({ market }: {
 		trove,
 		fees
 	} = useLiquitySelector(selector);
+	console.debug("xxx", trove.netDebt.toString());
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
 	const [showDepositDoneModal, setShowDepositDoneModal] = useState(false);
@@ -293,7 +293,7 @@ export const MarketView = ({ market }: {
 							</div>
 
 							<div className="flex-column-align-left">
-								<div>{price.sub(currentPrice).div(price).mul(100).toString(2)}%</div>
+								<div>{price.gt(currentPrice) ? price.sub(currentPrice).div(price).mul(100).toString(2) : 0}%</div>
 								<div className="label labelSmall">{t("belowCurrentPrice")}</div>
 							</div>
 
@@ -335,7 +335,9 @@ export const MarketView = ({ market }: {
 						</div>
 					</div>
 
-					<div className="flex-row-space-between">
+					<div
+						className="flex-row-space-between"
+						style={{ alignItems: "flex-end" }}>
 						<div className="flex-column-align-left">
 							<div className="label">{t("deposited")}</div>
 
@@ -373,7 +375,9 @@ export const MarketView = ({ market }: {
 						</div>
 					</div>
 
-					<div className="flex-row-space-between">
+					<div
+						className="flex-row-space-between"
+						style={{ alignItems: "flex-end" }}>
 						<div className="flex-column-align-left">
 							<div className="label">{t("available2Borrow")}</div>
 
@@ -410,7 +414,9 @@ export const MarketView = ({ market }: {
 						</div>
 					</div>
 
-					<div className="flex-row-space-between">
+					<div
+						className="flex-row-space-between"
+						style={{ alignItems: "flex-end" }}>
 						<div className="flex-column-align-left">
 							<div className="label">{t("debt")}</div>
 
@@ -440,7 +446,9 @@ export const MarketView = ({ market }: {
 						</div>
 					</div>
 
-					<div className="flex-row-space-between">
+					<div
+						className="flex-row-space-between"
+						style={{ alignItems: "flex-end" }}>
 						<div className="flex-column-align-left">
 							<div className="label">{t("available2Withdraw")}</div>
 

@@ -3,8 +3,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Coin } from "../libs/types"
 import { IconButton } from "./IconButton";
 import { globalContants } from "../libs/globalContants";
-import { Decimal } from "lib-base/dist/src/Decimal";
 import { debounce } from "../libs/debounce";
+import { Decimal } from "lib-base";
 
 export const AmountInput = ({
 	coin = null,

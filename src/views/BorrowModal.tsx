@@ -66,6 +66,7 @@ export const BorrowModal = ({
 		validationContext,
 		constants
 	);
+	// console.debug("xxx", borrowAmount, debt, netDebtNumber, troveChange, description);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
 
