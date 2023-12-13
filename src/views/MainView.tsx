@@ -6,7 +6,7 @@ import { Route, BrowserRouter, Switch } from "react-router-dom";
 import { BorrowView } from "./BorrowView";
 import { StakeView } from "./StakeView";
 import { useChainId, useNetwork } from "wagmi";
-import { LiquidationsView } from "./liquidationsView";
+import { LiquidationsView } from "./LiquidationsView";
 
 export const MainView = () => {
 	const [showConnectModal, setShowConnectModal] = useState(false);
