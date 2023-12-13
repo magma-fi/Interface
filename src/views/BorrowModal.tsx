@@ -77,7 +77,9 @@ export const BorrowModal = ({
 	useEffect(init, []);
 
 	const handleMax = () => {
-		setValueForced(Number(max.toString()));
+		const val = Number(max.toString());
+		setValueForced(val);
+		setBorrowAmount(val);
 	};
 
 	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -146,9 +148,9 @@ export const BorrowModal = ({
 	return isOpen ? <Modal
 		title={t("borrow") + " " + WEN.symbol}
 		onClose={handleCloseModal}>
-		<div className="flex-row-space-between">
+		<div className="flex-row-space-between depositModal">
 			<div
-				className="flex-column"
+				className="flex-column subContainer"
 				style={{ gap: "24px" }}>
 				<div className="flex-column-align-left">
 					<div
@@ -202,8 +204,7 @@ export const BorrowModal = ({
 			</div>
 
 			<div
-				className="subCard"
-				style={{ minWidth: "fit-content" }}>
+				className="subCard subContainer">
 				<div className="flex-row-space-between">
 					<div className="label">{t("utilizationRate")}</div>
 
