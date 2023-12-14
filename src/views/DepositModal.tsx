@@ -28,7 +28,8 @@ export const DepositeModal = ({
 	fees,
 	validationContext,
 	onDone = () => { },
-	constants
+	constants,
+	depositAndBorrow = true
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -39,26 +40,29 @@ export const DepositeModal = ({
 	fees: Fees;
 	validationContext: ValidationContext;
 	onDone: (tx: string) => void;
-	constants?: Record<string, unknown>
+	constants?: Record<string, unknown>;
+	depositAndBorrow: boolean;
 }) => {
 	const { t } = useLang();
-	const amountDeposited = Number(trove.collateral);
-	const [valueForced, setValueForced] = useState(amountDeposited);
-	const [depositValue, setDepositValue] = useState(0);
-	const [borrowValue, setBorrowValue] = useState(0);
+	// const amountDeposited = Number(trove.collateral);
+	const [valueForced, setValueForced] = useState(-1);
+	const [depositValue, setDepositValue] = useState(-1);
+	const [borrowValue, setBorrowValue] = useState(-1);
 	const [showExpandBorrowView, setShowExpandBorrowView] = useState(false);
 	const previousTrove = useRef<Trove>(trove);
 	const previousAvailableBorrow = previousTrove.current.collateral.mul(price).div(CRITICAL_COLLATERAL_RATIO);
 	const [newAvailableBorrow, setNewAvailableBorrow] = useState(previousAvailableBorrow);
 	const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
-	const previousBorrowedAmountNumber = Number(previousNetDebt.toString());
-	const [defaultBorrowAmount, setDefaultBorrowAmount] = useState(previousBorrowedAmountNumber);
+	// const previousBorrowedAmountNumber = Number(previousNetDebt.toString());
+	const [defaultBorrowAmount, setDefaultBorrowAmount] = useState(-1);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId);
+	const [desireCollateral, setDesireCollateral] = useState(previousTrove.current?.collateral);
+	const [desireNetDebt, setDesireNetDebt] = useState(previousNetDebt);
 
-	const isDirty = !previousTrove.current.collateral.eq(depositValue) || !previousNetDebt.eq(borrowValue);
-	const updatedTrove = isDirty ? new Trove(Decimal.from(depositValue), Decimal.from(borrowValue)) : trove;
+	const isDirty = !previousTrove.current.collateral.eq(desireCollateral) || !previousNetDebt.eq(desireNetDebt);
+	const updatedTrove = isDirty ? new Trove(desireCollateral, desireNetDebt) : trove;
 	const borrowingRate = fees.borrowingRate();
 	const [troveChange, description] = validateTroveChange(
 		trove!,
@@ -71,12 +75,12 @@ export const DepositeModal = ({
 	const errorMessages = description as ErrorMessage;
 
 	const init = () => {
-		setValueForced(amountDeposited);
-		setDepositValue(0);
-		setBorrowValue(0);
+		setValueForced(-1);
+		setDepositValue(-1);
+		setBorrowValue(-1);
 		setShowExpandBorrowView(false);
 		setNewAvailableBorrow(previousAvailableBorrow);
-		setDefaultBorrowAmount(previousBorrowedAmountNumber);
+		setDefaultBorrowAmount(-1);
 	};
 
 	useEffect(init, []);
@@ -133,7 +137,7 @@ export const DepositeModal = ({
 	}
 
 	const handleMaxBorrow = () => {
-		const val = Number(newAvailableBorrow?.toString());
+		const val = Number(newAvailableBorrow?.sub(previousNetDebt).toString());
 		setDefaultBorrowAmount(val);
 		setBorrowValue(val);
 	};
@@ -162,8 +166,8 @@ export const DepositeModal = ({
 			max={Number(newAvailableBorrow?.toString())}
 			error={description && t(errorMessages.key, errorMessages.values)}
 			warning={undefined}
-			allowReduce={false}
-			currentValue={defaultBorrowAmount}
+			allowReduce={true}
+			currentValue={-1}
 			allowIncrease={true} />
 	</div>
 
@@ -200,24 +204,21 @@ export const DepositeModal = ({
 	useEffect(() => {
 		if (!trove) return;
 
-		const collateral = Decimal.from(depositValue);
-
-		setNewAvailableBorrow(collateral.mul(price).div(CRITICAL_COLLATERAL_RATIO));
-
-		if (!previousTrove.current?.collateral.eq(collateral)) {
-			const unsavedChanges = Difference.between(collateral, previousTrove.current?.collateral);
+		if (depositValue >= 0) {
+			const newCollateral = previousTrove.current?.collateral.add(depositValue);
+			const unsavedChanges = Difference.between(newCollateral, previousTrove.current?.collateral);
 			const nextCollateral = applyUnsavedCollateralChanges(unsavedChanges, trove);
-			setDepositValue(Number(nextCollateral.toString()));
+			setDesireCollateral(nextCollateral);
+
+			setNewAvailableBorrow(newCollateral.mul(price).div(CRITICAL_COLLATERAL_RATIO).sub(previousNetDebt));
 		}
 
-		const tempNetDebt = Decimal.from(borrowValue);
-
-		if (!previousNetDebt.eq(tempNetDebt)) {
+		if (borrowValue >= 0) {
+			const tempNetDebt = previousNetDebt.add(borrowValue);
 			const unsavedChanges = Difference.between(tempNetDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
-			setBorrowValue(Number(nextNetDebt.toString()));
+			setDesireNetDebt(nextNetDebt);
 		}
-
 	}, [trove, depositValue, price, borrowValue]);
 
 	const handleInputDeposit = (val: number) => {
@@ -265,19 +266,19 @@ export const DepositeModal = ({
 						max={Number(accountBalance.toString())}
 						warning={undefined}
 						error={undefined}
-						allowReduce={false}
-						currentValue={amountDeposited}
+						allowReduce={true}
+						currentValue={-1}
 						allowIncrease={true} />
 				</div>
 
-				<div
+				{depositAndBorrow && <div
 					className="collapsedView"
 					style={{ width: "100%" }}>
 					<ExpandableView
 						coverView={availableBorrowView}
 						hiddenView={borrowView}
 						expand={showExpandBorrowView} />
-				</div>
+				</div>}
 			</div>
 
 			<div

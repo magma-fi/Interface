@@ -10,8 +10,7 @@ import {
   CRITICAL_COLLATERAL_RATIO,
   LiquityStoreState,
   TroveClosureParams,
-  TroveCreationParams,
-  Decimalish
+  TroveCreationParams
 } from "lib-base";
 
 import { COIN } from "../../../strings";

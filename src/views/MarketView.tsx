@@ -67,6 +67,7 @@ export const MarketView = ({ market }: {
 	} = useLiquitySelector(selector);
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
+	const [depositAndBorrow, setDepositAndBorrow] = useState(true);
 	const [showDepositDoneModal, setShowDepositDoneModal] = useState(false);
 	const [showBorrowModal, setShowBorrowModal] = useState(false);
 	const [showBorrowDoneModal, setShowBorrowDoneModal] = useState(false);
@@ -152,6 +153,8 @@ export const MarketView = ({ market }: {
 	};
 
 	const handleDeposit = (evt: React.MouseEvent<HTMLButtonElement>) => {
+		setDepositAndBorrow(evt.currentTarget.id === "0");
+
 		evt.preventDefault();
 		evt.stopPropagation();
 		setShowDepositModal(true);
@@ -247,6 +250,7 @@ export const MarketView = ({ market }: {
 					</div>
 
 					<button
+						id="0"
 						className="primaryButton bigButton"
 						style={{ width: "100%" }}
 						onClick={handleDeposit}>
@@ -361,6 +365,7 @@ export const MarketView = ({ market }: {
 							className="flex-column-align-right"
 							style={{ gap: "5px" }}>
 							<button
+								id="1"
 								className="secondaryButton"
 								onClick={handleDeposit}>
 								<img src="images/deposit-light.png" />
@@ -550,7 +555,8 @@ export const MarketView = ({ market }: {
 			fees={fees}
 			validationContext={validationContext}
 			onDone={handleDepositDone}
-			constants={constants} />}
+			constants={constants}
+			depositAndBorrow={depositAndBorrow} />}
 
 		{showDepositDoneModal && <TxDone
 			title={t("depositedSuccessfully")}
