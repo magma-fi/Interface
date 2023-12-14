@@ -90,7 +90,8 @@ export const MarketView = ({ market }: {
 	const availableBorrow = maxAvailableBorrow.gt(trove.debt) ? maxAvailableBorrow.sub(trove.debt) : Decimal.ZERO;
 	// const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateral.mulDiv(price, trove.debt);
 	// const troveUtilizationRate = troveCollateralRatio.div(CRITICAL_COLLATERAL_RATIO).mul(100);
-	const troveUtilizationRate = trove.debt.gt(1) ? trove.netDebt.div(trove.collateral.mul(price)).mul(100) : Decimal.ZERO;
+	const currentNetDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
+	const troveUtilizationRate = currentNetDebt.div(trove.collateral.mul(price)).mul(100);
 	const troveUtilizationRateNumber = Number(troveUtilizationRate.toString());
 	const chartData = [
 		{ name: '', value: troveUtilizationRateNumber },
@@ -578,7 +579,7 @@ export const MarketView = ({ market }: {
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={maxAvailableBorrow}
+			max={maxAvailableBorrow.sub(trove.debt)}
 			onDone={handleBorrowDone}
 			constants={constants} />}
 
@@ -602,7 +603,7 @@ export const MarketView = ({ market }: {
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO}
+			max={currentNetDebt}
 			onDone={handleRepayDone}
 			constants={constants} />}
 

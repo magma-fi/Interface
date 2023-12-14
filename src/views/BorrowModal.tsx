@@ -44,20 +44,20 @@ export const BorrowModal = ({
 }) => {
 	const { t } = useLang();
 	const debt = Number(trove.debt);
-	const [borrowAmount, setBorrowAmount] = useState(0);
+	const [borrowAmount, setBorrowAmount] = useState(-1);
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	const netDebtNumber = Number(netDebt.toString());
-	const [valueForced, setValueForced] = useState(netDebtNumber);
+	// const netDebtNumber = Number(netDebt.toString());
+	const [valueForced, setValueForced] = useState(-1);
 	// const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
 	// const [forcedSlideValue, setForcedSlideValue] = useState(0);
 	// const [slideValue, setSlideValue] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId);
-
-	const isDirty = !netDebt.eq(borrowAmount);
-	const updatedTrove = isDirty ? new Trove(trove.collateral, Decimal.from(borrowAmount)) : trove;
+	const [desireNetDebt, setDesireNetDebt] = useState(previousTrove.current?.netDebt);
+	const isDirty = !netDebt.eq(desireNetDebt);
+	const updatedTrove = isDirty ? new Trove(trove.collateral, desireNetDebt) : trove;
 	const borrowingRate = fees.borrowingRate();
 	const [troveChange, description] = validateTroveChange(
 		trove!,
@@ -71,8 +71,8 @@ export const BorrowModal = ({
 	const errorMessages = description as ErrorMessage;
 
 	const init = () => {
-		setValueForced(netDebtNumber);
-		setBorrowAmount(0);
+		setValueForced(-1);
+		setBorrowAmount(-1);
 	};
 
 	useEffect(init, []);
@@ -101,16 +101,14 @@ export const BorrowModal = ({
 	useEffect(() => {
 		if (!trove) return;
 
-		const netDebt = Decimal.from(borrowAmount);
-		const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
-
-		// setForcedSlideValue(Number(Decimal.ONE.div(trove.collateral.mulDiv(price, netDebt)).toString()));
-
-		if (!previousNetDebt.eq(netDebt)) {
-			const unsavedChanges = Difference.between(netDebt, previousNetDebt);
+		if (borrowAmount >= 0) {
+			const newNetDebt = netDebt.add(borrowAmount);
+			const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
+			const unsavedChanges = Difference.between(newNetDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
-			setBorrowAmount(Number(nextNetDebt.toString()));
+			setDesireNetDebt(nextNetDebt);
 
+			// setForcedSlideValue(Number(Decimal.ONE.div(trove.collateral.mulDiv(price, netDebt)).toString()));
 		}
 	}, [trove, borrowAmount, price]);
 
@@ -175,8 +173,8 @@ export const BorrowModal = ({
 						max={Number(max.toString())}
 						warning={undefined}
 						error={description && t(errorMessages.key, errorMessages.values)}
-						allowReduce={false}
-						currentValue={netDebtNumber}
+						allowReduce={true}
+						currentValue={-1}
 						allowIncrease={true} />
 				</div>
 
