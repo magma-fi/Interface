@@ -373,25 +373,31 @@ export const DepositeModal = ({
 			</div>
 		</div>
 
-		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
-			transactionId={txId}
-			change={stableTroveChange}
-			maxBorrowingRate={borrowingRate.add(0.005)}
-			borrowingFeeDecayToleranceMinutes={60}>
-			<button
-				className="primaryButton bigButton"
-				style={{ width: "100%" }}>
-				<img src="images/deposit.png" />
+		{
+			stableTroveChange &&
+				(
+					(!transactionState.id && transactionState.type === "idle")
+					|| transactionState.type === "cancelled"
+				)
+				? <TroveAction
+					transactionId={txId}
+					change={stableTroveChange}
+					maxBorrowingRate={borrowingRate.add(0.005)}
+					borrowingFeeDecayToleranceMinutes={60}>
+					<button
+						className="primaryButton bigButton"
+						style={{ width: "100%" }}>
+						<img src="images/deposit.png" />
 
-				{t("deposit")}
-			</button>
-		</TroveAction> : <button
-			className="primaryButton bigButton"
-			style={{ width: "100%" }}
-			disabled>
-			<img src="images/deposit.png" />
+						{t("deposit")}
+					</button>
+				</TroveAction> : <button
+					className="primaryButton bigButton"
+					style={{ width: "100%" }}
+					disabled>
+					<img src="images/deposit.png" />
 
-			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("depositing") + "...") : t("deposit")}
-		</button>}
+					{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("depositing") + "...") : t("deposit")}
+				</button>}
 	</Modal> : <></>
 };

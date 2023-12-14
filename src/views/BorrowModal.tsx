@@ -276,26 +276,32 @@ export const BorrowModal = ({
 			</div>
 		</div>
 
-		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
-			transactionId={txId}
-			change={stableTroveChange}
-			maxBorrowingRate={borrowingRate.add(0.005)}
-			borrowingFeeDecayToleranceMinutes={60}>
-			<button
-				className="primaryButton bigButton"
-				style={{ width: "100%" }}
-				disabled={borrowAmount <= debt}>
-				<img src="images/borrow-dark.png" />
+		{
+			stableTroveChange &&
+				(
+					(!transactionState.id && transactionState.type === "idle")
+					|| transactionState.type === "cancelled"
+				)
+				? <TroveAction
+					transactionId={txId}
+					change={stableTroveChange}
+					maxBorrowingRate={borrowingRate.add(0.005)}
+					borrowingFeeDecayToleranceMinutes={60}>
+					<button
+						className="primaryButton bigButton"
+						style={{ width: "100%" }}
+						disabled={borrowAmount <= debt}>
+						<img src="images/borrow-dark.png" />
 
-				{t("borrow")}
-			</button>
-		</TroveAction> : <button
-			className="primaryButton bigButton"
-			style={{ width: "100%" }}
-			disabled>
-			<img src="images/borrow-dark.png" />
+						{t("borrow")}
+					</button>
+				</TroveAction> : <button
+					className="primaryButton bigButton"
+					style={{ width: "100%" }}
+					disabled>
+					<img src="images/borrow-dark.png" />
 
-			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("borrowing") + "...") : t("borrow")}
-		</button>}
+					{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("borrowing") + "...") : t("borrow")}
+				</button>}
 	</Modal> : <></>
 };

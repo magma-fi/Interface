@@ -43,8 +43,8 @@ export const RepayModal = ({
 	constants?: Record<string, unknown>
 }) => {
 	const { t } = useLang();
-	const [valueForced, setValueForced] = useState(0);
-	const [repayAmount, setRepayAmount] = useState(0);
+	const [valueForced, setValueForced] = useState(-1);
+	const [repayAmount, setRepayAmount] = useState(-1);
 	const [desireDebt, setDesireDebt] = useState(max)
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
@@ -73,8 +73,8 @@ export const RepayModal = ({
 	// const [sliderForcedValue, setSliderForcedValue] = useState(Number(utilRate.toString()));
 
 	const init = () => {
-		setValueForced(0);
-		setRepayAmount(0);
+		setValueForced(-1);
+		setRepayAmount(-1);
 		setDesireDebt(max);
 	};
 
@@ -102,11 +102,10 @@ export const RepayModal = ({
 	useEffect(() => {
 		if (!trove) return;
 
-		const netDebt = trove.netDebt.sub(repayAmount);
-		const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
-
-		if (!previousNetDebt.eq(netDebt)) {
-			const unsavedChanges = Difference.between(netDebt, previousNetDebt);
+		if (repayAmount >= 0) {
+			const newNetDebt = netDebt.sub(repayAmount);
+			const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
+			const unsavedChanges = Difference.between(newNetDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
 			setDesireDebt(nextNetDebt);
 		}
@@ -235,26 +234,32 @@ export const RepayModal = ({
 			</div>
 		</div>
 
-		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
-			transactionId={txId}
-			change={stableTroveChange}
-			maxBorrowingRate={borrowingRate.add(0.005)}
-			borrowingFeeDecayToleranceMinutes={60}>
-			<button
-				className="primaryButton bigButton"
-				style={{ width: "100%" }}
-				disabled={repayAmount === 0}>
-				<img src="images/repay-dark.png" />
+		{
+			stableTroveChange &&
+				(
+					(!transactionState.id && transactionState.type === "idle")
+					|| transactionState.type === "cancelled"
+				)
+				? <TroveAction
+					transactionId={txId}
+					change={stableTroveChange}
+					maxBorrowingRate={borrowingRate.add(0.005)}
+					borrowingFeeDecayToleranceMinutes={60}>
+					<button
+						className="primaryButton bigButton"
+						style={{ width: "100%" }}
+						disabled={repayAmount === 0}>
+						<img src="images/repay-dark.png" />
 
-				{t("repay")}
-			</button>
-		</TroveAction> : <button
-			className="primaryButton bigButton"
-			style={{ width: "100%" }}
-			disabled>
-			<img src="images/repay-dark.png" />
+						{t("repay")}
+					</button>
+				</TroveAction> : <button
+					className="primaryButton bigButton"
+					style={{ width: "100%" }}
+					disabled>
+					<img src="images/repay-dark.png" />
 
-			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("repaying") + "...") : t("repay")}
-		</button>}
+					{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("repaying") + "...") : t("repay")}
+				</button>}
 	</Modal> : <></>
 };
