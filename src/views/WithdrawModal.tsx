@@ -45,10 +45,10 @@ export const WithdrawModal = ({
 	const maxNumber = Number(max.toString());
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
-	const [withdrawAmount, setWithdrawAmount] = useState(0);
+	const [withdrawAmount, setWithdrawAmount] = useState(-1);
 	const [desireCollateral, setDesireCollateral] = useState(trove.collateral);
 	const previousTrove = useRef<Trove>(trove);
-	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
+	// const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
 	// const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
 	// const [slideValue, setSlideValue] = useState(0);
@@ -57,7 +57,6 @@ export const WithdrawModal = ({
 
 	const isDirty = !trove.collateral.eq(desireCollateral);
 	const updatedTrove = isDirty ? new Trove(desireCollateral, trove.netDebt) : trove;
-	console.debug("xxx 交易前", desireCollateral.toString(), trove.netDebt.toString(), updatedTrove);
 	const borrowingRate = fees.borrowingRate();
 	const [troveChange, description] = validateTroveChange(
 		trove!,
@@ -66,7 +65,6 @@ export const WithdrawModal = ({
 		validationContext,
 		constants
 	);
-	// console.debug("xxx", troveChange, description);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
 
@@ -74,7 +72,7 @@ export const WithdrawModal = ({
 
 	const init = () => {
 		setValueForced(-1);
-		setWithdrawAmount(0);
+		setWithdrawAmount(-1);
 	};
 
 	useEffect(init, []);
@@ -102,13 +100,11 @@ export const WithdrawModal = ({
 	useEffect(() => {
 		if (!trove) return;
 
-		const col = trove.collateral.sub(withdrawAmount);
-		const previousCol = previousTrove.current?.collateral;
-
-		if (!previousCol.eq(col)) {
+		if (withdrawAmount >= 0) {
+			const col = trove.collateral.sub(withdrawAmount);
+			const previousCol = previousTrove.current?.collateral;
 			const unsavedChanges = Difference.between(col, previousCol);
 			const nextCol = applyUnsavedCollateralChanges(unsavedChanges, trove);
-			// setWithdrawAmount(Number(trove.collateral.sub(withdrawAmount).toString()));
 			setDesireCollateral(nextCol);
 		}
 	}, [trove, withdrawAmount, price]);
@@ -175,8 +171,8 @@ export const WithdrawModal = ({
 						warning={undefined}
 						error={description && t(errorMessages.key, errorMessages.values)}
 						allowReduce={true}
-						currentValue={maxNumber}
-						allowIncrease={false} />
+						currentValue={-1}
+						allowIncrease={true} />
 				</div>
 
 				{/* <div className="flex-column-align-left">
@@ -242,26 +238,32 @@ export const WithdrawModal = ({
 			</div>
 		</div>
 
-		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
-			transactionId={txId}
-			change={stableTroveChange}
-			maxBorrowingRate={borrowingRate.add(0.005)}
-			borrowingFeeDecayToleranceMinutes={60}>
-			<button
-				className="primaryButton bigButton"
-				style={{ width: "100%" }}
-				disabled={withdrawAmount === 0}>
-				<img src="images/repay-dark.png" />
+		{
+			stableTroveChange &&
+				(
+					(!transactionState.id && transactionState.type === "idle")
+					|| transactionState.type === "cancelled"
+				)
+				? <TroveAction
+					transactionId={txId}
+					change={stableTroveChange}
+					maxBorrowingRate={borrowingRate.add(0.005)}
+					borrowingFeeDecayToleranceMinutes={60}>
+					<button
+						className="primaryButton bigButton"
+						style={{ width: "100%" }}
+						disabled={withdrawAmount === 0}>
+						<img src="images/repay-dark.png" />
 
-				{t("withdraw")}
-			</button>
-		</TroveAction> : <button
-			className="primaryButton bigButton"
-			style={{ width: "100%" }}
-			disabled>
-			<img src="images/repay-dark.png" />
+						{t("withdraw")}
+					</button>
+				</TroveAction> : <button
+					className="primaryButton bigButton"
+					style={{ width: "100%" }}
+					disabled>
+					<img src="images/repay-dark.png" />
 
-			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("withdrawing") + "...") : t("withdraw")}
-		</button>}
+					{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("withdrawing") + "...") : t("withdraw")}
+				</button>}
 	</Modal> : <></>
 };
