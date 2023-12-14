@@ -91,7 +91,7 @@ export const MarketView = ({ market }: {
 	// const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateral.mulDiv(price, trove.debt);
 	// const troveUtilizationRate = troveCollateralRatio.div(CRITICAL_COLLATERAL_RATIO).mul(100);
 	const currentNetDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	const troveUtilizationRate = currentNetDebt.div(trove.collateral.mul(price)).mul(100);
+	const troveUtilizationRate = trove.collateral.gt(0) ? currentNetDebt.div(trove.collateral.mul(price)).mul(100) : Decimal.ZERO;
 	const troveUtilizationRateNumber = Number(troveUtilizationRate.toString());
 	const chartData = [
 		{ name: '', value: troveUtilizationRateNumber },
