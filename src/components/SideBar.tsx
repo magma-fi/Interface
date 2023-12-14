@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "./NavLink";
 import { useLang } from "../hooks/useLang";
 import { WEN } from "../libs/globalContants";
@@ -15,11 +15,16 @@ import { StyleModeSelect } from "./StyleModeSelect";
 export const SideBar: React.FC = ({ children }) => {
   const { t } = useLang();
   const { pathname } = useLocation();
+  const [showMobileMenu, setShowMobileMenu] = useState(window.innerWidth > 575.98);
   // const {
   //   config: { frontendTag }
   // } = useLiquity();
   // const { frontend } = useLiquitySelector(select);
   // const isFrontendRegistered = frontendTag === AddressZero || frontend.status === "registered";
+
+  const handleShowMenuForMobile = () => {
+    setShowMobileMenu(!showMobileMenu);
+  };
 
   return (
     <div className="sider">
@@ -61,59 +66,50 @@ export const SideBar: React.FC = ({ children }) => {
         showExternalLink={false}
         active={pathname === "/liquidations"} />
 
-      <NavLink
-        label={t("docs")}
-        icon="images/docs.png"
-        url="https://docs.magma.finance/"
-        fullWidth={true}
-        showExternalLink={true}
-        active={false}
-        target="_blank" />
+      <div
+        className="navLink mainMenuForMobile"
+        onClick={handleShowMenuForMobile}>
+        <img src="images/main-menu.png" />
 
-      <NavLink
-        label={t("twitter")}
-        icon="images/x.png"
-        url="https://twitter.com/"
-        fullWidth={true}
-        showExternalLink={true}
-        active={false}
-        target="_blank" />
-
-      <hr className="division" />
-
-      <div style={{
-        marginLeft: "16px",
-        display: "flex",
-        gap: "8px",
-        flexDirection: "column"
-      }}>
-        <StyleModeSelect />
-
-        <LangSelect />
+        {t("menu")}
       </div>
 
-      <hr className="division" />
+      {showMobileMenu && <div className="mainMenu">
+        <NavLink
+          label={t("docs")}
+          icon="images/docs.png"
+          url="https://docs.magma.finance/"
+          fullWidth={true}
+          showExternalLink={true}
+          active={false}
+          target="_blank" />
 
-      {/* <Flex sx={{ alignItems: "center", flex: 1 }}>
-        <LiquityLogo height={logoHeight} />
+        <NavLink
+          label={t("twitter")}
+          icon="images/x.png"
+          url="https://twitter.com/"
+          fullWidth={true}
+          showExternalLink={true}
+          active={false}
+          target="_blank" />
 
-        <Box
-          sx={{
-            mx: [2, 3],
-            width: "0px",
-            height: "100%",
-            borderLeft: ["none", "1px solid lightgrey"]
-          }}
-        />
-        {isFrontendRegistered && (
-          <>
-            <SideNav />
-            <Nav />
-          </>
-        )}
-      </Flex> */}
+        <hr className="division" />
 
-      {children}
+        <div style={{
+          marginLeft: "16px",
+          display: "flex",
+          gap: "8px",
+          flexDirection: "column"
+        }}>
+          <StyleModeSelect />
+
+          <LangSelect />
+        </div>
+
+        <hr className="division" />
+
+        {children}
+      </div>}
     </div>
   );
 };

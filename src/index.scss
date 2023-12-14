@@ -114,6 +114,16 @@ h4 {
   height: fit-content;
 }
 
+.charts {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  gap: var(--flex-gap-middle);
+  height: fit-content;
+  gap: 1rem;
+  align-items: flex-start;
+  width: calc(100% - 1rem);
+}
+
 .flex-row-align-left {
   display: flex;
   flex-direction: row;
@@ -157,7 +167,7 @@ h4 {
 
 .app {
   display: flex;
-  flex-direction: row;
+  flex-direction: row-reverse;
   gap: var(--flex-gap-larger);
   position: relative;
 }
@@ -195,6 +205,7 @@ h4 {
   color: var(--color);
   opacity: 0.7;
   text-transform: capitalize;
+  width: fit-content;
 
   img {
     height: 16px;
@@ -211,6 +222,10 @@ h4 {
     border: 1px solid var(--actived-border-color);
     border-radius: 45px;
   }
+}
+
+.navLink-fullWidth {
+  width: calc(100% - 2rem);
 }
 
 .dropdownMenu {
@@ -795,7 +810,6 @@ h4 {
     .tableRow {
       display: flex;
       padding: 16px 16px 12px 16px;
-      flex-direction: column;
       align-items: flex-start;
       align-self: stretch;
       border-radius: 16px;
@@ -820,10 +834,25 @@ h4 {
 
 .depositModal {
   width: 752px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--flex-gap-larger);
 
   .subContainer {
     width: 50%;
   }
+}
+
+.mainMenu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--flex-gap-small);
+}
+
+.mainMenuForMobile {
+  display: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -834,5 +863,179 @@ h4 {
   :root {
     /* --background-color: white;
     --color: darkslategray; */
+  }
+}
+
+@media (max-width: 575.98px) {
+  body {
+    background-image: url("/images/bg-mobile.png");
+  }
+
+  .app {
+    flex-direction: column;
+    width: 100vw;
+    height: fit-content;
+  }
+
+  .sider {
+    flex-direction: row;
+    width: 100%;
+    padding: 8px 0px;
+    justify-content: center;
+    align-items: flex-start;
+    position: fixed;
+    bottom: 0;
+    border-radius: 24px 24px 0px 0px;
+    border-top: 1px solid var(--surface-card-stroke);
+    border-right: 1px solid var(--surface-card-stroke);
+    border-left: 1px solid var(--surface-card-stroke);
+    background: var(--surface-card);
+    box-shadow: 19px 24px 72px 0px rgba(5, 2, 7, 0.40);
+    backdrop-filter: blur(7px);
+    justify-content: space-around;
+
+    .division {
+      display: none;
+    }
+  }
+
+  .sider .logo {
+    display: none;
+  }
+
+  .mainMenu {
+    display: flex;
+    position: absolute;
+    right: 1rem;
+    bottom: 3.5rem;
+    background-color: rgba(0, 0, 0, 0.80);
+    padding: 1rem;
+    border-radius: 1rem;
+    backdrop-filter: blur(7px);
+    gap: var(--flex-gap-middle);
+    z-index: 1000000000;
+
+    .navLink {
+      display: flex;
+      flex-direction: row;
+      gap: var(--flex-gap-small);
+      justify-content: flex-start;
+      align-items: center;
+      padding: 12px 16px;
+      font-family: metropolis400;
+      text-decoration: none;
+      color: var(--color);
+      opacity: 0.7;
+      text-transform: capitalize;
+      width: fit-content;
+      font-size: 1rem;
+
+      img {
+        height: 16px;
+      }
+
+      &:hover {
+        opacity: 1;
+      }
+
+      &.active {
+        opacity: 1;
+        font-family: metropolis700;
+        background-color: var(--actived-background-color);
+        border: 1px solid var(--actived-border-color);
+        border-radius: 45px;
+      }
+    }
+  }
+
+  .navLink {
+    flex-direction: column;
+    padding: 0;
+    font-size: 0.625rem;
+    width: fit-content;
+
+    #externalLink {
+      display: none;
+    }
+
+    &.active {
+      background-color: none;
+      border: none;
+      border-radius: 0;
+    }
+  }
+
+  .navLink-fullWidth {
+    width: fit-content;
+  }
+
+  .mainMenuForMobile {
+    display: flex;
+  }
+
+  .mainContainer {
+    width: calc(100% - 2rem);
+    padding: 1rem;
+  }
+
+  .tab {
+    width: calc(100% - var(--flex-gap-small) * 2);
+  }
+
+  .marketView {
+    display: flex;
+    flex-direction: column-reverse;
+    grid-template-columns: none;
+
+    .card {
+      width: calc(100% - var(--flex-gap-small) * 2);
+      padding: var(--flex-gap-small);
+    }
+  }
+
+  .modalOverlay {
+    position: absolute;
+
+    .modal {
+      width: calc(100% - 6rem);
+    }
+  }
+
+  .depositModal {
+    width: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    .subContainer {
+      width: 100%;
+    }
+  }
+
+  .subCard {
+    width: calc(100% - 2rem) !important;
+  }
+
+  .table {
+    .tableBody {
+      .tableRow {
+        width: calc(100% - 2rem);
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-end;
+
+        .tableCell {
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .tableCell:last-child::before {
+          content: " ";
+        }
+      }
+    }
   }
 }

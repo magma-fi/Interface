@@ -283,13 +283,7 @@ export const MarketView = ({ market }: {
 						</DropdownMenu>
 					</div>
 
-					<div
-						className="two-columns-grid"
-						style={{
-							gap: "1rem",
-							alignItems: "flex-start",
-							width: "calc(100% - 1rem)"
-						}}>
+					<div className="charts">
 						<div className="subCard">
 							<div className="flex-row-space-between">
 								<div className="label">{t("liquidation")}</div>

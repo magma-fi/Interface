@@ -18,14 +18,15 @@ export function NavLink({
 	target = "_self"
 }: NavLinkProps) {
 	return <a
-		className={"navLink" + (active ? " active" : "")}
+		className={"navLink" + (active ? " active" : "") + (fullWidth ? " navLink-fullWidth" : "")}
 		href={url}
-		style={{ width: fullWidth ? "calc(100% - 32px)" : "fit-content" }}
 		target={target}>
 		{icon && <img src={icon} />}
 
 		{label}
 
-		{showExternalLink && <img src="images/external-link.png" />}
+		{showExternalLink && <img
+			id="externalLink"
+			src="images/external-link.png" />}
 	</a>
 }

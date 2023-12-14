@@ -25,15 +25,6 @@ export const MainView = () => {
 	return <>
 		<div className="app">
 			<BrowserRouter>
-				<SideBar>
-					<UserAccount
-						onConnect={handleConnectWallet}
-						isSupportedNetwork={isSupportedNetwork}
-						chains={chains}
-						chainId={chainId} />
-					{/* <SystemStatsPopup /> */}
-				</SideBar>
-
 				<div style={{
 					display: "flex",
 					flexGrow: 1,
@@ -62,6 +53,15 @@ export const MainView = () => {
 						</Route> */}
 					</Switch>
 				</div>
+
+				<SideBar>
+					<UserAccount
+						onConnect={handleConnectWallet}
+						isSupportedNetwork={isSupportedNetwork}
+						chains={chains}
+						chainId={chainId} />
+					{/* <SystemStatsPopup /> */}
+				</SideBar>
 			</BrowserRouter>
 		</div>
 

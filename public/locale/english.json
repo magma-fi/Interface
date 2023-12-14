@@ -93,5 +93,6 @@
 	"collateral": "Collateral",
 	"liquidate": "Liquidate",
 	"collateralRatioMustBeAtLeast": "Collateral ratio must be at least {percent}",
-	"depositAndBorrow": "Deposit and Borrow"
+	"depositAndBorrow": "Deposit and Borrow",
+	"menu": "menu"
 }

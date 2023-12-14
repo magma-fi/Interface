@@ -240,7 +240,7 @@ export const DepositeModal = ({
 	return isOpen ? <Modal
 		title={t("deposit") + " " + market?.symbol}
 		onClose={handleCloseModal}>
-		<div className="flex-row-space-between depositModal">
+		<div className="depositModal">
 			<div
 				className="flex-column subContainer"
 				style={{ gap: "24px" }}>

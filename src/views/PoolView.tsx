@@ -164,12 +164,7 @@ export const PoolView = ({ market }: {
 	};
 
 	return <>
-		<div
-			className="two-columns-grid"
-			style={{
-				width: "100%",
-				gap: "40px"
-			}}>
+		<div className="marketView">
 			<div
 				className="flex-column"
 				style={{ gap: "24px" }}>
