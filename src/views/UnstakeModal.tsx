@@ -4,17 +4,11 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, ValidationContext, ValidationContextForStabilityPool } from "../libs/types";
-import { WEN, globalContants } from "../libs/globalContants";
+import { ValidationContextForStabilityPool } from "../libs/types";
+import { WEN } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useRef, useMemo } from "react";
-import { ExpandableView } from "./ExpandableView";
-import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE, StabilityDeposit } from "lib-base";
-import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
-import { Fees } from "lib-base/dist/src/Fees";
-import { useStableTroveChange } from "../hooks/useStableTroveChange";
-import { TroveAction } from "../components/Trove/TroveAction";
-import { calculateAvailableBorrow, calculateAvailableWithdrawal } from "../utils";
+import { useState, useEffect, useMemo } from "react";
+import { Decimal, StabilityDeposit } from "lib-base";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { useMyTransactionState } from "../components/Transaction";
 import { TxLabel } from "../components/TxLabel";

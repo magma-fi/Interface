@@ -4,17 +4,11 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, ValidationContext, ValidationContextForStabilityPool } from "../libs/types";
-import { WEN, globalContants } from "../libs/globalContants";
+import { ValidationContextForStabilityPool } from "../libs/types";
+import { WEN } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useRef, useMemo } from "react";
-import { ExpandableView } from "./ExpandableView";
-import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE, StabilityDeposit } from "lib-base";
-import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
-import { Fees } from "lib-base/dist/src/Fees";
-import { useStableTroveChange } from "../hooks/useStableTroveChange";
-import { TroveAction } from "../components/Trove/TroveAction";
-import { calculateAvailableBorrow, calculateAvailableWithdrawal } from "../utils";
+import { useState, useEffect, useMemo } from "react";
+import { Decimal, StabilityDeposit } from "lib-base";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { useMyTransactionState } from "../components/Transaction";
 import { TxLabel } from "../components/TxLabel";
@@ -39,18 +33,19 @@ export const StakeModal = ({
 	lusdInStabilityPool: Decimal;
 }) => {
 	const { t } = useLang();
-	const amountDeposited = 0;
-	const [valueForced, setValueForced] = useState(amountDeposited);
+	const [valueForced, setValueForced] = useState(-1);
 	const [depositAmount, setDepositAmount] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId);
 
 	const handleMax = () => {
-		setValueForced(Number(accountBalance.toString()));
+		const val = Number(accountBalance.toString());
+		setValueForced(val);
+		setDepositAmount(val);
 	};
 
 	const handleInputDeposit = (val: number) => {
-		setValueForced(0);
+		setValueForced(-1);
 		setDepositAmount(val);
 	};
 
@@ -109,8 +104,8 @@ export const StakeModal = ({
 					max={Number(accountBalance.toString())}
 					warning={undefined}
 					error={undefined}
-					allowReduce={false}
-					currentValue={amountDeposited}
+					allowReduce={true}
+					currentValue={-1}
 					allowIncrease={true} />
 			</div>
 
