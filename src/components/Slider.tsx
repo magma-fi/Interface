@@ -4,21 +4,21 @@ import { debounce } from "../libs/debounce";
 export const Slider = ({
 	min,
 	max,
-	currentValue,
 	onChange,
 	forcedValue = -1,
 	allowReduce = true,
+	limitValue = 0,
 	allowIncrease = true
 }: {
 	min: number;
 	max: number;
-	currentValue: number;
 	onChange?: (val: number) => void;
 	forcedValue: number;
 	allowReduce: boolean;
+	limitValue: number;
 	allowIncrease: boolean;
 }) => {
-	const [value, setValue] = useState(currentValue);
+	const [value, setValue] = useState(0);
 
 	const sendBack = useCallback((val: number) => {
 		if (onChange) {
@@ -26,27 +26,30 @@ export const Slider = ({
 		}
 	}, [onChange]);
 
-	const updateValue = useCallback((val: number) => {
+	const updateValue = useCallback((val: number, send = false) => {
 		if (
-			(!allowIncrease && val <= currentValue)
-			|| (!allowReduce && val >= currentValue)
+			(allowIncrease && allowReduce)
+			|| (
+				(!allowIncrease && val <= limitValue)
+				|| (!allowReduce && val >= limitValue)
+			)
 		) {
 			setValue(val);
-			sendBack(val);
+			send && sendBack(val);
 		} else {
-			setValue(currentValue);
+			setValue(limitValue);
 		}
-	}, [allowIncrease, allowReduce, currentValue, sendBack]);
+	}, [allowIncrease, allowReduce, limitValue, sendBack]);
 
 	const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
 		const val = Number(evt.currentTarget.value);
-		updateValue(val);
+		updateValue(val, true);
 	};
 
 	useEffect(() => {
 		if (forcedValue >= 0) {
-			setValue(forcedValue);
-			updateValue(forcedValue);
+			// setValue(forcedValue);
+			updateValue(forcedValue, false);
 		}
 	}, [forcedValue, updateValue])
 
