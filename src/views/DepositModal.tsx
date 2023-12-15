@@ -40,7 +40,7 @@ export const DepositeModal = ({
 	fees: Fees;
 	validationContext: ValidationContext;
 	onDone: (tx: string) => void;
-	constants?: Record<string, unknown>;
+	constants?: Record<string, Decimal>;
 	depositAndBorrow: boolean;
 }) => {
 	const { t } = useLang();
@@ -217,7 +217,12 @@ export const DepositeModal = ({
 			const tempNetDebt = previousNetDebt.add(borrowValue);
 			const unsavedChanges = Difference.between(tempNetDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
-			setDesireNetDebt(nextNetDebt);
+
+			const dec = Math.pow(10, WEN.decimals || 0);
+			const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION.div(dec) || Decimal.ONE;
+			// const wenMinimumNetDebt = constants?.MIN_NET_DEBT.div(dec) || Decimal.ONE;
+
+			setDesireNetDebt(nextNetDebt.add(wenLiquidationReserve));
 		}
 	}, [trove, depositValue, price, borrowValue]);
 
