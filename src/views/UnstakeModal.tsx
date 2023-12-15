@@ -40,17 +40,19 @@ export const UnstakeModal = ({
 }) => {
 	const { t } = useLang();
 	const amountDeposited = 0;
-	const [valueForced, setValueForced] = useState(amountDeposited);
+	const [valueForced, setValueForced] = useState(-1);
 	const [unstakeAmount, setUnstakeAmount] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId);
 
 	const handleMax = () => {
-		setValueForced(Number(stabilityDeposit.currentLUSD.toString()));
+		const val = Number(stabilityDeposit.currentLUSD);
+		setValueForced(val);
+		setUnstakeAmount(val);
 	};
 
 	const handleInputDeposit = (val: number) => {
-		setValueForced(0);
+		setValueForced(-1);
 		setUnstakeAmount(val);
 	};
 
@@ -108,8 +110,8 @@ export const UnstakeModal = ({
 					max={Number(accountBalance.toString())}
 					warning={undefined}
 					error={undefined}
-					allowReduce={false}
-					currentValue={amountDeposited}
+					allowReduce={true}
+					currentValue={-1}
 					allowIncrease={true} />
 			</div>
 
