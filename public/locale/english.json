@@ -94,5 +94,6 @@
 	"liquidate": "Liquidate",
 	"collateralRatioMustBeAtLeast": "Collateral ratio must be at least {percent}",
 	"depositAndBorrow": "Deposit and Borrow",
-	"menu": "menu"
+	"menu": "menu",
+	"noLiquidatableTrove": "No Liquidatable Trove"
 }

@@ -112,7 +112,7 @@ export const validateTroveChange = (
     validChange: Exclude<TroveChange<Decimal>, { type: "invalidCreation" }> | undefined,
     description: JSX.Element | ErrorMessage | undefined
   ] => {
-  const wenMinimumDebt = constants?.MIN_NET_DEBT.add(constants?.LUSD_GAS_COMPENSATION).div(Math.pow(10, WEN.decimals || 18)) || LUSD_MINIMUM_DEBT;
+  const wenMinimumDebt = constants?.MIN_NET_DEBT.add(constants?.LUSD_GAS_COMPENSATION) || LUSD_MINIMUM_DEBT;
   const { total, price } = selectedState;
   const change = originalTrove.whatChanged(adjustedTrove, borrowingRate);
 
@@ -179,7 +179,7 @@ const validateTroveCreation = (
   }: TroveChangeValidationContext,
   constants?: Record<string, Decimal>
 ): JSX.Element | ErrorMessage | null => {
-  const wenMinimumNetDebt = constants?.MIN_NET_DEBT.div(Math.pow(10, WEN.decimals || 18)) || LUSD_MINIMUM_NET_DEBT;
+  const wenMinimumNetDebt = constants?.MIN_NET_DEBT || LUSD_MINIMUM_NET_DEBT;
   if (borrowLUSD.lt(wenMinimumNetDebt)) {
     // return (
     //   <ErrorDescription>
@@ -206,7 +206,7 @@ const validateTroveCreation = (
       );
     }
   } else {
-    const mcr = constants?.MCR.div(Math.pow(10, WEN.decimals || 18)) || MINIMUM_COLLATERAL_RATIO;
+    const mcr = constants?.MCR || MINIMUM_COLLATERAL_RATIO;
 
     // return this.collateralRatio(price).lt(MINIMUM_COLLATERAL_RATIO);
     // if (resultingTrove.collateralRatioIsBelowMinimum(price)) {
@@ -257,7 +257,7 @@ const validateTroveAdjustment = (
   }: TroveChangeValidationContext,
   constants?: Record<string, Decimal>
 ): JSX.Element | ErrorMessage | null => {
-  const wenMinimumDebt = constants?.MIN_NET_DEBT.add(constants?.LUSD_GAS_COMPENSATION).div(Math.pow(10, WEN.decimals || 18)) || LUSD_MINIMUM_DEBT;
+  const wenMinimumDebt = constants?.MIN_NET_DEBT.add(constants?.LUSD_GAS_COMPENSATION) || LUSD_MINIMUM_DEBT;
 
   if (recoveryMode) {
     if (withdrawCollateral) {

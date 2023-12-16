@@ -21,13 +21,13 @@ import { TxLabel } from "../components/TxLabel";
 import { graphqlAsker } from "../libs/graphqlAsker";
 import { useChainId } from "wagmi";
 import { CloseModal } from "./CloseModal";
-import { useContract } from "../hooks/useContract";
-import { BorrowerOperations } from "lib-ethers/dist/types";
-import { useLiquity } from "../hooks/LiquityContext";
-import BorrowerOperationsAbi from "lib-ethers/abi/BorrowerOperations.json";
 
-export const MarketView = ({ market }: {
+export const MarketView = ({
+	market,
+	constants
+}: {
 	market: Coin;
+	constants: Record<string, Decimal>
 }) => {
 	const selector = useMemo(() => {
 		return (state: LiquityStoreState) => {
@@ -103,34 +103,34 @@ export const MarketView = ({ market }: {
 	const availableWithdrawalFiat = availableWithdrawal.mul(price);
 	const chainId = useChainId();
 	const [txs, setTxs] = useState<TroveChangeTx[]>();
-	const { liquity } = useLiquity();
-	const [constants, setConstants] = useState<Record<string, unknown>>();
+	// const { liquity } = useLiquity();
+	// const [constants, setConstants] = useState<Record<string, unknown>>();
 
-	const [borrowerOperationsDefault, borrowerOperationsStatus] = useContract<BorrowerOperations>(
-		liquity.connection.addresses.borrowerOperations,
-		BorrowerOperationsAbi
-	);
+	// const [borrowerOperationsDefault, borrowerOperationsStatus] = useContract<BorrowerOperations>(
+	// 	liquity.connection.addresses.borrowerOperations,
+	// 	BorrowerOperationsAbi
+	// );
 
-	useEffect(() => {
-		const getContants = async () => {
-			let minNetDebt;
-			let wenGasGompensation;
-			let mcr;
-			if (borrowerOperationsStatus === "LOADED") {
-				minNetDebt = await borrowerOperationsDefault?.MIN_NET_DEBT()
-				wenGasGompensation = await borrowerOperationsDefault?.LUSD_GAS_COMPENSATION();
-				mcr = await borrowerOperationsDefault?.MCR();
-			}
+	// useEffect(() => {
+	// 	const getContants = async () => {
+	// 		let minNetDebt;
+	// 		let wenGasGompensation;
+	// 		let mcr;
+	// 		if (borrowerOperationsStatus === "LOADED") {
+	// 			minNetDebt = await borrowerOperationsDefault?.MIN_NET_DEBT()
+	// 			wenGasGompensation = await borrowerOperationsDefault?.LUSD_GAS_COMPENSATION();
+	// 			mcr = await borrowerOperationsDefault?.MCR();
+	// 		}
 
-			setConstants({
-				MIN_NET_DEBT: Decimal.from(minNetDebt?.toString() || 0),
-				LUSD_GAS_COMPENSATION: Decimal.from(wenGasGompensation?.toString() || 0),
-				MCR: Decimal.from(mcr?.toString() || 0)
-			});
-		};
+	// 		setConstants({
+	// 			MIN_NET_DEBT: Decimal.from(minNetDebt?.toString() || 0),
+	// 			LUSD_GAS_COMPENSATION: Decimal.from(wenGasGompensation?.toString() || 0),
+	// 			MCR: Decimal.from(mcr?.toString() || 0)
+	// 		});
+	// 	};
 
-		getContants();
-	}, [borrowerOperationsDefault, borrowerOperationsStatus]);
+	// 	getContants();
+	// }, [borrowerOperationsDefault, borrowerOperationsStatus]);
 
 	useEffect(() => {
 		if (!trove.ownerAddress) return;

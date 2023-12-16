@@ -73,7 +73,7 @@ export const TransactionProvider: React.FC = ({ children }) => {
   );
 };
 
-const useTransactionState = () => {
+export const useTransactionState = () => {
   const transactionState = useContext(TransactionContext);
 
   if (!transactionState) {

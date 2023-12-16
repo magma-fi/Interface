@@ -218,8 +218,9 @@ export const DepositeModal = ({
 			const unsavedChanges = Difference.between(tempNetDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
 
-			const dec = Math.pow(10, WEN.decimals || 0);
-			const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION.div(dec) || Decimal.ONE;
+			// const dec = Math.pow(10, WEN.decimals || 0);
+			// const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION.div(dec) || Decimal.ONE;
+			const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || Decimal.ONE;
 			// const wenMinimumNetDebt = constants?.MIN_NET_DEBT.div(dec) || Decimal.ONE;
 
 			setDesireNetDebt(nextNetDebt.add(wenLiquidationReserve));

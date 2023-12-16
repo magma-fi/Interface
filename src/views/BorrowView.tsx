@@ -5,8 +5,9 @@ import { useLang } from "../hooks/useLang";
 import { Troves, WEN, globalContants } from "../libs/globalContants";
 import { Coin } from "../libs/types";
 import { MarketView } from "./MarketView";
+import { Decimal } from "lib-base";
 
-export const BorrowView = () => {
+export const BorrowView = ({ constants }: { constants: Record<string, Decimal> }) => {
 	const { t } = useLang();
 	const [currentTrove, setCurrentTrove] = useState<Coin>(globalContants.COINS.IOTX);
 
@@ -30,6 +31,8 @@ export const BorrowView = () => {
 			options={Troves}
 			onSelect={handleSelectTrove} />
 
-		<MarketView market={currentTrove} />
+		<MarketView
+			market={currentTrove}
+			constants={constants} />
 	</div>
 };

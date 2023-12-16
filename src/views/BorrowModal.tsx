@@ -52,8 +52,8 @@ export const BorrowModal = ({
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)));
 	const troveUtilizationRateNumberPercent = troveUtilizationRateNumber * 100;
 	const [forcedSlideValue, setForcedSlideValue] = useState(troveUtilizationRateNumber);
-	const dec = Math.pow(10, WEN.decimals || 0);
-	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION.div(dec) || Decimal.ONE;
+	// const dec = Math.pow(10, WEN.decimals || 0);
+	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || Decimal.ONE;
 	// const wenMinimumNetDebt = constants?.MIN_NET_DEBT.div(dec) || Decimal.ONE;
 	// const [slideValue, setSlideValue] = useState();
 	const txId = useMemo(() => String(new Date().getTime()), []);
