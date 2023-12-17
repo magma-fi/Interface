@@ -39,7 +39,7 @@ export const UnstakeModal = ({
 	const transactionState = useMyTransactionState(txId, true);
 
 	const handleMax = () => {
-		const val = Number(stabilityDeposit.currentLUSD.toString(2));
+		const val = Number(stabilityDeposit.currentLUSD.toString(0));
 		setValueForced(val);
 		setUnstakeAmount(val);
 	};

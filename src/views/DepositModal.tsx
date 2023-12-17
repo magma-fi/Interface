@@ -89,7 +89,7 @@ export const DepositeModal = ({
 	useEffect(init, []);
 
 	const handleMax = () => {
-		const val = Number(accountBalance.toString(2));
+		const val = Number(accountBalance.toString(0));
 		setValueForced(val);
 		setDepositValue(val);
 	};
