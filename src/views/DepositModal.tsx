@@ -73,6 +73,7 @@ export const DepositeModal = ({
 		validationContext,
 		constants
 	);
+	console.debug("xxx", troveChange, description);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
 
@@ -88,7 +89,7 @@ export const DepositeModal = ({
 	useEffect(init, []);
 
 	const handleMax = () => {
-		const val = Number(accountBalance.toString());
+		const val = Number(accountBalance.toString(2));
 		setValueForced(val);
 		setDepositValue(val);
 	};
@@ -212,7 +213,8 @@ export const DepositeModal = ({
 			const nextCollateral = applyUnsavedCollateralChanges(unsavedChanges, trove);
 			setDesireCollateral(nextCollateral);
 
-			setNewAvailableBorrow(newCollateral.mul(price).div(CRITICAL_COLLATERAL_RATIO).sub(previousNetDebt));
+			const newBorrow = newCollateral.mul(price).div(CRITICAL_COLLATERAL_RATIO);
+			setNewAvailableBorrow(newBorrow.gt(previousNetDebt) ? newBorrow.sub(previousNetDebt) : Decimal.ZERO);
 		}
 
 		if (borrowValue >= 0) {
