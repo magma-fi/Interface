@@ -44,6 +44,7 @@ export const RepayModal = ({
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
 	const [repayAmount, setRepayAmount] = useState(-1);
+	const [repaidAmount, setRepaidAmount] = useState(0);
 	const [desireDebt, setDesireDebt] = useState(max)
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
@@ -56,11 +57,27 @@ export const RepayModal = ({
 	const transactionState = useMyTransactionState(txId, true);
 	// const [slideValue, setSlideValue] = useState(0);
 	// const dec = Math.pow(10, WEN.decimals || 0);
-	// const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION.div(dec) || Decimal.ONE;
+
+	const feeFrom = (original: Trove, edited: Trove, borrowingRate: Decimal): Decimal => {
+		const change = original.whatChanged(edited, borrowingRate);
+
+		if (change && change.type !== "invalidCreation" && change.params.borrowLUSD) {
+			return change.params.borrowLUSD.mul(borrowingRate);
+		} else {
+			return Decimal.ZERO;
+		}
+	};
+
+	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || Decimal.ONE;
+	const isDebtIncrease = desireDebt.gt(trove.netDebt);
+	const debtIncreaseAmount = isDebtIncrease ? desireDebt.sub(trove.netDebt) : Decimal.ZERO;
+	const borrowingRate = fees.borrowingRate();
+	const fee = isDebtIncrease
+		? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
+		: Decimal.ZERO;
 
 	const isDirty = !netDebt.eq(desireDebt);
-	const updatedTrove = isDirty ? new Trove(trove.collateral, desireDebt) : trove;
-	const borrowingRate = fees.borrowingRate();
+	const updatedTrove = isDirty ? new Trove(trove.collateral, desireDebt.add(wenLiquidationReserve).add(fee)) : trove;
 	const [troveChange, description] = validateTroveChange(
 		trove!,
 		updatedTrove!,
@@ -85,9 +102,10 @@ export const RepayModal = ({
 	};
 
 	const handleMax = () => {
-		const val = Number(max.toString());
+		const val = Number(max.toString(0));
 		setValueForced(val);
 		setRepayAmount(val);
+		setRepaidAmount(val);
 	};
 
 	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -126,12 +144,14 @@ export const RepayModal = ({
 			)
 		);
 		setRepayAmount(newDebt);
+		setRepaidAmount(newDebt);
 		setValueForced(newDebt);
 	};
 
 	const handleInputRepay = (val: number) => {
 		setValueForced(-1);
 		setRepayAmount(val);
+		setRepaidAmount(val);
 	};
 
 	const handleCloseModal = () => {
@@ -141,7 +161,8 @@ export const RepayModal = ({
 
 	useEffect(() => {
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string, repayAmount);
+			init();
+			onDone(transactionState.tx.rawSentTransaction as unknown as string, repaidAmount);
 			transactionState.resolved = true;
 		}
 	}, [transactionState.type])

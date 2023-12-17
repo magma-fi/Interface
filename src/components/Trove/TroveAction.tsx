@@ -10,6 +10,7 @@ type TroveActionProps = {
   change: Exclude<TroveChange<Decimal>, { type: "invalidCreation" }>;
   maxBorrowingRate: Decimal;
   borrowingFeeDecayToleranceMinutes: number;
+  onSent?: () => void;
 };
 
 export const TroveAction: React.FC<TroveActionProps> = ({
@@ -17,7 +18,8 @@ export const TroveAction: React.FC<TroveActionProps> = ({
   transactionId,
   change,
   maxBorrowingRate,
-  borrowingFeeDecayToleranceMinutes
+  borrowingFeeDecayToleranceMinutes,
+  onSent
 }) => {
   const { liquity } = useLiquity();
 
@@ -25,16 +27,21 @@ export const TroveAction: React.FC<TroveActionProps> = ({
     transactionId,
     change.type === "creation"
       ? liquity.send.openTrove.bind(liquity.send, change.params, {
-          maxBorrowingRate,
-          borrowingFeeDecayToleranceMinutes
-        })
+        maxBorrowingRate,
+        borrowingFeeDecayToleranceMinutes
+      })
       : change.type === "closure"
-      ? liquity.send.closeTrove.bind(liquity.send)
-      : liquity.send.adjustTrove.bind(liquity.send, change.params, {
+        ? liquity.send.closeTrove.bind(liquity.send)
+        : liquity.send.adjustTrove.bind(liquity.send, change.params, {
           maxBorrowingRate,
           borrowingFeeDecayToleranceMinutes
         })
   );
 
-  return <div onClick={sendTransaction}>{children}</div>;
+  const handleSend = () => {
+    sendTransaction();
+    onSent && onSent();
+  };
+
+  return <div onClick={handleSend}>{children}</div>;
 };

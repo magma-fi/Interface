@@ -60,8 +60,25 @@ export const BorrowModal = ({
 	const transactionState = useMyTransactionState(txId, true);
 	const [desireDebt, setDesireDebt] = useState(previousTrove.current?.netDebt);
 	const isDirty = !netDebt.eq(desireDebt);
-	const updatedTrove = isDirty ? new Trove(trove.collateral, desireDebt) : trove;
+	const isDebtIncrease = desireDebt.gt(trove.netDebt);
+	const debtIncreaseAmount = isDebtIncrease ? desireDebt.sub(trove.netDebt) : Decimal.ZERO;
 	const borrowingRate = fees.borrowingRate();
+
+	const feeFrom = (original: Trove, edited: Trove, borrowingRate: Decimal): Decimal => {
+		const change = original.whatChanged(edited, borrowingRate);
+
+		if (change && change.type !== "invalidCreation" && change.params.borrowLUSD) {
+			return change.params.borrowLUSD.mul(borrowingRate);
+		} else {
+			return Decimal.ZERO;
+		}
+	};
+
+	const fee = isDebtIncrease
+		? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
+		: Decimal.ZERO;
+
+	const updatedTrove = isDirty ? new Trove(trove.collateral, desireDebt.add(wenLiquidationReserve).add(fee)) : trove;
 	const [troveChange, description] = validateTroveChange(
 		trove!,
 		updatedTrove!,
@@ -114,7 +131,7 @@ export const BorrowModal = ({
 			const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
 			const unsavedChanges = Difference.between(newNetDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
-			setDesireDebt(nextNetDebt.add(wenLiquidationReserve));
+			setDesireDebt(nextNetDebt);
 
 		}
 	}, [trove, borrowAmount, price]);
