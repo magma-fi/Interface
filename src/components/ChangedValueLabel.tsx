@@ -5,8 +5,15 @@ export const ChangedValueLabel = ({
 	previousValue: string | number;
 	newValue: string | number;
 }) => {
-	return <div className="flex-row-align-left">
+	return <div
+		className="flex-row-align-left"
+		style={{
+			justifyContent: "center",
+			alignItems: "center"
+		}}>
 		<div className="label labelSmall">{previousValue}</div>
+
+		<div>→</div>
 
 		<div
 			className="label"

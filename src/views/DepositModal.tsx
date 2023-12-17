@@ -73,7 +73,6 @@ export const DepositeModal = ({
 		validationContext,
 		constants
 	);
-	console.debug("xxx", troveChange, description);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
 
@@ -368,7 +367,7 @@ export const DepositeModal = ({
 						<div className="label">{t("vaultDebt")}</div>
 
 						<ChangedValueLabel
-							previousValue={trove.debt.toString(2) + " " + globalContants.USD}
+							previousValue={trove.debt.toString(2)}
 							newValue={updatedTrove.debt.toString(2) + " " + globalContants.USD} />
 					</div>
 				</>}

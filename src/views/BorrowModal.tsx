@@ -266,7 +266,7 @@ export const BorrowModal = ({
 					<div className="label">{t("vaultDebt")}</div>
 
 					<ChangedValueLabel
-						previousValue={trove.debt.toString(2) + " " + globalContants.USD}
+						previousValue={trove.debt.toString(2)}
 						newValue={updatedTrove.debt.toString(2) + " " + globalContants.USD} />
 				</div>
 			</div>
