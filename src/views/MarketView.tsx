@@ -539,6 +539,12 @@ export const MarketView = ({
 
 						<div>{total.collateral.gt(0) ? total.debt.div(total.collateral.mul(price)).mul(100).toString(2) : 0}%</div>
 					</div>
+
+					<div className="flex-row-space-between">
+						<div className="description">{market.symbol}&nbsp;{t("price")}</div>
+
+						<div>{price.toString(2)}&nbsp;{globalContants.USD}</div>
+					</div>
 				</div>
 			</div>
 		</div>
