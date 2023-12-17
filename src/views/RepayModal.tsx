@@ -53,7 +53,7 @@ export const RepayModal = ({
 	const troveUtilizationRateNumber = Number(troveUR);
 	const troveUtilizationRateNumberPercent = troveUtilizationRateNumber * 100;
 	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId);
+	const transactionState = useMyTransactionState(txId, true);
 	// const [slideValue, setSlideValue] = useState(0);
 	// const dec = Math.pow(10, WEN.decimals || 0);
 	// const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION.div(dec) || Decimal.ONE;
@@ -140,7 +140,7 @@ export const RepayModal = ({
 	};
 
 	useEffect(() => {
-		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, repayAmount);
 			transactionState.resolved = true;
 		}

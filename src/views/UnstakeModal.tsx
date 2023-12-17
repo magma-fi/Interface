@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { ValidationContextForStabilityPool } from "../libs/types";
+import { ErrorMessage, ValidationContextForStabilityPool } from "../libs/types";
 import { WEN } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect, useMemo } from "react";
@@ -37,7 +37,7 @@ export const UnstakeModal = ({
 	const [valueForced, setValueForced] = useState(-1);
 	const [unstakeAmount, setUnstakeAmount] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId);
+	const transactionState = useMyTransactionState(txId, true);
 
 	const handleMax = () => {
 		const val = Number(stabilityDeposit.currentLUSD);
@@ -59,9 +59,10 @@ export const UnstakeModal = ({
 		stabilityDeposit.currentLUSD.sub(unstakeAmount),
 		validationContext
 	);
+	const errorMessages = description as ErrorMessage;
 
 	useEffect(() => {
-		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, unstakeAmount);
 			transactionState.resolved = true;
 		}
@@ -103,7 +104,7 @@ export const UnstakeModal = ({
 					onInput={handleInputDeposit}
 					max={Number(accountBalance.toString())}
 					warning={undefined}
-					error={undefined}
+					error={description && t(errorMessages.key)}
 					allowReduce={true}
 					currentValue={-1}
 					allowIncrease={true} />

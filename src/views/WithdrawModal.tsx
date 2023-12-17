@@ -55,7 +55,7 @@ export const WithdrawModal = ({
 	const [sliderForcedValue, setSliderForcedValue] = useState(troveUtilizationRateNumber);
 	// const [slideValue, setSlideValue] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId);
+	const transactionState = useMyTransactionState(txId, true);
 
 	const isDirty = !trove.collateral.eq(desireCollateral);
 	const updatedTrove = isDirty ? new Trove(desireCollateral, trove.debt) : trove;
@@ -136,7 +136,7 @@ export const WithdrawModal = ({
 	};
 
 	useEffect(() => {
-		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, withdrawAmount);
 			transactionState.resolved = true;
 		}

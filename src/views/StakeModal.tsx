@@ -36,7 +36,7 @@ export const StakeModal = ({
 	const [valueForced, setValueForced] = useState(-1);
 	const [depositAmount, setDepositAmount] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId);
+	const transactionState = useMyTransactionState(txId, true);
 
 	const handleMax = () => {
 		const val = Number(accountBalance.toString());
@@ -60,7 +60,7 @@ export const StakeModal = ({
 	);
 
 	useEffect(() => {
-		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, depositAmount);
 			transactionState.resolved = true;
 		}

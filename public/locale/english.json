@@ -95,5 +95,6 @@
 	"collateralRatioMustBeAtLeast": "Collateral ratio must be at least {percent}",
 	"depositAndBorrow": "Deposit and Borrow",
 	"menu": "menu",
-	"noLiquidatableTrove": "No Liquidatable Vault"
+	"noLiquidatableTrove": "No Liquidatable Vault",
+	"notAllowedToUnstake": "You're not allowed to withdraw LUSD from your Stability Deposit when there are undercollateralized Troves. Please liquidate those Troves or try again later."
 }

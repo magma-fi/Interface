@@ -15,6 +15,7 @@ import { Tooltip } from "./Tooltip";
 import type { TooltipProps } from "./Tooltip";
 
 import { TransactionStatus } from "./TransactionStatus";
+import { sendTransaction } from "viem/_types/actions/wallet/sendTransaction";
 
 type TransactionIdle = {
   type: "idle";
@@ -46,11 +47,15 @@ type TransactionWaitingForConfirmations = {
 type TransactionConfirmed = {
   type: "confirmed";
   id: string;
+  resolved?: boolean;
+  tx?: SentTransaction;
 };
 
 type TransactionConfirmedOneShot = {
   type: "confirmedOneShot";
   id: string;
+  resolved?: boolean;
+  tx?: SentTransaction;
 };
 
 export type TransactionState =
@@ -83,13 +88,128 @@ export const useTransactionState = () => {
   return transactionState;
 };
 
-export const useMyTransactionState = (myId: string | RegExp): TransactionState => {
-  const [transactionState] = useTransactionState();
+export const useMyTransactionState = (myId: string | RegExp, monitor = false): TransactionState => {
+  const [transactionState, setTransactionState] = useTransactionState();
+  const { provider } = useLiquity();
 
-  return transactionState.type !== "idle" &&
+  const tt: TransactionState = transactionState.type !== "idle" &&
     (typeof myId === "string" ? transactionState.id === myId : transactionState.id.match(myId))
     ? transactionState
     : { type: "idle" };
+
+  const id = tt.type !== "idle" ? tt.id : undefined;
+  const tx = (tt.type === "waitingForConfirmation" || tt.type === "confirmedOneShot") ? tt.tx : undefined;
+
+  useEffect(() => {
+    if (monitor && id && tx) {
+      let cancelled = false;
+      let finished = false;
+
+      const txHash = tx.rawSentTransaction as unknown as string;
+
+      const waitForConfirmation = async () => {
+        try {
+          // const receipt = await tx.waitForReceipt();
+          const receipt = await provider.getTransactionReceipt(txHash);
+          if (!receipt) {
+            return setTimeout(() => {
+              waitForConfirmation();
+            }, 5000);
+          }
+
+          if (cancelled) {
+            return;
+          }
+
+          finished = true;
+
+          if (receipt.status === 1) {
+            setTransactionState({
+              type: "confirmedOneShot",
+              id,
+              tx
+            });
+          } else {
+            const reason = await tryToGetRevertReason(provider, receipt);
+
+            if (cancelled) {
+              return;
+            }
+
+            console.error(`Tx ${txHash} failed`);
+            if (reason) {
+              console.error(`Revert reason: ${reason}`);
+            }
+
+            setTransactionState({
+              type: "failed",
+              id,
+              error: new Error(reason ? `Reverted: ${reason}` : "Failed")
+            });
+          }
+        } catch (rawError) {
+          if (cancelled) {
+            return;
+          }
+
+          finished = true;
+
+          // if (rawError instanceof EthersTransactionCancelledError) {
+          //   setTransactionState({ type: "cancelled", id });
+          // } else {
+          //   console.error(`Failed to get receipt for tx ${txHash}`);
+          //   console.error(rawError);
+
+          //   setTransactionState({
+          //     type: "failed",
+          //     id,
+          //     error: new Error("Failed")
+          //   });
+          // }
+        }
+      };
+
+      waitForConfirmation();
+
+      return () => {
+        if (!finished) {
+          setTransactionState({ type: "idle" });
+          cancelled = true;
+        }
+      };
+    }
+  }, [provider, id, tx, setTransactionState, monitor]);
+
+  useEffect(() => {
+    if (!monitor) return;
+
+    if (tt.type === "confirmedOneShot" && id) {
+      // hack: the txn confirmed state lasts 5 seconds which blocks other states, review with Dani
+      setTransactionState({
+        type: "confirmed",
+        id,
+        tx
+      });
+    } else if (
+      tt.type === "confirmed" ||
+      tt.type === "failed" ||
+      tt.type === "cancelled"
+    ) {
+      let cancelled = false;
+
+      setTimeout(() => {
+        if (!cancelled) {
+          setTransactionState({ type: "idle" });
+        }
+      }, 5000);
+
+      return () => {
+        cancelled = true;
+      };
+    }
+  }, [tt.type, setTransactionState, id, monitor]);
+
+  return tt;
 };
 
 const hasMessage = (error: unknown): error is { message: string } =>

@@ -57,7 +57,7 @@ export const DepositeModal = ({
 	const [defaultBorrowAmount, setDefaultBorrowAmount] = useState(-1);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
 	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId);
+	const transactionState = useMyTransactionState(txId, true);
 	const [desireCollateral, setDesireCollateral] = useState(previousTrove.current?.collateral);
 	const [desireNetDebt, setDesireNetDebt] = useState(previousNetDebt);
 	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || Decimal.ONE;
@@ -233,7 +233,7 @@ export const DepositeModal = ({
 	};
 
 	useEffect(() => {
-		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string);
 			transactionState.resolved = true;
 		}

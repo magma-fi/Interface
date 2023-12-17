@@ -57,7 +57,7 @@ export const BorrowModal = ({
 	// const wenMinimumNetDebt = constants?.MIN_NET_DEBT.div(dec) || Decimal.ONE;
 	// const [slideValue, setSlideValue] = useState();
 	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId);
+	const transactionState = useMyTransactionState(txId, true);
 	const [desireDebt, setDesireDebt] = useState(previousTrove.current?.netDebt);
 	const isDirty = !netDebt.eq(desireDebt);
 	const updatedTrove = isDirty ? new Trove(trove.collateral, desireDebt) : trove;
@@ -136,7 +136,7 @@ export const BorrowModal = ({
 	};
 
 	useEffect(() => {
-		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string);
 			transactionState.resolved = true;
 		}

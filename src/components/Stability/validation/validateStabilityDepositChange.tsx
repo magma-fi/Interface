@@ -9,6 +9,7 @@ import { COIN } from "../../../strings";
 import { Amount } from "../../ActionDescription";
 import { ErrorDescription } from "../../ErrorDescription";
 import { StabilityActionDescription } from "../StabilityActionDescription";
+import { ErrorMessage } from "../../../libs/types";
 
 export const selectForStabilityDepositChangeValidation = ({
   trove,
@@ -35,9 +36,9 @@ export const validateStabilityDepositChange = (
     haveUndercollateralizedTroves
   }: StabilityDepositChangeValidationContext
 ): [
-  validChange: StabilityDepositChange<Decimal> | undefined,
-  description: JSX.Element | undefined
-] => {
+    validChange: StabilityDepositChange<Decimal> | undefined,
+    description: JSX.Element | ErrorMessage | undefined
+  ] => {
   const change = originalDeposit.whatChanged(editedLUSD);
 
   if (haveOwnFrontend) {
@@ -69,10 +70,11 @@ export const validateStabilityDepositChange = (
   if (change.withdrawLUSD && haveUndercollateralizedTroves) {
     return [
       undefined,
-      <ErrorDescription>
-        You're not allowed to withdraw LUSD from your Stability Deposit when there are
-        undercollateralized Troves. Please liquidate those Troves or try again later.
-      </ErrorDescription>
+      // <ErrorDescription>
+      //   You're not allowed to withdraw LUSD from your Stability Deposit when there are
+      //   undercollateralized Troves. Please liquidate those Troves or try again later.
+      // </ErrorDescription>
+      { key: "notAllowedToUnstake" } as ErrorMessage
     ];
   }
 

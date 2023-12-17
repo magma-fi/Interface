@@ -28,7 +28,7 @@ export const CloseModal = ({
 }) => {
 	const { t } = useLang();
 	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId);
+	const transactionState = useMyTransactionState(txId, true);
 
 	const updatedTrove = new Trove(Decimal.ZERO, Decimal.ZERO);
 	const borrowingRate = fees.borrowingRate();
@@ -46,7 +46,7 @@ export const CloseModal = ({
 	};
 
 	useEffect(() => {
-		if (transactionState.type === "waitingForConfirmation" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onClose()
 			transactionState.resolved = true;
 		}

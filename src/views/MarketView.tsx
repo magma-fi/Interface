@@ -637,7 +637,7 @@ export const MarketView = ({
 				txHash={txHash}
 				title={t("withdrawn")}
 				logo="images/iotx.png"
-				amount={withdrawnAmount.toFixed(2) + " " + WEN.symbol} />
+				amount={withdrawnAmount.toFixed(2) + " " + market.symbol} />
 		</TxDone>}
 
 		{showCloseModal && <CloseModal
