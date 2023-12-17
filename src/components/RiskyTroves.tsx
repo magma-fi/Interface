@@ -103,10 +103,13 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
 
   // 交易结束或失败后重置transactionState。
   useEffect(() => {
-    if (transactionState.id === txId && (transactionState.type === "waitingForConfirmation" || transactionState.type === "failed")) {
+    if (transactionState.id === txId && (transactionState.type === "confirmed" || transactionState.type === "failed")) {
       setTransactionState({ type: "idle" });
       setResetTx(!resetTx);
-      setReload({});
+      
+      setTimeout(() => {
+        setReload({});
+      }, 5000);
     }
   }, [transactionState.id, transactionState.type, txId])
 
