@@ -106,6 +106,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     if (transactionState.id === txId && (transactionState.type === "waitingForConfirmation" || transactionState.type === "failed")) {
       setTransactionState({ type: "idle" });
       setResetTx(!resetTx);
+      setReload({});
     }
   }, [transactionState.id, transactionState.type, txId])
 
