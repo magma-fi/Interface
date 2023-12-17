@@ -33,14 +33,13 @@ export const UnstakeModal = ({
 	lusdInStabilityPool: Decimal;
 }) => {
 	const { t } = useLang();
-	const amountDeposited = 0;
 	const [valueForced, setValueForced] = useState(-1);
 	const [unstakeAmount, setUnstakeAmount] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
 
 	const handleMax = () => {
-		const val = Number(stabilityDeposit.currentLUSD);
+		const val = Number(stabilityDeposit.currentLUSD.toString(2));
 		setValueForced(val);
 		setUnstakeAmount(val);
 	};
