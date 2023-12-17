@@ -265,11 +265,9 @@ export const BorrowModal = ({
 				<div className="flex-row-space-between">
 					<div className="label">{t("vaultDebt")}</div>
 
-					<div
-						className="label"
-						style={{ color: "#F6F6F7" }}>
-						{updatedTrove.debt.toString(2)}&nbsp;{globalContants.USD}
-					</div>
+					<ChangedValueLabel
+						previousValue={trove.debt.toString(2) + " " + globalContants.USD}
+						newValue={updatedTrove.debt.toString(2) + " " + globalContants.USD} />
 				</div>
 			</div>
 		</div>

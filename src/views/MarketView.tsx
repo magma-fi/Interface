@@ -38,7 +38,8 @@ export const MarketView = ({
 				numberOfTroves,
 				borrowingRate,
 				trove,
-				fees
+				fees,
+				lusdBalance
 			} = state;
 
 			return {
@@ -49,7 +50,8 @@ export const MarketView = ({
 				numberOfTroves,
 				borrowingRate,
 				trove,
-				fees
+				fees,
+				lusdBalance
 			};
 		};
 	}, []);
@@ -63,7 +65,8 @@ export const MarketView = ({
 		numberOfTroves,
 		borrowingRate,
 		trove,
-		fees
+		fees,
+		lusdBalance
 	} = useLiquitySelector(selector);
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
@@ -597,7 +600,7 @@ export const MarketView = ({
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={currentNetDebt}
+			max={Decimal.min(currentNetDebt, lusdBalance)}
 			onDone={handleRepayDone}
 			constants={constants} />}
 
