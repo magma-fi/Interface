@@ -83,7 +83,11 @@ export const DropdownMenu = ({
 			{expanded && <div
 				className="dropdownMenuOptions"
 				onMouseLeave={handleMouseLeave}
-				onMouseEnter={handleMouseEnter}>
+				onMouseEnter={handleMouseEnter}
+				style={{
+					top: "auto",
+					bottom: "0"
+				}}>
 				{options.map((option, index) => {
 					return <div
 						key={option.title || option.key}
