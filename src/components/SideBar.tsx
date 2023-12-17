@@ -87,7 +87,7 @@ export const SideBar: React.FC = ({ children }) => {
         <NavLink
           label={t("twitter")}
           icon="images/x.png"
-          url="https://twitter.com/"
+          url="https://twitter.com/MagmaProtocol"
           fullWidth={true}
           showExternalLink={true}
           active={false}
