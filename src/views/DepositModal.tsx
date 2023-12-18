@@ -14,7 +14,7 @@ import { validateTroveChange } from "../components/Trove/validation/validateTrov
 import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
 import { TroveAction } from "../components/Trove/TroveAction";
-import { calculateAvailableBorrow, calculateAvailableWithdrawal } from "../utils";
+import { calculateAvailableBorrow, calculateAvailableWithdrawal, feeFrom } from "../utils";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { useMyTransactionState } from "../components/Transaction";
 
@@ -62,10 +62,15 @@ export const DepositeModal = ({
 	const [desireNetDebt, setDesireNetDebt] = useState(previousNetDebt);
 	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || Decimal.ONE;
 	// const wenMinimumNetDebt = constants?.MIN_NET_DEBT.div(dec) || Decimal.ONE;
-
+	const troveNetDebt = trove.debt.gt(wenLiquidationReserve) ? trove.netDebt : Decimal.ZERO;
 	const isDirty = !previousTrove.current.collateral.eq(desireCollateral) || !previousNetDebt.eq(desireNetDebt);
-	const updatedTrove = isDirty ? new Trove(desireCollateral, desireNetDebt) : trove;
+	const isDebtIncrease = desireNetDebt.gt(troveNetDebt);
+	const debtIncreaseAmount = isDebtIncrease ? desireNetDebt.sub(troveNetDebt) : Decimal.ZERO;
 	const borrowingRate = fees.borrowingRate();
+	const fee = isDebtIncrease
+		? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
+		: Decimal.ZERO;
+	const updatedTrove = isDirty ? new Trove(desireCollateral, desireNetDebt.add(wenLiquidationReserve).add(fee)) : trove;
 	const [troveChange, description] = validateTroveChange(
 		trove!,
 		updatedTrove!,
@@ -220,7 +225,7 @@ export const DepositeModal = ({
 			const tempNetDebt = previousNetDebt.add(borrowValue);
 			const unsavedChanges = Difference.between(tempNetDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
-			setDesireNetDebt(nextNetDebt.add(wenLiquidationReserve));
+			setDesireNetDebt(nextNetDebt);
 		}
 	}, [trove, depositValue, price, borrowValue]);
 
