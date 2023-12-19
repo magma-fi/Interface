@@ -33,6 +33,31 @@ export type ErrorMessage = {
 	values: Record<string, string>
 }
 
+export type AccountForSubgraph = {
+	id: string;
+}
+
+export type TroveInTx = {
+	id: string;
+	owner: AccountForSubgraph;
+}
+
+export enum TroveOperation {
+	OpenTrove = "openTrove",
+	AdjustTrove = "adjustTrove"
+}
+
+export type TxForSubgraph = {
+	id: string;
+	timestamp: number
+}
+
 export type TroveChangeTx = {
 	id: string;
+	trove: TroveInTx;
+	troveOperation: TroveOperation;
+	collateralChange: string;
+	debtChange: string;
+	sequenceNumber: number;
+	transaction: TxForSubgraph;
 }

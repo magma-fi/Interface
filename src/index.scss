@@ -65,6 +65,11 @@ body {
 a {
   text-decoration: none;
   cursor: pointer;
+
+  &:link,
+  &:visited {
+    color: unset;
+  }
 }
 
 h1 {
@@ -541,13 +546,22 @@ h4 {
   }
 }
 
-.badge-id {
-  background-color: var(--badge-id-background-color);
+.badge {
   padding: var(--flex-gap-tiny) var(--flex-gap-small);
   border-radius: 50px;
-  color: var(--badge-id-color);
   font-size: 0.875rem;
   font-family: Metropolis400;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: var(--flex-gap-tiny);
+  width: fit-content;
+  text-transform: capitalize;
+
+  img {
+    width: 11px;
+  }
 }
 
 .iconButton {

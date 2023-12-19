@@ -16,6 +16,17 @@ export enum StyleModes {
 	Dark = "dark"
 }
 
+export enum BadgeType {
+	Deposit = "deposit",
+	Withdraw = "withdraw",
+	Borrow = "borrow",
+	Repay = "repay",
+	RecoveryMode = "recoveryMode",
+	CloseTrove = "closeTrove",
+	Id = "ID",
+	Lock = "lockInDays"
+}
+
 export const WEN: Coin = {
 	symbol: "WEN",
 	logo: "images/wen.png",

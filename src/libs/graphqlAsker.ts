@@ -16,7 +16,8 @@ export const graphqlAsker = {
 				return doneCallback(data);
 			}
 		}).catch(error => {
-			console.error(error)
+			console.error(error);
+			return doneCallback(null);
 		});
 	},
 
@@ -37,10 +38,8 @@ export const graphqlAsker = {
 					}
 				}
 				troveOperation
-				collateralBefore
-				collateralAfter
-				debtBefore
-				debtAfter
+				collateralChange
+				debtChange
 				sequenceNumber
 				transaction {
 					id

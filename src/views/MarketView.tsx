@@ -19,8 +19,9 @@ import { WithdrawModal } from "./WithdrawModal";
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { graphqlAsker } from "../libs/graphqlAsker";
-import { useChainId } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { CloseModal } from "./CloseModal";
+import { TransactiionListItem } from "./TransactiionListItem";
 
 export const MarketView = ({
 	market,
@@ -105,44 +106,18 @@ export const MarketView = ({
 	const availableWithdrawal = calculateAvailableWithdrawal(trove, price);
 	const availableWithdrawalFiat = availableWithdrawal.mul(price);
 	const chainId = useChainId();
-	const [txs, setTxs] = useState<TroveChangeTx[]>();
-	// const { liquity } = useLiquity();
-	// const [constants, setConstants] = useState<Record<string, unknown>>();
-
-	// const [borrowerOperationsDefault, borrowerOperationsStatus] = useContract<BorrowerOperations>(
-	// 	liquity.connection.addresses.borrowerOperations,
-	// 	BorrowerOperationsAbi
-	// );
-
-	// useEffect(() => {
-	// 	const getContants = async () => {
-	// 		let minNetDebt;
-	// 		let wenGasGompensation;
-	// 		let mcr;
-	// 		if (borrowerOperationsStatus === "LOADED") {
-	// 			minNetDebt = await borrowerOperationsDefault?.MIN_NET_DEBT()
-	// 			wenGasGompensation = await borrowerOperationsDefault?.LUSD_GAS_COMPENSATION();
-	// 			mcr = await borrowerOperationsDefault?.MCR();
-	// 		}
-
-	// 		setConstants({
-	// 			MIN_NET_DEBT: Decimal.from(minNetDebt?.toString() || 0),
-	// 			LUSD_GAS_COMPENSATION: Decimal.from(wenGasGompensation?.toString() || 0),
-	// 			MCR: Decimal.from(mcr?.toString() || 0)
-	// 		});
-	// 	};
-
-	// 	getContants();
-	// }, [borrowerOperationsDefault, borrowerOperationsStatus]);
-
+	const { address } = useAccount();
+	const [txs, setTxs] = useState<TroveChangeTx[]>([]);
 	useEffect(() => {
-		if (!trove.ownerAddress) return;
+		if (!address) return;
 
-		const query = graphqlAsker.requestTroveChanges("0x")
-		graphqlAsker.ask(chainId, query, data => {
-			setTxs(data as TroveChangeTx[]);
+		const query = graphqlAsker.requestTroveChanges(address)
+		graphqlAsker.ask(chainId, query, (data: any) => {
+			if (data) {
+				setTxs(data.troveChanges);
+			}
 		});
-	}, [chainId, trove.ownerAddress]);
+	}, [address, chainId]);
 
 	if (market?.symbol === "DAI" || market?.symbol === "USDC") {
 		return <div className="marketView">
@@ -486,7 +461,9 @@ export const MarketView = ({
 				</div>}
 			</div>
 
-			<div>
+			<div
+				className="flex-column"
+				style={{ gap: "40px" }}>
 				<div
 					className="card"
 					style={{ gap: "24px" }}>
@@ -546,6 +523,24 @@ export const MarketView = ({
 						<div>{price.toString(2)}&nbsp;{globalContants.USD}</div>
 					</div>
 				</div>
+
+				{txs?.length > 0 && <div
+					className="card"
+					style={{ gap: "24px" }}>
+					<div className="flex-row-space-between">
+						<h3>{t("latestTransactions")}</h3>
+
+						<div>&nbsp;</div>
+					</div>
+
+					{txs.map(txItem => {
+						return <TransactiionListItem
+							key={txItem.id}
+							data={txItem}
+							market={market}
+							price={price} />
+					})}
+				</div>}
 			</div>
 		</div>
 
