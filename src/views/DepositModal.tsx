@@ -67,9 +67,12 @@ export const DepositeModal = ({
 	const isDebtIncrease = desireNetDebt.gt(troveNetDebt);
 	const debtIncreaseAmount = isDebtIncrease ? desireNetDebt.sub(troveNetDebt) : Decimal.ZERO;
 	const borrowingRate = fees.borrowingRate();
-	const fee = isDebtIncrease
-		? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
-		: Decimal.ZERO;
+	const fee = !depositAndBorrow
+		? (
+			isDebtIncrease
+				? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
+				: Decimal.ZERO
+		) : borrowingRate.mul(borrowValue);
 	const updatedTrove = isDirty ? new Trove(desireCollateral, desireNetDebt.add(wenLiquidationReserve).add(fee)) : trove;
 	const [troveChange, description] = validateTroveChange(
 		trove!,
@@ -222,9 +225,16 @@ export const DepositeModal = ({
 		}
 
 		if (borrowValue >= 0) {
-			const tempNetDebt = previousNetDebt.add(borrowValue);
-			const unsavedChanges = Difference.between(tempNetDebt, previousNetDebt);
-			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
+			let nextNetDebt: Decimal;
+
+			if (!depositAndBorrow) {
+				const tempNetDebt = previousNetDebt.add(borrowValue);
+				const unsavedChanges = Difference.between(tempNetDebt, previousNetDebt);
+				nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
+			} else {
+				nextNetDebt = Decimal.from(borrowValue);
+			}
+
 			setDesireNetDebt(nextNetDebt);
 		}
 	}, [trove, depositValue, price, borrowValue]);

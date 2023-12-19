@@ -582,7 +582,7 @@ export const MarketView = ({
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={maxAvailableBorrow.sub(trove.debt)}
+			max={maxAvailableBorrow.gt(trove.debt) ? maxAvailableBorrow.sub(trove.debt) : Decimal.ZERO}
 			onDone={handleBorrowDone}
 			constants={constants} />}
 

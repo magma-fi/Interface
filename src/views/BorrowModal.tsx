@@ -61,10 +61,9 @@ export const BorrowModal = ({
 	const [desireNetDebt, setDesireNextDebt] = useState(previousTrove.current?.netDebt);
 	const isDirty = !netDebt.eq(desireNetDebt);
 	const isDebtIncrease = desireNetDebt.gt(trove.netDebt);
-	const debtIncreaseAmount = isDebtIncrease ? desireNetDebt.sub(trove.netDebt) : Decimal.ZERO;
 	const borrowingRate = fees.borrowingRate();
 	const fee = isDebtIncrease
-		? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
+		? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(borrowAmount).add(borrowingRate.mul(borrowAmount))), borrowingRate)
 		: Decimal.ZERO;
 	const updatedTrove = isDirty ? new Trove(trove.collateral, desireNetDebt.add(wenLiquidationReserve).add(fee)) : trove;
 	const [troveChange, description] = validateTroveChange(
