@@ -94,7 +94,6 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
     // publicProvider(),
   ]
 );
-console.debug("xxx", chains);
 
 const wagmiCfg = createConfig({
   autoConnect: true,

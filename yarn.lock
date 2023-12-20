@@ -5229,15 +5229,15 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-"lib-base@https://github.com/siyushin/lib-base.git#f430f9da33a3a4ce35f32a660ad89fdb264d1aa8":
+"lib-base@https://github.com/siyushin/lib-base.git#7dcd125fd358d152ba791e4c0a3d876be7fc9f14":
   version "1.0.0"
-  resolved "https://github.com/siyushin/lib-base.git#f430f9da33a3a4ce35f32a660ad89fdb264d1aa8"
+  resolved "https://github.com/siyushin/lib-base.git#7dcd125fd358d152ba791e4c0a3d876be7fc9f14"
   dependencies:
     "@ethersproject/bignumber" "5.7.0"
 
-"lib-ethers@https://github.com/magma-fi/lib-ethers.git#1a5443f6519e22a7f2d11e3716b499084b003056":
+"lib-ethers@https://github.com/magma-fi/lib-ethers.git#e6cf4bcda12c7c587c107f80523d41827b5488e6":
   version "1.0.0"
-  resolved "https://github.com/magma-fi/lib-ethers.git#1a5443f6519e22a7f2d11e3716b499084b003056"
+  resolved "https://github.com/magma-fi/lib-ethers.git#e6cf4bcda12c7c587c107f80523d41827b5488e6"
 
 lines-and-columns@^1.1.6:
   version "1.2.4"
