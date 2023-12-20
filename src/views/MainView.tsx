@@ -12,10 +12,12 @@ import { BorrowerOperations } from "lib-ethers/dist/types";
 import { useLiquity } from "../hooks/LiquityContext";
 import BorrowerOperationsAbi from "lib-ethers/abi/BorrowerOperations.json";
 import { Decimal } from "lib-base";
-import { WEN } from "../libs/globalContants";
+import { WEN, globalContants } from "../libs/globalContants";
+import { TermsModal } from "./TermsModal";
 
 export const MainView = () => {
 	const [showConnectModal, setShowConnectModal] = useState(false);
+	const [showTerms, setShowTerms] = useState(false);
 	const { chain, chains } = useNetwork();
 	const chainId = useChainId();
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
@@ -26,6 +28,12 @@ export const MainView = () => {
 		liquity.connection.addresses.borrowerOperations,
 		BorrowerOperationsAbi
 	);
+
+	useEffect(() => {
+		if (!window.localStorage.getItem(globalContants.TERMS_SHOWED)) {
+			setShowTerms(true);
+		}
+	}, []);
 
 	useEffect(() => {
 		const getContants = async () => {
@@ -55,6 +63,11 @@ export const MainView = () => {
 
 	const handleCloseConnectModal = () => {
 		setShowConnectModal(false)
+	};
+
+	const handleCloseTermsModal = () => {
+		setShowTerms(false);
+		window.localStorage.setItem(globalContants.TERMS_SHOWED, "1");
 	};
 
 	return <>
@@ -103,5 +116,9 @@ export const MainView = () => {
 		<ConnectWalletModal
 			isOpen={showConnectModal}
 			onClose={handleCloseConnectModal} />
+
+		{showTerms && <TermsModal
+			isOpen={showTerms}
+			onClose={handleCloseTermsModal} />}
 	</>
 };

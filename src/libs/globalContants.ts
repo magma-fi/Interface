@@ -101,5 +101,6 @@ export const globalContants = {
 	default_NETWORK_RPC: "https://babel-api.testnet.iotex.io",
 	ADDRESS_PLACEHOLDER: "0x43D46D96157f497070BfD0725C34C4A9d1013292",
 	LIQUIDATION_AT: 0.8,
-	BIG_NUMBER_0: BigNumber.from(0)
+	BIG_NUMBER_0: BigNumber.from(0),
+	TERMS_SHOWED: "termsShowed"
 };
