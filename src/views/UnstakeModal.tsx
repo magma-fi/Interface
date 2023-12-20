@@ -55,7 +55,7 @@ export const UnstakeModal = ({
 
 	const [validChange, description] = validateStabilityDepositChange(
 		stabilityDeposit,
-		stabilityDeposit.currentLUSD.sub(unstakeAmount),
+		stabilityDeposit.currentLUSD.gt(unstakeAmount) ? stabilityDeposit.currentLUSD.sub(unstakeAmount) : Decimal.ZERO,
 		validationContext
 	);
 	const errorMessages = description as ErrorMessage;
