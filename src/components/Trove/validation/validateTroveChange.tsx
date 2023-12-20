@@ -180,6 +180,12 @@ const validateTroveCreation = (
   constants?: Record<string, Decimal>
 ): JSX.Element | ErrorMessage | null => {
   const wenMinimumNetDebt = constants?.MIN_NET_DEBT || LUSD_MINIMUM_NET_DEBT;
+  const wenTotalSupply = constants?.wenTotalSupply;
+
+  if (wenTotalSupply?.add(borrowLUSD || 0).gt(1000000)) {
+    return { key: "limit1M" } as ErrorMessage;
+  }
+  
   if (borrowLUSD.lt(wenMinimumNetDebt)) {
     // return (
     //   <ErrorDescription>
@@ -258,6 +264,11 @@ const validateTroveAdjustment = (
   constants?: Record<string, Decimal>
 ): JSX.Element | ErrorMessage | null => {
   const wenMinimumDebt = constants?.MIN_NET_DEBT.add(constants?.LUSD_GAS_COMPENSATION) || LUSD_MINIMUM_DEBT;
+  const wenTotalSupply = constants?.wenTotalSupply;
+
+  if (wenTotalSupply?.add(borrowLUSD || 0).gt(1000000)) {
+    return { key: "limit1M" } as ErrorMessage;
+  }
 
   if (recoveryMode) {
     if (withdrawCollateral) {

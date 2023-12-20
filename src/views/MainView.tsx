@@ -8,9 +8,10 @@ import { StakeView } from "./StakeView";
 import { useChainId, useNetwork } from "wagmi";
 import { LiquidationsView } from "./LiquidationsView";
 import { useContract } from "../hooks/useContract";
-import { BorrowerOperations } from "lib-ethers/dist/types";
+import { BorrowerOperations, LUSDToken } from "lib-ethers/dist/types";
 import { useLiquity } from "../hooks/LiquityContext";
 import BorrowerOperationsAbi from "lib-ethers/abi/BorrowerOperations.json";
+import LUSDTokenAbi from "lib-ethers/abi/LUSDToken.json";
 import { Decimal } from "lib-base";
 import { WEN, globalContants } from "../libs/globalContants";
 import { TermsModal } from "./TermsModal";
@@ -23,6 +24,12 @@ export const MainView = () => {
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
 	const { liquity } = useLiquity();
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});
+	const dec = Math.pow(10, WEN.decimals || 18);
+
+	const [wenTokenDefault, wenTokenStatus] = useContract<LUSDToken>(
+		liquity.connection.addresses.lusdToken,
+		LUSDTokenAbi
+	);
 
 	const [borrowerOperationsDefault, borrowerOperationsStatus] = useContract<BorrowerOperations>(
 		liquity.connection.addresses.borrowerOperations,
@@ -37,25 +44,32 @@ export const MainView = () => {
 
 	useEffect(() => {
 		const getContants = async () => {
-			const dec = Math.pow(10, WEN.decimals || 18);
+			let totalSupply;
 			let minNetDebt;
 			let wenGasGompensation;
 			let mcr;
+
 			if (borrowerOperationsStatus === "LOADED") {
 				minNetDebt = await borrowerOperationsDefault?.MIN_NET_DEBT()
 				wenGasGompensation = await borrowerOperationsDefault?.LUSD_GAS_COMPENSATION();
 				mcr = await borrowerOperationsDefault?.MCR();
 			}
 
+			if (wenTokenStatus === "LOADED") {
+				totalSupply = await wenTokenDefault?.totalSupply();
+			}
+
 			setConstants({
+				...constants,
 				MIN_NET_DEBT: Decimal.from(minNetDebt?.toString() || 0).div(dec),
 				LUSD_GAS_COMPENSATION: Decimal.from(wenGasGompensation?.toString() || 0).div(dec),
-				MCR: Decimal.from(mcr?.toString() || 0).div(dec)
+				MCR: Decimal.from(mcr?.toString() || 0).div(dec),
+				wenTotalSupply: Decimal.from(totalSupply?.toString() || 0).div(dec)
 			});
 		};
 
 		getContants();
-	}, [borrowerOperationsDefault, borrowerOperationsStatus]);
+	}, [borrowerOperationsDefault, borrowerOperationsStatus, wenTokenStatus, wenTokenDefault]);
 
 	const handleConnectWallet = () => {
 		setShowConnectModal(true);
