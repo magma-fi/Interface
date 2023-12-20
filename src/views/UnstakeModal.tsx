@@ -117,7 +117,7 @@ export const UnstakeModal = ({
 
 					<ChangedValueLabel
 						previousValue={stabilityDeposit.currentLUSD.toString(2)}
-						newValue={stabilityDeposit.currentLUSD.sub(unstakeAmount).toString(2) + " " + WEN.symbol} />
+						newValue={(stabilityDeposit.currentLUSD.gt(unstakeAmount) ? stabilityDeposit.currentLUSD.sub(unstakeAmount) : Decimal.ZERO).toString(2) + " " + WEN.symbol} />
 				</div>
 
 				<div className="flex-row-space-between">
