@@ -4,6 +4,7 @@ import { iotexTestnet, iotex } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
+import { jsonRpcProvider } from "@wagmi/core/providers/jsonRpc"
 // import { ConnectKitProvider, getDefaultClient } from "connectkit";
 // import { Flex, Heading, Paragraph, Link } from "theme-ui";
 
@@ -85,7 +86,18 @@ getConfig().then(config => {
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [iotexTestnet, iotex],
-  [publicProvider()]
+  [
+    jsonRpcProvider({
+      rpc: (chain) => {
+        if (chain.id === 4689) {
+          return { http: "https://babel-api.mainnet.iotex.one" }
+        } else {
+          return null;
+        }
+      }
+    }),
+    publicProvider(),
+  ]
 );
 
 const wagmiCfg = createConfig({
