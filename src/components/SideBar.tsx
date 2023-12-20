@@ -101,9 +101,9 @@ export const SideBar: React.FC = ({ children }) => {
           gap: "8px",
           flexDirection: "column"
         }}>
-          <StyleModeSelect />
+          {/* <StyleModeSelect /> */}
 
-          <LangSelect />
+          {/* <LangSelect /> */}
         </div>
 
         <hr className="division" />
