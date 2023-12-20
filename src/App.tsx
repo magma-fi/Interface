@@ -22,6 +22,7 @@ import { AppLoader } from "./components/AppLoader";
 import { useAsyncValue } from "./hooks/AsyncValue";
 import { appController } from "./libs/appController";
 import { TransactionProvider } from "./components/Transaction";
+import appConfig from "./appConfig.json";
 
 // const isDemoMode = import.meta.env.VITE_APP_DEMO_MODE === "true";
 
@@ -88,17 +89,12 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
   [iotexTestnet, iotex],
   [
     jsonRpcProvider({
-      rpc: (chain) => {
-        if (chain.id === 4689) {
-          return { http: "https://babel-api.mainnet.iotex.one" }
-        } else {
-          return null;
-        }
-      }
+      rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
     }),
-    publicProvider(),
+    // publicProvider(),
   ]
 );
+console.debug("xxx", chains);
 
 const wagmiCfg = createConfig({
   autoConnect: true,

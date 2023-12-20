@@ -2,6 +2,17 @@
 	"subgraph": {
 		"4690": {
 			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet"
+		},
+		"4689": {
+			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex"
+		}
+	},
+	"rpc": {
+		"4689": {
+			"http": "https://rpc.ankr.com/iotex"
+		},
+		"4690": {
+			"http": "https://babel-api.testnet.iotex.io"
 		}
 	}
 }
