@@ -92,7 +92,7 @@ export const TransactiionListItem = ({
 				</div>}
 
 				{deb !== 0 && <div className="label smallLabel">
-					{(deb < 0 ? "-" : "") + price.mul(Math.abs(deb)).shorten()}&nbsp;{globalContants.USD}
+					{(deb < 0 ? "-" : "") + Decimal.from(Math.abs(deb)).shorten()}&nbsp;{globalContants.USD}
 				</div>}
 			</div>
 		</div>
