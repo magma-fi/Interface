@@ -125,7 +125,7 @@ export const StakeModal = ({
 
 					<ChangedValueLabel
 						previousValue={accountBalance.toString(2)}
-						newValue={accountBalance.sub(depositAmount).toString(2) + " " + WEN.symbol} />
+						newValue={(accountBalance.gt(depositAmount) ? accountBalance.sub(depositAmount) : Decimal.ZERO).toString(2) + " " + WEN.symbol} />
 				</div>
 
 				<div className="flex-row-space-between">
