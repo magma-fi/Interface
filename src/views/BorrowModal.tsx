@@ -28,7 +28,8 @@ export const BorrowModal = ({
 	validationContext,
 	max,
 	onDone = () => { },
-	constants
+	constants,
+	liquidationPrice
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -40,6 +41,7 @@ export const BorrowModal = ({
 	max: Decimal;
 	onDone: (tx: string) => void;
 	constants?: Record<string, Decimal>;
+	liquidationPrice: Decimal;
 }) => {
 	const { t } = useLang();
 	// const debt = Number(trove.debt);
@@ -215,14 +217,6 @@ export const BorrowModal = ({
 				</div>
 
 				<div className="flex-row-space-between">
-					<div className="label">{t("liquidationPrice")}(1&nbsp;{market?.symbol})</div>
-
-					<ChangedValueLabel
-						previousValue={trove.collateral.gt(0) ? trove.collateral.div(trove.debt).toString(2) : 0}
-						newValue={(updatedTrove.collateral.gt(0) ? updatedTrove.collateral.div(updatedTrove.debt).toString(2) : 0) + " " + globalContants.USD} />
-				</div>
-
-				<div className="flex-row-space-between">
 					<div className="label">{t("available2Borrow")}</div>
 
 					<ChangedValueLabel
@@ -236,6 +230,24 @@ export const BorrowModal = ({
 					<ChangedValueLabel
 						previousValue={trove.debt.gt(0) ? calculateAvailableWithdrawal(trove, price).toString(2) : 0}
 						newValue={(updatedTrove.debt.gt(0) ? calculateAvailableWithdrawal(updatedTrove, price).toString(2) : 0) + " " + market.symbol} />
+				</div>
+
+				<div className="flex-row-space-between">
+					<div className="label">{t("vaultDebt")}</div>
+
+					<ChangedValueLabel
+						previousValue={trove.debt.toString(2)}
+						newValue={updatedTrove.debt.toString(2) + " " + globalContants.USD} />
+				</div>
+
+				<div className="flex-row-space-between">
+					<div className="label">{t("liquidationPrice")}(1&nbsp;{market?.symbol})</div>
+
+					<div
+						className="label"
+						style={{ color: "#F6F6F7" }}>
+						{liquidationPrice.toString(2)}&nbsp;{globalContants.USD}
+					</div>
 				</div>
 
 				<div className="flex-row-space-between">
@@ -264,14 +276,6 @@ export const BorrowModal = ({
 						style={{ color: "#F6F6F7" }}>
 						{LUSD_LIQUIDATION_RESERVE.toString(2)}&nbsp;{WEN.symbol}
 					</div>
-				</div>
-
-				<div className="flex-row-space-between">
-					<div className="label">{t("vaultDebt")}</div>
-
-					<ChangedValueLabel
-						previousValue={trove.debt.toString(2)}
-						newValue={updatedTrove.debt.toString(2) + " " + globalContants.USD} />
 				</div>
 			</div>
 		</div>

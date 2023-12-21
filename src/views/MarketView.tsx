@@ -89,13 +89,21 @@ export const MarketView = ({
 	// const recoveryMode = totalCollateralRatio.div(CRITICAL_COLLATERAL_RATIO);
 	const recoveryMode = Decimal.ONE.div(MINIMUM_COLLATERAL_RATIO);
 	const borrowingFeePct = new Percent(borrowingRate);
-	const currentPrice = trove.collateral.div(trove.debt);
-	const maxAvailableBorrow = trove.collateral.mul(price).div(CRITICAL_COLLATERAL_RATIO);
+
+	const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateralRatio(price);
+	const troveCollateralValue = trove.collateral.mul(price);
+	const line = Decimal.min(constants?.MCR || MINIMUM_COLLATERAL_RATIO, troveCollateralRatio);
+	const debtToLiquidate = Decimal.max(
+		trove.debt,
+		Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(troveCollateralValue)
+	);
+	const liquidationPrice = debtToLiquidate.div(trove.collateral);
+
+	const maxAvailableBorrow = troveCollateralValue.div(CRITICAL_COLLATERAL_RATIO);
 	const availableBorrow = maxAvailableBorrow.gt(trove.debt) ? maxAvailableBorrow.sub(trove.debt) : Decimal.ZERO;
-	// const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateral.mulDiv(price, trove.debt);
 	// const troveUtilizationRate = troveCollateralRatio.div(CRITICAL_COLLATERAL_RATIO).mul(100);
 	const currentNetDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	const troveUtilizationRate = trove.collateral.gt(0) ? currentNetDebt.div(trove.collateral.mul(price)).mul(100) : Decimal.ZERO;
+	const troveUtilizationRate = trove.collateral.gt(0) ? currentNetDebt.div(troveCollateralValue).mul(100) : Decimal.ZERO;
 	const troveUtilizationRateNumber = Number(troveUtilizationRate.toString());
 	const chartData = [
 		{ name: '', value: troveUtilizationRateNumber },
@@ -272,12 +280,12 @@ export const MarketView = ({
 							</div>
 
 							<div className="flex-column-align-left">
-								<div>{price.gt(currentPrice) ? price.sub(currentPrice).div(price).mul(100).toString(2) : 0}%</div>
+								<div>{price.gt(liquidationPrice) ? price.sub(liquidationPrice).div(price).mul(100).toString(2) : 0}%</div>
 								<div className="label labelSmall">{t("belowCurrentPrice")}</div>
 							</div>
 
 							<div className="flex-column-align-left">
-								<div>{currentPrice.toString(5)}&nbsp;{globalContants.USD}</div>
+								<div>{liquidationPrice.toString(5)}&nbsp;{globalContants.USD}</div>
 
 								<div className="label labelSmall">{t("liquidationPrice")}</div>
 							</div>
@@ -326,7 +334,7 @@ export const MarketView = ({
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{trove.collateral.mul(price).toString(2)}&nbsp;{globalContants.USD}</div>
+									<div>{troveCollateralValue.toString(2)}&nbsp;{globalContants.USD}</div>
 
 									<div className="label labelSmall">{trove.collateral.toString(2)}&nbsp;{IOTX.symbol}</div>
 								</div>
@@ -555,7 +563,8 @@ export const MarketView = ({
 			validationContext={validationContext}
 			onDone={handleDepositDone}
 			constants={constants}
-			depositAndBorrow={depositAndBorrow} />}
+			depositAndBorrow={depositAndBorrow}
+			liquidationPrice={liquidationPrice} />}
 
 		{showDepositDoneModal && <TxDone
 			title={t("depositedSuccessfully")}
@@ -579,7 +588,8 @@ export const MarketView = ({
 			validationContext={validationContext}
 			max={maxAvailableBorrow.gt(trove.debt) ? maxAvailableBorrow.sub(trove.debt) : Decimal.ZERO}
 			onDone={handleBorrowDone}
-			constants={constants} />}
+			constants={constants}
+			liquidationPrice={liquidationPrice} />}
 
 		{showBorrowDoneModal && <TxDone
 			title={t("borrowedSuccessfully")}

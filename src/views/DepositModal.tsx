@@ -29,7 +29,8 @@ export const DepositeModal = ({
 	validationContext,
 	onDone = () => { },
 	constants,
-	depositAndBorrow = true
+	depositAndBorrow = true,
+	liquidationPrice
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -42,6 +43,7 @@ export const DepositeModal = ({
 	onDone: (tx: string) => void;
 	constants?: Record<string, Decimal>;
 	depositAndBorrow: boolean;
+	liquidationPrice: Decimal;
 }) => {
 	const { t } = useLang();
 	// const amountDeposited = Number(trove.collateral);
@@ -310,14 +312,6 @@ export const DepositeModal = ({
 				</div>
 
 				<div className="flex-row-space-between">
-					<div className="label">{t("liquidationPrice")}(1&nbsp;{market?.symbol})</div>
-
-					<ChangedValueLabel
-						previousValue={trove.collateral.gt(0) ? trove.collateral.div(trove.debt).toString(2) : 0}
-						newValue={(updatedTrove.collateral.gt(0) ? updatedTrove.collateral.div(updatedTrove.debt).toString(2) : 0) + " " + globalContants.USD} />
-				</div>
-
-				<div className="flex-row-space-between">
 					<div className="label">{t("deposited")}</div>
 
 					<ChangedValueLabel
@@ -339,6 +333,16 @@ export const DepositeModal = ({
 					<ChangedValueLabel
 						previousValue={trove.debt.gt(0) ? calculateAvailableWithdrawal(trove, price).toString(2) : 0}
 						newValue={(updatedTrove.debt.gt(0) ? calculateAvailableWithdrawal(updatedTrove, price).toString(2) : 0) + " " + market.symbol} />
+				</div>
+
+				<div className="flex-row-space-between">
+					<div className="label">{t("liquidationPrice")}(1&nbsp;{market?.symbol})</div>
+
+					<div
+						className="label"
+						style={{ color: "#F6F6F7" }}>
+						{liquidationPrice.toString(2)}&nbsp;{globalContants.USD}
+					</div>
 				</div>
 
 				{showExpandBorrowView && <>
