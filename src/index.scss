@@ -593,6 +593,7 @@ h4 {
 .label {
   color: var(--text-secondary);
   font-size: 0.875rem;
+  white-space: nowrap;
   // text-transform: capitalize;
 }
 

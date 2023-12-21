@@ -84,7 +84,7 @@ export const DepositeModal = ({
 		constants
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
-	const errorMessages = description as ErrorMessage;
+	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
 
 	const init = () => {
 		setValueForced(-1);
@@ -93,6 +93,7 @@ export const DepositeModal = ({
 		setShowExpandBorrowView(false);
 		setNewAvailableBorrow(previousAvailableBorrow);
 		setDefaultBorrowAmount(-1);
+		setErrorMessages(undefined);
 	};
 
 	useEffect(init, []);
@@ -101,6 +102,7 @@ export const DepositeModal = ({
 		const val = Number(accountBalance.toString(0));
 		setValueForced(val);
 		setDepositValue(val);
+		setErrorMessages(undefined);
 	};
 
 	const handleExpandBorrow = () => {
@@ -176,7 +178,7 @@ export const DepositeModal = ({
 			valueForced={defaultBorrowAmount}
 			onInput={handleInputBorrow}
 			max={Number(newAvailableBorrow?.toString())}
-			error={description && t(errorMessages.key, errorMessages.values)}
+			error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
 			warning={undefined}
 			allowReduce={true}
 			currentValue={-1}
@@ -244,6 +246,7 @@ export const DepositeModal = ({
 	const handleInputDeposit = (val: number) => {
 		setValueForced(-1);
 		setDepositValue(val);
+		setErrorMessages(undefined);
 	};
 
 	const handleCloseModal = () => {
@@ -251,6 +254,10 @@ export const DepositeModal = ({
 	};
 
 	useEffect(() => {
+		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
+			setErrorMessages({ string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage);
+		}
+
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string);
 			transactionState.resolved = true;
@@ -285,7 +292,7 @@ export const DepositeModal = ({
 						onInput={handleInputDeposit}
 						max={Number(accountBalance.toString())}
 						warning={undefined}
-						error={(!depositAndBorrow && description) ? t(errorMessages.key, errorMessages.values) : undefined}
+						error={(!depositAndBorrow && errorMessages) ? (errorMessages.string || t(errorMessages.key!, errorMessages.values)) : undefined}
 						allowReduce={true}
 						currentValue={-1}
 						allowIncrease={true} />

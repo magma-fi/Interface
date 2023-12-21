@@ -76,7 +76,7 @@ export const BorrowModal = ({
 		constants
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
-	const errorMessages = description as ErrorMessage;
+	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
 
 	const newUR = ((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(updatedTrove.collateralRatio(price)) : Decimal.ZERO);
 
@@ -87,6 +87,7 @@ export const BorrowModal = ({
 	const init = () => {
 		setValueForced(-1);
 		setBorrowAmount(-1);
+		setErrorMessages(undefined);
 	};
 
 	useEffect(init, []);
@@ -95,6 +96,7 @@ export const BorrowModal = ({
 		const val = Number(max.toString());
 		setValueForced(val);
 		setBorrowAmount(val);
+		setErrorMessages(undefined);
 	};
 
 	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -134,6 +136,7 @@ export const BorrowModal = ({
 	const handleInputBorrowValue = (val: number) => {
 		setValueForced(-1);
 		setBorrowAmount(val);
+		setErrorMessages(undefined);
 	};
 
 	const handleCloseModal = () => {
@@ -142,6 +145,10 @@ export const BorrowModal = ({
 	};
 
 	useEffect(() => {
+		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
+			setErrorMessages({ string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage);
+		}
+
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string);
 			transactionState.resolved = true;
@@ -176,7 +183,7 @@ export const BorrowModal = ({
 						onInput={handleInputBorrowValue}
 						max={Number(max.toString())}
 						warning={undefined}
-						error={description && t(errorMessages.key, errorMessages.values)}
+						error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
 						allowReduce={true}
 						currentValue={-1}
 						allowIncrease={true} />

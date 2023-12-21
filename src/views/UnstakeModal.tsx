@@ -38,29 +38,36 @@ export const UnstakeModal = ({
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
 
-	const handleMax = () => {
-		const val = Number(stabilityDeposit.currentLUSD.toString(0));
-		setValueForced(val);
-		setUnstakeAmount(val);
-	};
-
-	const handleInputDeposit = (val: number) => {
-		setValueForced(-1);
-		setUnstakeAmount(val);
-	};
-
-	const handleCloseModal = () => {
-		onClose();
-	};
-
 	const [validChange, description] = validateStabilityDepositChange(
 		stabilityDeposit,
 		stabilityDeposit.currentLUSD.gt(unstakeAmount) ? stabilityDeposit.currentLUSD.sub(unstakeAmount) : Decimal.ZERO,
 		validationContext
 	);
-	const errorMessages = description as ErrorMessage;
+	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
+
+	const handleMax = () => {
+		const val = Number(stabilityDeposit.currentLUSD.toString(0));
+		setValueForced(val);
+		setUnstakeAmount(val);
+		setErrorMessages(undefined);
+	};
+
+	const handleInputDeposit = (val: number) => {
+		setValueForced(-1);
+		setUnstakeAmount(val);
+		setErrorMessages(undefined);
+	};
+
+	const handleCloseModal = () => {
+		setErrorMessages(undefined);
+		onClose();
+	};
 
 	useEffect(() => {
+		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
+			setErrorMessages({ string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage);
+		}
+
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, unstakeAmount);
 			transactionState.resolved = true;
@@ -103,7 +110,7 @@ export const UnstakeModal = ({
 					onInput={handleInputDeposit}
 					max={Number(accountBalance.toString())}
 					warning={undefined}
-					error={description && t(errorMessages.key)}
+					error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
 					allowReduce={true}
 					currentValue={-1}
 					allowIncrease={true} />

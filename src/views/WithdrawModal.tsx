@@ -68,7 +68,7 @@ export const WithdrawModal = ({
 		constants
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
-	const errorMessages = description as ErrorMessage;
+	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
 
 	const utilRate = Decimal.ONE.div(updatedTrove.collateralRatio(price));
 
@@ -79,6 +79,7 @@ export const WithdrawModal = ({
 	const init = () => {
 		setValueForced(-1);
 		setWithdrawAmount(-1);
+		setErrorMessages(undefined);
 	};
 
 	useEffect(init, []);
@@ -86,6 +87,7 @@ export const WithdrawModal = ({
 	const handleMax = () => {
 		setValueForced(maxNumber);
 		setWithdrawAmount(maxNumber);
+		setErrorMessages(undefined);
 	};
 
 	const applyUnsavedCollateralChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -128,6 +130,7 @@ export const WithdrawModal = ({
 	const handleInputWithdraw = (val: number) => {
 		setValueForced(-1);
 		setWithdrawAmount(val);
+		setErrorMessages(undefined);
 	};
 
 	const handleCloseModal = () => {
@@ -136,6 +139,10 @@ export const WithdrawModal = ({
 	};
 
 	useEffect(() => {
+		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
+			setErrorMessages({ string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage);
+		}
+
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, withdrawAmount);
 			transactionState.resolved = true;
@@ -170,7 +177,7 @@ export const WithdrawModal = ({
 						onInput={handleInputWithdraw}
 						max={maxNumber}
 						warning={undefined}
-						error={description && t(errorMessages.key, errorMessages.values)}
+						error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
 						allowReduce={true}
 						currentValue={-1}
 						allowIncrease={true} />

@@ -15,7 +15,6 @@ import { Tooltip } from "./Tooltip";
 import type { TooltipProps } from "./Tooltip";
 
 import { TransactionStatus } from "./TransactionStatus";
-import { sendTransaction } from "viem/_types/actions/wallet/sendTransaction";
 
 type TransactionIdle = {
   type: "idle";
@@ -35,6 +34,7 @@ type TransactionWaitingForApproval = {
 type TransactionCancelled = {
   type: "cancelled";
   id: string;
+  error: Error;
 };
 
 type TransactionWaitingForConfirmations = {
@@ -261,8 +261,13 @@ export const useTransactionFunction = (
         tx
       });
     } catch (error) {
-      if (hasMessage(error) && error.message.includes("User denied transaction signature")) {
-        setTransactionState({ type: "cancelled", id });
+      const cancelMessage = "User denied transaction signature";
+      if (hasMessage(error) && error.message.includes(cancelMessage)) {
+        setTransactionState({
+          type: "cancelled",
+          id,
+          error: new Error(cancelMessage)
+        });
       } else {
         console.error(error);
 

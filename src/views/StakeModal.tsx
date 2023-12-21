@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { ValidationContextForStabilityPool } from "../libs/types";
+import { ErrorMessage, ValidationContextForStabilityPool } from "../libs/types";
 import { WEN } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect, useMemo } from "react";
@@ -38,28 +38,37 @@ export const StakeModal = ({
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
 
-	const handleMax = () => {
-		const val = Number(accountBalance.toString());
-		setValueForced(val);
-		setDepositAmount(val);
-	};
-
-	const handleInputDeposit = (val: number) => {
-		setValueForced(-1);
-		setDepositAmount(val);
-	};
-
-	const handleCloseModal = () => {
-		onClose();
-	};
-
 	const [validChange, description] = validateStabilityDepositChange(
 		stabilityDeposit,
 		stabilityDeposit.currentLUSD.add(depositAmount),
 		validationContext
 	);
 
+	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
+
+	const handleMax = () => {
+		const val = Number(accountBalance.toString());
+		setValueForced(val);
+		setDepositAmount(val);
+		setErrorMessages(undefined);
+	};
+
+	const handleInputDeposit = (val: number) => {
+		setValueForced(-1);
+		setDepositAmount(val);
+		setErrorMessages(undefined);
+	};
+
+	const handleCloseModal = () => {
+		setErrorMessages(undefined);
+		onClose();
+	};
+
 	useEffect(() => {
+		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
+			setErrorMessages({ string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage);
+		}
+
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, depositAmount);
 			transactionState.resolved = true;
@@ -103,7 +112,7 @@ export const StakeModal = ({
 					onInput={handleInputDeposit}
 					max={Number(accountBalance.toString())}
 					warning={undefined}
-					error={undefined}
+					error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
 					allowReduce={true}
 					currentValue={-1}
 					allowIncrease={true} />

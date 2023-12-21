@@ -74,7 +74,7 @@ export const RepayModal = ({
 		constants
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
-	const errorMessages = description as ErrorMessage;
+	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
 
 	const utilRate = Decimal.ONE.div(updatedTrove.collateralRatio(price));
 	const [sliderForcedValue, setSliderForcedValue] = useState(troveUtilizationRateNumber);
@@ -87,6 +87,7 @@ export const RepayModal = ({
 		setValueForced(-1);
 		setRepayAmount(-1);
 		setDesireNetDebt(max);
+		setErrorMessages(undefined);
 	};
 
 	const handleMax = () => {
@@ -94,6 +95,7 @@ export const RepayModal = ({
 		setValueForced(val);
 		setRepayAmount(val);
 		setRepaidAmount(val);
+		setErrorMessages(undefined);
 	};
 
 	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -140,6 +142,7 @@ export const RepayModal = ({
 		setValueForced(-1);
 		setRepayAmount(val);
 		setRepaidAmount(val);
+		setErrorMessages(undefined);
 	};
 
 	const handleCloseModal = () => {
@@ -148,6 +151,10 @@ export const RepayModal = ({
 	};
 
 	useEffect(() => {
+		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
+			setErrorMessages({ string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage);
+		}
+
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
 			init();
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, repaidAmount);
@@ -183,7 +190,7 @@ export const RepayModal = ({
 						onInput={handleInputRepay}
 						max={Number(max.toString())}
 						warning={undefined}
-						error={description && t(errorMessages.key, errorMessages.values)} />
+						error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))} />
 				</div>
 
 				<div className="flex-column-align-left">
