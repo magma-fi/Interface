@@ -84,7 +84,8 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
           tempArr.push(trove);
         }
       } else {
-        if (trove.collateralRatioIsBelowMinimum(price)) {
+        // if (trove.collateralRatioIsBelowMinimum(price)) {
+        if (trove.collateralRatio(price).lt(constants?.MCR)) {
           tempArr.push(trove);
         }
       }
@@ -105,7 +106,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     if (transactionState.id === txId && (transactionState.type === "confirmed" || transactionState.type === "failed")) {
       setTransactionState({ type: "idle" });
       setResetTx(!resetTx);
-      
+
       setTimeout(() => {
         setReload({});
       }, 5000);
