@@ -528,7 +528,7 @@ export const MarketView = ({
 					<div className="flex-row-space-between">
 						<div className="description">{market.symbol}&nbsp;{t("price")}</div>
 
-						<div>{price.toString(2)}&nbsp;{globalContants.USD}</div>
+						<div>{price.toString(4)}&nbsp;{globalContants.USD}</div>
 					</div>
 				</div>
 
