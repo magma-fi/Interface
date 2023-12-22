@@ -88,10 +88,10 @@ getConfig().then(config => {
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [iotexTestnet, iotex],
   [
-    jsonRpcProvider({
-      rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
-    }),
-    // publicProvider(),
+    // jsonRpcProvider({
+    //   rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
+    // }),
+    publicProvider(),
   ]
 );
 

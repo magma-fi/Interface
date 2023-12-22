@@ -69,7 +69,6 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
   const { liquity } = useLiquity();
   const [loading, setLoading] = useState(true);
   const [troves, setTroves] = useState<UserTrove[]>();
-  // const [liquidatableTroves, setLiquidatableTroves] = useState<UserTrove[]>();
   const [reload, setReload] = useState({});
   const forceReload = useCallback(() => setReload({}), []);
   const [page, setPage] = useState(0);

@@ -128,7 +128,7 @@ export const MarketView = ({
 		const xp = x0 + length * cos;
 		const yp = y0 + length * sin;
 
-		return [<path d={`M ${xpc} ${ypc} L${xp} ${yp}`} stroke={color} stroke-width="2" fill={color} />];
+		return [<path d={`M ${xpc} ${ypc} L${xp} ${yp}`} stroke={color} strokeWidth="2" fill={color} />];
 	};
 
 	const availableWithdrawal = calculateAvailableWithdrawal(trove, price, liquidationPoint);
