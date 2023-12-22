@@ -9,7 +9,7 @@
 	},
 	"rpc": {
 		"4689": {
-			"http": "https://rpc.ankr.com/iotex"
+			"http": "https://babel-api.mainnet.iotex.one"
 		},
 		"4690": {
 			"http": "https://babel-api.testnet.iotex.io"
