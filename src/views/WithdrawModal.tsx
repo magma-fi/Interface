@@ -29,7 +29,11 @@ export const WithdrawModal = ({
 	validationContext,
 	max,
 	onDone = () => { },
-	constants
+	constants,
+	recoveryMode,
+	liquidationPoint,
+	availableWithdrawal,
+	availableBorrow
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -41,6 +45,10 @@ export const WithdrawModal = ({
 	max: Decimal;
 	onDone: (tx: string, withdrawAmount: number) => void;
 	constants?: Record<string, Decimal>;
+	recoveryMode: boolean;
+	liquidationPoint: Decimal;
+	availableWithdrawal: Decimal;
+	availableBorrow: Decimal;
 }) => {
 	const maxNumber = Number(max.toString());
 	const { t } = useLang();
@@ -49,7 +57,7 @@ export const WithdrawModal = ({
 	const [desireCollateral, setDesireCollateral] = useState(trove.collateral);
 	const previousTrove = useRef<Trove>(trove);
 	// const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	const maxSafe = Decimal.ONE.div(CRITICAL_COLLATERAL_RATIO);
+	const maxSafe = Decimal.ONE.div(liquidationPoint);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)));
 	const troveUtilizationRateNumberPercent = troveUtilizationRateNumber * 100;
 	const [sliderForcedValue, setSliderForcedValue] = useState(troveUtilizationRateNumber);
@@ -222,16 +230,16 @@ export const WithdrawModal = ({
 					<div className="label">{t("available2Borrow")}</div>
 
 					<ChangedValueLabel
-						previousValue={trove.debt.gt(0) ? calculateAvailableBorrow(trove, price).toString(2) : 0}
-						newValue={(updatedTrove.debt.gt(0) ? calculateAvailableBorrow(updatedTrove, price).toString(2) : 0) + " " + WEN.symbol} />
+						previousValue={availableBorrow.toString(2)}
+						newValue={(updatedTrove.debt.gt(0) ? calculateAvailableBorrow(updatedTrove, price, liquidationPoint).toString(2) : 0) + " " + WEN.symbol} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("available2Withdraw")}</div>
 
 					<ChangedValueLabel
-						previousValue={trove.debt.gt(0) ? calculateAvailableWithdrawal(trove, price).toString(2) : 0}
-						newValue={(updatedTrove.debt.gt(0) ? calculateAvailableWithdrawal(updatedTrove, price).toString(2) : 0) + " " + market.symbol} />
+						previousValue={trove.debt.gt(0) ? availableWithdrawal.toString(2) : 0}
+						newValue={(updatedTrove.debt.gt(0) ? calculateAvailableWithdrawal(updatedTrove, price, liquidationPoint).toString(2) : 0) + " " + market.symbol} />
 				</div>
 
 				<div className="flex-row-space-between">

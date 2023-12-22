@@ -185,7 +185,7 @@ const validateTroveCreation = (
   if (wenTotalSupply?.add(borrowLUSD || 0).gt(1000000)) {
     return { key: "limit1M" } as ErrorMessage;
   }
-  
+
   if (borrowLUSD.lt(wenMinimumNetDebt)) {
     // return (
     //   <ErrorDescription>
@@ -299,11 +299,15 @@ const validateTroveAdjustment = (
     }
   } else {
     if (resultingTrove.collateralRatioIsBelowMinimum(price)) {
-      return (
-        <ErrorDescription>
-          Collateral ratio must be at least <Amount>{mcrPercent}</Amount>.
-        </ErrorDescription>
-      );
+      // return (
+      //   <ErrorDescription>
+      //     Collateral ratio must be at least <Amount>{mcrPercent}</Amount>.
+      //   </ErrorDescription>
+      // );
+      return {
+        key: "collateralRatioMustBeAtLeast",
+        values: { percent: mcrPercent }
+      } as ErrorMessage
     }
 
     if (wouldTriggerRecoveryMode) {

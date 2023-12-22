@@ -24,7 +24,7 @@
 	"liquidationReserve": "Liquidation Reserve",
 	"loanToValue": "Loan to Value",
 	"yourVault": "your vault",
-	"liquidation": "liquidation",
+	"liquidation": "Liquidation",
 	"currentPrice": "Current Price",
 	"belowCurrentPrice": "Below Current Price",
 	"liquidationPrice": "Liquidation Price",
@@ -99,5 +99,6 @@
 	"notAllowedToUnstake": "You're not allowed to withdraw LUSD from your Stability Deposit when there are undercollateralized Troves. Please liquidate those Troves or try again later.",
 	"price": "Price",
 	"latestTransactions": "Latest Transactions",
-	"limit1M": "The borrowing amount exceeds the temporary limit of the total supply of 1 million WEN."
+	"limit1M": "The borrowing amount exceeds the temporary limit of the total supply of 1 million WEN.",
+	"recoveryMode": "Recovery Mode"
 }

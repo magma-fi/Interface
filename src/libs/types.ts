@@ -31,7 +31,7 @@ export type ValidationContextForStabilityPool = {
 export type ErrorMessage = {
 	string?: string;
 	key?: string;
-	values: Record<string, string>;
+	values?: Record<string, string>;
 }
 
 export type AccountForSubgraph = {

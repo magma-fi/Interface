@@ -87,31 +87,51 @@ export const MarketView = ({
 	// const totalCollateralRatio = total.collateralRatio(price);
 	// const totalCollateralRatioPct = new Percent(totalCollateralRatio);
 	// const recoveryMode = totalCollateralRatio.div(CRITICAL_COLLATERAL_RATIO);
-	const recoveryMode = Decimal.ONE.div(MINIMUM_COLLATERAL_RATIO);
+	const recoveryMode = total.collateralRatioIsBelowCritical(price);
+	const CCR = constants?.CCR?.gt(0) ? constants?.CCR : CRITICAL_COLLATERAL_RATIO;
+	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : MINIMUM_COLLATERAL_RATIO
+	const recoveryModeAt = CCR.gt(0) ? Decimal.ONE.div(CCR) : Decimal.ZERO;
+	const liquidationPoint = recoveryMode ? CCR : MCR;
 	const borrowingFeePct = new Percent(borrowingRate);
 
 	const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateralRatio(price);
 	const troveCollateralValue = trove.collateral.mul(price);
-	const line = Decimal.min(constants?.MCR || MINIMUM_COLLATERAL_RATIO, troveCollateralRatio);
+	const line = Decimal.min(liquidationPoint, troveCollateralRatio);
 	const debtToLiquidate = Decimal.max(
 		trove.debt,
 		Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(troveCollateralValue)
 	);
 	const liquidationPrice = debtToLiquidate.div(trove.collateral);
 
-	const maxAvailableBorrow = troveCollateralValue.div(CRITICAL_COLLATERAL_RATIO);
-	const availableBorrow = maxAvailableBorrow.gt(trove.debt) ? maxAvailableBorrow.sub(trove.debt) : Decimal.ZERO;
-	// const troveUtilizationRate = troveCollateralRatio.div(CRITICAL_COLLATERAL_RATIO).mul(100);
+	const maxAvailableBorrow = troveCollateralValue.div(liquidationPoint);
+	const availableBorrow = maxAvailableBorrow.gt(trove.debt) ? maxAvailableBorrow.mul(Decimal.ONE.sub(borrowingRate)).sub(trove.debt) : Decimal.ZERO;
 	const currentNetDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
+	const totalUtilizationRate = total.collateral.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? total.netDebt.div(total.collateral.mul(price)) : Decimal.ZERO;
 	const troveUtilizationRate = trove.collateral.gt(0) ? currentNetDebt.div(troveCollateralValue).mul(100) : Decimal.ZERO;
-	const troveUtilizationRateNumber = Number(troveUtilizationRate.toString());
+	const troveUtilizationRateNumber = Number(troveUtilizationRate);
+
+	const RADIAN = Math.PI / 180;
 	const chartData = [
 		{ name: '', value: troveUtilizationRateNumber },
 		{ name: '', value: 100 - troveUtilizationRateNumber }
 	];
 	const COLORS = ['#7ecf29', '#2b2326'];
+	const needle = (value: number, cx: number, cy: number, color: string | undefined) => {
+		const ang = value;
+		const length = 54;//(iR + 2 * oR) / 3;
+		const sin = Math.sin(-RADIAN * ang);
+		const cos = Math.cos(-RADIAN * ang);
+		const x0 = cx + 5;
+		const y0 = cy + 5;
+		const xpc = x0 + (length - 15) * cos;
+		const ypc = y0 + ((length - 15)) * sin;
+		const xp = x0 + length * cos;
+		const yp = y0 + length * sin;
 
-	const availableWithdrawal = calculateAvailableWithdrawal(trove, price);
+		return [<path d={`M ${xpc} ${ypc} L${xp} ${yp}`} stroke={color} stroke-width="2" fill={color} />];
+	};
+
+	const availableWithdrawal = calculateAvailableWithdrawal(trove, price, liquidationPoint);
 	const availableWithdrawalFiat = availableWithdrawal.mul(price);
 	const chainId = useChainId();
 	const { address } = useAccount();
@@ -270,7 +290,9 @@ export const MarketView = ({
 					</div>
 
 					<div className="charts">
-						<div className="subCard">
+						<div
+							className="subCard"
+							style={{ minHeight: "190px" }}>
 							<div className="flex-row-space-between">
 								<div className="label">{t("liquidation")}</div>
 
@@ -293,7 +315,9 @@ export const MarketView = ({
 							<div className="label labelSmall">{t("currentPrice")}:&nbsp;{price.toString(5)}&nbsp;{globalContants.USD}</div>
 						</div>
 
-						<div className="subCard">
+						<div
+							className="subCard"
+							style={{ minHeight: "190px" }}>
 							<div className="label">{t("utilizationRate")}</div>
 
 							<div className="chartContainer">
@@ -306,19 +330,31 @@ export const MarketView = ({
 										outerRadius={54}
 										stroke="rgba(255, 255, 255, 0.1)"
 										paddingAngle={0}
-										dataKey="value">
+										dataKey="value"
+										startAngle={0}
+										endAngle={360}>
 										{chartData.map((entry, index) => (
-											<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+											<Cell
+												key={index}
+												fill={COLORS[index % COLORS.length]} />
 										))}
 									</Pie>
+
+									{needle(Number(recoveryModeAt.mul(360)), 50, 50, '#F25454')}
 								</PieChart>
 
 								<div className="label">{troveUtilizationRateNumber.toFixed(2)}%</div>
 							</div>
 
-							<div
-								className="label labelSmall"
-							>{t("liquidationAt")}&nbsp;{globalContants.LIQUIDATION_AT * 100}%</div>
+							<div className="flex-column">
+								<div className="label labelSmall">{t("liquidationAt")}&nbsp;{globalContants.LIQUIDATION_AT * 100}%</div>
+
+								<div className="flex-row-align-left label labelSmall">
+									<div>{t("recoveryMode")}</div>
+
+									<div style={{ color: "#F25454" }}>{recoveryModeAt.mul(100).toString(2)}%</div>
+								</div>
+							</div>
 						</div>
 					</div>
 
@@ -487,8 +523,8 @@ export const MarketView = ({
 						<div className="description">{t("totalUtilizationRate")}</div>
 
 						<div className="flex-column-align-right">
-							<div>{troveUtilizationRate.prettify()}%</div>
-							<div className="comments">{t("recoveryModeAt", { recovery: recoveryMode.mul(100).toString(2) })}</div>
+							<div>{totalUtilizationRate.mul(100).toString(2)}%</div>
+							<div className="comments">{t("recoveryModeAt", { recovery: recoveryModeAt.mul(100).toString(2) })}</div>
 						</div>
 					</div>
 
@@ -564,7 +600,11 @@ export const MarketView = ({
 			onDone={handleDepositDone}
 			constants={constants}
 			depositAndBorrow={depositAndBorrow}
-			liquidationPrice={liquidationPrice} />}
+			liquidationPrice={liquidationPrice}
+			availableWithdrawal={availableWithdrawal}
+			availableBorrow={availableBorrow}
+			recoveryMode={recoveryMode}
+			liquidationPoint={liquidationPoint} />}
 
 		{showDepositDoneModal && <TxDone
 			title={t("depositedSuccessfully")}
@@ -586,10 +626,14 @@ export const MarketView = ({
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={maxAvailableBorrow.gt(trove.debt) ? maxAvailableBorrow.sub(trove.debt) : Decimal.ZERO}
+			max={availableBorrow}
 			onDone={handleBorrowDone}
 			constants={constants}
-			liquidationPrice={liquidationPrice} />}
+			liquidationPrice={liquidationPrice}
+			availableWithdrawal={availableWithdrawal}
+			recoveryMode={recoveryMode}
+			liquidationPoint={liquidationPoint}
+			availableBorrow={availableBorrow} />}
 
 		{showBorrowDoneModal && <TxDone
 			title={t("borrowedSuccessfully")}
@@ -613,7 +657,11 @@ export const MarketView = ({
 			validationContext={validationContext}
 			max={Decimal.min(currentNetDebt, lusdBalance)}
 			onDone={handleRepayDone}
-			constants={constants} />}
+			constants={constants}
+			availableWithdrawal={availableWithdrawal}
+			recoveryMode={recoveryMode}
+			liquidationPoint={liquidationPoint}
+			availableBorrow={availableBorrow} />}
 
 		{showRepayDoneModal && <TxDone
 			title={t("repaidSuccessfully")}
@@ -637,7 +685,11 @@ export const MarketView = ({
 			validationContext={validationContext}
 			max={availableWithdrawal}
 			onDone={handleWithdrawDone}
-			constants={constants} />}
+			constants={constants}
+			availableWithdrawal={availableWithdrawal}
+			recoveryMode={recoveryMode}
+			liquidationPoint={liquidationPoint}
+			availableBorrow={availableBorrow} />}
 
 		{showWithdrawDoneModal && <TxDone
 			title={t("withdrawnSuccessfully")}

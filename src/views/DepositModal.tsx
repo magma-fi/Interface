@@ -30,7 +30,11 @@ export const DepositeModal = ({
 	onDone = () => { },
 	constants,
 	depositAndBorrow = true,
-	liquidationPrice
+	liquidationPrice,
+	availableWithdrawal,
+	recoveryMode,
+	liquidationPoint,
+	availableBorrow
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -44,6 +48,10 @@ export const DepositeModal = ({
 	constants?: Record<string, Decimal>;
 	depositAndBorrow: boolean;
 	liquidationPrice: Decimal;
+	availableWithdrawal: Decimal;
+	recoveryMode: boolean;
+	liquidationPoint: Decimal;
+	availableBorrow: Decimal;
 }) => {
 	const { t } = useLang();
 	// const amountDeposited = Number(trove.collateral);
@@ -84,7 +92,11 @@ export const DepositeModal = ({
 		constants
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
+	const txErrorMessages = (description?.key || description?.string) && description as ErrorMessage;
+
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
+
+	const errorInfo = txErrorMessages || errorMessages;
 
 	const init = () => {
 		setValueForced(-1);
@@ -178,7 +190,7 @@ export const DepositeModal = ({
 			valueForced={defaultBorrowAmount}
 			onInput={handleInputBorrow}
 			max={Number(newAvailableBorrow?.toString())}
-			error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
+			error={errorInfo && (errorInfo.string || t(errorInfo.key!, errorInfo.values))}
 			warning={undefined}
 			allowReduce={true}
 			currentValue={-1}
@@ -292,7 +304,7 @@ export const DepositeModal = ({
 						onInput={handleInputDeposit}
 						max={Number(accountBalance.toString())}
 						warning={undefined}
-						error={(!depositAndBorrow && errorMessages) ? (errorMessages.string || t(errorMessages.key!, errorMessages.values)) : undefined}
+						error={(!depositAndBorrow && errorInfo) ? (errorInfo.string || t(errorInfo.key!, errorInfo.values)) : undefined}
 						allowReduce={true}
 						currentValue={-1}
 						allowIncrease={true} />
@@ -338,8 +350,8 @@ export const DepositeModal = ({
 					<div className="label">{t("available2Withdraw")}</div>
 
 					<ChangedValueLabel
-						previousValue={trove.debt.gt(0) ? calculateAvailableWithdrawal(trove, price).toString(2) : 0}
-						newValue={(updatedTrove.debt.gt(0) ? calculateAvailableWithdrawal(updatedTrove, price).toString(2) : 0) + " " + market.symbol} />
+						previousValue={trove.debt.gt(0) ? availableWithdrawal.toString(2) : 0}
+						newValue={(updatedTrove.debt.gt(0) ? calculateAvailableWithdrawal(updatedTrove, price, liquidationPoint).toString(2) : 0) + " " + market.symbol} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -357,8 +369,8 @@ export const DepositeModal = ({
 						<div className="label">{t("available2Borrow")}</div>
 
 						<ChangedValueLabel
-							previousValue={trove.debt.gt(0) ? calculateAvailableBorrow(trove, price).toString(2) : 0}
-							newValue={(updatedTrove.debt.gt(0) ? calculateAvailableBorrow(updatedTrove, price).toString(2) : 0) + " " + WEN.symbol} />
+							previousValue={trove.debt.gt(0) ? availableBorrow.toString(2) : 0}
+							newValue={(updatedTrove.debt.gt(0) ? calculateAvailableBorrow(updatedTrove, price, liquidationPoint).toString(2) : 0) + " " + WEN.symbol} />
 					</div>
 
 					<div className="flex-row-space-between">

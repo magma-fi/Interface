@@ -2,18 +2,18 @@ import { Trove, Decimal, CRITICAL_COLLATERAL_RATIO } from "lib-base";
 
 export const shortenAddress = (address: string) => address.substr(0, 6) + "..." + address.substr(-4);
 
-export const calculateAvailableWithdrawal = (forTrove: Trove, price: Decimal) => {
+export const calculateAvailableWithdrawal = (forTrove: Trove, price: Decimal, collateralRatio: Decimal = CRITICAL_COLLATERAL_RATIO) => {
 	const collateralValue = forTrove.collateral.mul(price);
-	const debtLine = forTrove.debt.mul(CRITICAL_COLLATERAL_RATIO);
+	const debtLine = forTrove.debt.mul(collateralRatio);
 	if (collateralValue.gt(debtLine))
 		return collateralValue.sub(debtLine).div(price);
 	else
 		return Decimal.ZERO;
 };
 
-export const calculateAvailableBorrow = (forTrove: Trove, price: Decimal) => {
+export const calculateAvailableBorrow = (forTrove: Trove, price: Decimal, collateralRatio: Decimal = CRITICAL_COLLATERAL_RATIO) => {
 	const collateralValue = forTrove.collateral.mul(price);
-	const debtLine = collateralValue.div(CRITICAL_COLLATERAL_RATIO);
+	const debtLine = collateralValue.div(collateralRatio);
 	const debt = forTrove.debt.gt(1) ? forTrove.netDebt : forTrove.debt;
 	if (debtLine.gt(debt)) {
 		return debtLine.sub(debt);

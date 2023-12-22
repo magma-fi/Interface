@@ -48,11 +48,13 @@ export const MainView = () => {
 			let minNetDebt;
 			let wenGasGompensation;
 			let mcr;
+			let ccr;
 
 			if (borrowerOperationsStatus === "LOADED") {
 				minNetDebt = await borrowerOperationsDefault?.MIN_NET_DEBT()
 				wenGasGompensation = await borrowerOperationsDefault?.LUSD_GAS_COMPENSATION();
 				mcr = await borrowerOperationsDefault?.MCR();
+				ccr = await borrowerOperationsDefault?.CCR();
 			}
 
 			if (wenTokenStatus === "LOADED") {
@@ -64,7 +66,8 @@ export const MainView = () => {
 				MIN_NET_DEBT: Decimal.from(minNetDebt?.toString() || 0).div(dec),
 				LUSD_GAS_COMPENSATION: Decimal.from(wenGasGompensation?.toString() || 0).div(dec),
 				MCR: Decimal.from(mcr?.toString() || 0).div(dec),
-				wenTotalSupply: Decimal.from(totalSupply?.toString() || 0).div(dec)
+				wenTotalSupply: Decimal.from(totalSupply?.toString() || 0).div(dec),
+				CCR: Decimal.from(ccr?.toString() || 0).div(dec),
 			});
 		};
 
