@@ -347,7 +347,7 @@ export const MarketView = ({
 							</div>
 
 							<div className="flex-column">
-								<div className="label labelSmall">{t("liquidationAt")}&nbsp;{globalContants.LIQUIDATION_AT * 100}%</div>
+								<div className="label labelSmall">{t("liquidationAt")}&nbsp;{Decimal.ONE.div(MCR).mul(100).toString(2)}%</div>
 
 								<div className="flex-row-align-left label labelSmall">
 									<div>{t("recoveryMode")}</div>
