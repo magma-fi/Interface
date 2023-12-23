@@ -50,7 +50,7 @@ export const WithdrawModal = ({
 	availableWithdrawal: Decimal;
 	availableBorrow: Decimal;
 }) => {
-	const maxNumber = Number(max.toString());
+	const maxNumber = Number(max);
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
 	const [withdrawAmount, setWithdrawAmount] = useState(-1);

@@ -101,7 +101,7 @@ export const RepayModal = ({
 	};
 
 	const handleMax = () => {
-		const val = Number(max.toString(0));
+		const val = Number(max);
 		setValueForced(val);
 		setRepayAmount(val);
 		setRepaidAmount(val);
