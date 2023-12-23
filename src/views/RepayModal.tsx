@@ -17,7 +17,6 @@ import { calculateAvailableBorrow, calculateAvailableWithdrawal, feeFrom } from 
 import { Slider } from "../components/Slider";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { useMyTransactionState } from "../components/Transaction";
-import { ErrorFragment } from "@ethersproject/abi";
 
 export const RepayModal = ({
 	isOpen = false,
@@ -54,18 +53,15 @@ export const RepayModal = ({
 	const [valueForced, setValueForced] = useState(-1);
 	const [repayAmount, setRepayAmount] = useState(-1);
 	const [repaidAmount, setRepaidAmount] = useState(0);
-	const [desireNetDebt, setDesireNetDebt] = useState(max)
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	// const netDebtNumber = Number(netDebt.toString());
+	const [desireNetDebt, setDesireNetDebt] = useState(netDebt);
 	const maxSafe = Decimal.ONE.div(liquidationPoint);
 	const troveUR = Decimal.ONE.div(trove.collateralRatio(price));
 	const troveUtilizationRateNumber = Number(troveUR);
 	const troveUtilizationRateNumberPercent = troveUtilizationRateNumber * 100;
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
-	// const [slideValue, setSlideValue] = useState(0);
-	// const dec = Math.pow(10, WEN.decimals || 0);
 	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || Decimal.ONE;
 	const isDebtIncrease = desireNetDebt.gt(trove.netDebt);
 	const debtIncreaseAmount = isDebtIncrease ? desireNetDebt.sub(trove.netDebt) : Decimal.ZERO;
@@ -86,6 +82,7 @@ export const RepayModal = ({
 	const txErrorMessages = (description?.key || description?.string) && description as ErrorMessage;
 
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
+	console.debug("xxx errorMessages =", errorMessages, desireNetDebt.add(wenLiquidationReserve).add(fee).toString());
 
 	const errorInfo = txErrorMessages || errorMessages;
 
