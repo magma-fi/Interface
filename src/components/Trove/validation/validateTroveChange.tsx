@@ -20,9 +20,6 @@ import { ErrorDescription } from "../../ErrorDescription";
 import { ErrorMessage } from "../../../libs/types";
 import { WEN } from "../../../libs/globalContants";
 
-const mcrPercent = new Percent(MINIMUM_COLLATERAL_RATIO).toString(0);
-const ccrPercent = new Percent(CRITICAL_COLLATERAL_RATIO).toString(0);
-
 type TroveAdjustmentDescriptionParams = {
   params: TroveAdjustmentParams<Decimal>;
 };
@@ -157,7 +154,7 @@ export const validateTroveChange = (
     change.type === "creation"
       ? validateTroveCreation(change.params, context, constants)
       : change.type === "closure"
-        ? validateTroveClosure(change.params, context)
+        ? validateTroveClosure(change.params, context, constants)
         : validateTroveAdjustment(change.params, context, constants);
 
 
@@ -181,6 +178,9 @@ const validateTroveCreation = (
 ): JSX.Element | ErrorMessage | null => {
   const wenMinimumNetDebt = constants?.MIN_NET_DEBT || LUSD_MINIMUM_NET_DEBT;
   const wenTotalSupply = constants?.wenTotalSupply;
+  const ccrPercent = new Percent(constants?.CCR || CRITICAL_COLLATERAL_RATIO).toString(0);
+  const mcr = constants?.MCR || MINIMUM_COLLATERAL_RATIO;
+  const mcrPercent = new Percent(mcr).toString(0);
 
   if (wenTotalSupply?.add(borrowLUSD || 0).gt(1000000)) {
     return { key: "limit1M" } as ErrorMessage;
@@ -204,17 +204,18 @@ const validateTroveCreation = (
 
   if (recoveryMode) {
     if (!resultingTrove.isOpenableInRecoveryMode(price)) {
-      return (
-        <ErrorDescription>
-          You're not allowed to open a Trove with less than <Amount>{ccrPercent}</Amount> Collateral
-          Ratio during recovery mode. Please increase your Trove's Collateral Ratio.
-        </ErrorDescription>
-      );
+      // return (
+      //   <ErrorDescription>
+      //     You're not allowed to open a Trove with less than <Amount>{ccrPercent}</Amount> Collateral
+      //     Ratio during recovery mode. Please increase your Trove's Collateral Ratio.
+      //   </ErrorDescription>
+      // );
+      return {
+        key: "noOpenning",
+        values: { ccrPercent }
+      } as ErrorMessage;
     }
   } else {
-    const mcr = constants?.MCR || MINIMUM_COLLATERAL_RATIO;
-
-    // return this.collateralRatio(price).lt(MINIMUM_COLLATERAL_RATIO);
     // if (resultingTrove.collateralRatioIsBelowMinimum(price)) {
     if (resultingTrove.collateralRatio(price).lt(mcr)) {
       // return (
@@ -224,17 +225,21 @@ const validateTroveCreation = (
       // );
       return {
         key: "collateralRatioMustBeAtLeast",
-        values: { percent: mcr.mul(100).toString(2) + "%" }
+        values: { percent: mcrPercent }
       } as ErrorMessage;
     }
 
     if (wouldTriggerRecoveryMode) {
-      return (
-        <ErrorDescription>
-          You're not allowed to open a Trove that would cause the Total Collateral Ratio to fall
-          below <Amount>{ccrPercent}</Amount>. Please increase your Trove's Collateral Ratio.
-        </ErrorDescription>
-      );
+      // return (
+      //   <ErrorDescription>
+      //     You're not allowed to open a Trove that would cause the Total Collateral Ratio to fall
+      //     below <Amount>{ccrPercent}</Amount>. Please increase your Trove's Collateral Ratio.
+      //   </ErrorDescription>
+      // );
+      return {
+        key: "noOpenningToFall",
+        values: { ccrPercent }
+      } as ErrorMessage;
     }
   }
 
@@ -265,6 +270,10 @@ const validateTroveAdjustment = (
 ): JSX.Element | ErrorMessage | null => {
   const wenMinimumDebt = constants?.MIN_NET_DEBT.add(constants?.LUSD_GAS_COMPENSATION) || LUSD_MINIMUM_DEBT;
   const wenTotalSupply = constants?.wenTotalSupply;
+  const ccr = constants?.CCR || CRITICAL_COLLATERAL_RATIO;
+  const ccrPercent = new Percent(ccr).toString(0);
+  const mcr = constants?.MCR || MINIMUM_COLLATERAL_RATIO;
+  const mcrPercent = new Percent(mcr).toString(0);
 
   if (wenTotalSupply?.add(borrowLUSD || 0).gt(1000000)) {
     return { key: "limit1M" } as ErrorMessage;
@@ -272,33 +281,42 @@ const validateTroveAdjustment = (
 
   if (recoveryMode) {
     if (withdrawCollateral) {
-      return (
-        <ErrorDescription>
-          You're not allowed to withdraw collateral during recovery mode.
-        </ErrorDescription>
-      );
+      // return (
+      //   <ErrorDescription>
+      //     You're not allowed to withdraw collateral during recovery mode.
+      //   </ErrorDescription>
+      // );
+      return { key: "notAllowed2Withdraw" } as ErrorMessage
     }
 
     if (borrowLUSD) {
-      if (resultingTrove.collateralRatioIsBelowCritical(price)) {
-        return (
-          <ErrorDescription>
-            Your collateral ratio must be at least <Amount>{ccrPercent}</Amount> to borrow during
-            recovery mode. Please improve your collateral ratio.
-          </ErrorDescription>
-        );
+      // return this.collateralRatio(price).lt(CRITICAL_COLLATERAL_RATIO);
+      // if (resultingTrove.collateralRatioIsBelowCritical(price)) {
+      if (resultingTrove.collateralRatio(price).lt(ccr)) {
+        // return (
+        //   <ErrorDescription>
+        //     Your collateral ratio must be at least <Amount>{ccrPercent}</Amount> to borrow during
+        //     recovery mode. Please improve your collateral ratio.
+        //   </ErrorDescription>
+        // );
+        return {
+          key: "collateralRatioMust",
+          values: { ccrPercent }
+        } as ErrorMessage;
       }
 
       if (resultingTrove.collateralRatio(price).lt(originalTrove.collateralRatio(price))) {
-        return (
-          <ErrorDescription>
-            You're not allowed to decrease your collateral ratio during recovery mode.
-          </ErrorDescription>
-        );
+        // return (
+        //   <ErrorDescription>
+        //     You're not allowed to decrease your collateral ratio during recovery mode.
+        //   </ErrorDescription>
+        // );
+        return { key: "noDecreasing" } as ErrorMessage;
       }
     }
   } else {
-    if (resultingTrove.collateralRatioIsBelowMinimum(price)) {
+    // if (resultingTrove.collateralRatioIsBelowMinimum(price)) {
+    if (resultingTrove.collateralRatio(price).lt(mcr)) {
       // return (
       //   <ErrorDescription>
       //     Collateral ratio must be at least <Amount>{mcrPercent}</Amount>.
@@ -373,8 +391,11 @@ const validateTroveClosure = (
     wouldTriggerRecoveryMode,
     numberOfTroves,
     lusdBalance
-  }: TroveChangeValidationContext
+  }: TroveChangeValidationContext,
+  constants?: Record<string, Decimal>
 ): JSX.Element | ErrorMessage | null => {
+  const ccrPercent = new Percent(constants?.CCR || CRITICAL_COLLATERAL_RATIO).toString(0);
+
   if (numberOfTroves === 1) {
     return (
       <ErrorDescription>
@@ -384,11 +405,12 @@ const validateTroveClosure = (
   }
 
   if (recoveryMode) {
-    return (
-      <ErrorDescription>
-        You're not allowed to close your Trove during recovery mode.
-      </ErrorDescription>
-    );
+    // return (
+    //   <ErrorDescription>
+    //     You're not allowed to close your Trove during recovery mode.
+    //   </ErrorDescription>
+    // );
+    return { key: "onClosing" } as ErrorMessage;
   }
 
   if (repayLUSD?.gt(lusdBalance)) {
@@ -403,18 +425,22 @@ const validateTroveClosure = (
     // );
     return {
       key: "needMoreToClose",
-      values: { amount: repayLUSD.sub(lusdBalance).prettify() + " " + WEN.symbol }
+      values: { amount: repayLUSD.sub(lusdBalance).toString() + " " + WEN.symbol }
     } as ErrorMessage;
   }
 
   if (wouldTriggerRecoveryMode) {
-    return (
-      <ErrorDescription>
-        You're not allowed to close a Trove if it would cause the Total Collateralization Ratio to
-        fall below <Amount>{ccrPercent}</Amount>. Please wait until the Total Collateral Ratio
-        increases.
-      </ErrorDescription>
-    );
+    // return (
+    //   <ErrorDescription>
+    //     You're not allowed to close a Trove if it would cause the Total Collateralization Ratio to
+    //     fall below <Amount>{ccrPercent}</Amount>. Please wait until the Total Collateral Ratio
+    //     increases.
+    //   </ErrorDescription>
+    // );
+    return {
+      key: "noClosingToFall",
+      values: { ccrPercent }
+    } as ErrorMessage;
   }
 
   return null;
