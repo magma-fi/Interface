@@ -425,7 +425,7 @@ const validateTroveClosure = (
     // );
     return {
       key: "needMoreToClose",
-      values: { amount: repayLUSD.sub(lusdBalance).toString() + " " + WEN.symbol }
+      values: { amount: repayLUSD.sub(lusdBalance).toString() }
     } as ErrorMessage;
   }
 
