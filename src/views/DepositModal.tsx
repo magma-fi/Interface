@@ -9,7 +9,7 @@ import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { ExpandableView } from "./ExpandableView";
-import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE } from "lib-base";
+import { Decimal, Trove, Difference, LUSD_LIQUIDATION_RESERVE } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
@@ -59,24 +59,22 @@ export const DepositeModal = ({
 	const [depositValue, setDepositValue] = useState(0);
 	const [borrowValue, setBorrowValue] = useState(0);
 	const [showExpandBorrowView, setShowExpandBorrowView] = useState(depositAndBorrow);
+	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION.gt(0) ? constants?.LUSD_GAS_COMPENSATION : LUSD_LIQUIDATION_RESERVE;
+	const borrowingRate = fees.borrowingRate();
 	const previousTrove = useRef<Trove>(trove);
-	const previousAvailableBorrow = previousTrove.current.collateral.mul(price).div(CRITICAL_COLLATERAL_RATIO);
-	const [newAvailableBorrow, setNewAvailableBorrow] = useState(previousAvailableBorrow);
+	const remainBorrowingRate = Decimal.ONE.sub(borrowingRate);
+	const [newAvailableBorrow, setNewAvailableBorrow] = useState(availableBorrow);
 	const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
-	// const previousBorrowedAmountNumber = Number(previousNetDebt.toString());
 	const [defaultBorrowAmount, setDefaultBorrowAmount] = useState(-1);
 	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
 	const [desireCollateral, setDesireCollateral] = useState(previousTrove.current?.collateral);
 	const [desireNetDebt, setDesireNetDebt] = useState(previousNetDebt);
-	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || Decimal.ONE;
-	// const wenMinimumNetDebt = constants?.MIN_NET_DEBT.div(dec) || Decimal.ONE;
 	const troveNetDebt = trove.debt.gt(wenLiquidationReserve) ? trove.netDebt : Decimal.ZERO;
 	const isDirty = !previousTrove.current.collateral.eq(desireCollateral) || !previousNetDebt.eq(desireNetDebt);
 	const isDebtIncrease = desireNetDebt.gt(troveNetDebt);
 	const debtIncreaseAmount = isDebtIncrease ? desireNetDebt.sub(troveNetDebt) : Decimal.ZERO;
-	const borrowingRate = fees.borrowingRate();
 	const fee = !depositAndBorrow
 		? (
 			isDebtIncrease
@@ -103,7 +101,7 @@ export const DepositeModal = ({
 		setDepositValue(0);
 		setBorrowValue(0);
 		setShowExpandBorrowView(depositAndBorrow);
-		setNewAvailableBorrow(previousAvailableBorrow);
+		setNewAvailableBorrow(availableBorrow);
 		setDefaultBorrowAmount(-1);
 		setErrorMessages(undefined);
 	};
@@ -139,10 +137,10 @@ export const DepositeModal = ({
 						{newAvailableBorrow?.toString(2)}&nbsp;{WEN.symbol}
 					</div>
 
-					{newAvailableBorrow.gt(previousAvailableBorrow) && <div
+					{newAvailableBorrow.gt(availableBorrow) && <div
 						className="label labelSmall"
 						style={{ textDecoration: "line-through" }}>
-						{previousAvailableBorrow?.toString(2)}
+						{availableBorrow?.toString(2)}
 					</div>}
 				</div>
 			</div>
@@ -236,7 +234,8 @@ export const DepositeModal = ({
 			const nextCollateral = applyUnsavedCollateralChanges(unsavedChanges, trove);
 			setDesireCollateral(nextCollateral);
 
-			const newBorrow = newCollateral.mul(price).div(CRITICAL_COLLATERAL_RATIO);
+			const newMaxAvailableBorrow = newCollateral.mul(price).div(liquidationPoint).mul(remainBorrowingRate);
+			const newBorrow = newMaxAvailableBorrow.gt(wenLiquidationReserve) ? newMaxAvailableBorrow.sub(wenLiquidationReserve) : Decimal.ZERO;
 			setNewAvailableBorrow(newBorrow.gt(previousNetDebt) ? newBorrow.sub(previousNetDebt) : Decimal.ZERO);
 		}
 
@@ -397,7 +396,7 @@ export const DepositeModal = ({
 						<div
 							className="label"
 							style={{ color: "#F6F6F7" }}>
-							{LUSD_LIQUIDATION_RESERVE.toString(2)}&nbsp;{WEN.symbol}
+							{constants?.LUSD_GAS_COMPENSATION.toString(2)}&nbsp;{WEN.symbol}
 						</div>
 					</div>
 
