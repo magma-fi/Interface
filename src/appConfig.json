@@ -14,5 +14,13 @@
 		"4690": {
 			"http": "https://babel-api.testnet.iotex.io"
 		}
+	},
+	"swap": {
+		"4689": {
+			"liquidity": {
+				"address": "0x147cdae2bf7e809b9789ad0765899c06b361c5ce",
+				"abi": "/abis/MimoV2Router02NoReferral.json.json"
+			}
+		}
 	}
 }

@@ -101,7 +101,7 @@ export const MarketView = ({
 		trove.debt,
 		Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(troveCollateralValue)
 	);
-	const liquidationPrice = debtToLiquidate.div(trove.collateral);
+	const liquidationPrice = trove.collateral.gt(0) ? debtToLiquidate.div(trove.collateral) : Decimal.ZERO;
 
 	const maxAvailableBorrow = troveCollateralValue.div(liquidationPoint);
 	const maxAvailableBorrowSubFee = maxAvailableBorrow.mul(Decimal.ONE.sub(borrowingRate));
@@ -162,7 +162,7 @@ export const MarketView = ({
 		}
 	};
 
-	const handleCloseTroveFromRepayModal=()=>{
+	const handleCloseTroveFromRepayModal = () => {
 		handleCloseRepayModal();
 		setShowCloseModal(true);
 	};
