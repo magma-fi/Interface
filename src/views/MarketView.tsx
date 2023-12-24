@@ -549,7 +549,7 @@ export const MarketView = ({
 					<div className="flex-row-space-between">
 						<div className="description">{t("wenTotalSupply")}</div>
 
-						<div>{constants?.wenTotalSupply.toString(2) + " " + WEN.symbol}</div>
+						<div>{constants?.wenTotalSupply?.toString(2) + " " + WEN.symbol}</div>
 					</div>
 
 					<div className="flex-row-space-between">
