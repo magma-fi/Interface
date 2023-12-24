@@ -32,7 +32,8 @@ export const RepayModal = ({
 	recoveryMode,
 	liquidationPoint,
 	availableWithdrawal,
-	availableBorrow
+	availableBorrow,
+	onCloseVault = () => { }
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -48,6 +49,7 @@ export const RepayModal = ({
 	liquidationPoint: Decimal;
 	availableWithdrawal: Decimal;
 	availableBorrow: Decimal;
+	onCloseVault: () => void;
 }) => {
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
@@ -185,11 +187,22 @@ export const RepayModal = ({
 						style={{ alignItems: "center" }}>
 						<div className="label fat">{t("repayAmount")}</div>
 
-						<button
-							className="textButton smallTextButton"
-							onClick={handleMax}>
-							{t("max")}:&nbsp;{max.toString(2)}&nbsp;{WEN.symbol}
-						</button>
+						<div
+							className="flex-row-align-left"
+							style={{ gap: "0.5rem" }}>
+							<button
+								className="textButton smallTextButton"
+								onClick={handleMax}>
+								{t("max")}:&nbsp;{max.toString(2)}&nbsp;{WEN.symbol}
+							</button>
+
+							<button
+								className="textButton smallTextButton"
+								style={{ textTransform: "none" }}
+								onClick={onCloseVault}>
+								{t("or")}&nbsp;{t("closeVault")}
+							</button>
+						</div>
 					</div>
 
 					<AmountInput

@@ -162,6 +162,11 @@ export const MarketView = ({
 		}
 	};
 
+	const handleCloseTroveFromRepayModal=()=>{
+		handleCloseRepayModal();
+		setShowCloseModal(true);
+	};
+
 	const handleDeposit = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		setDepositAndBorrow(evt.currentTarget.id === "0");
 
@@ -665,7 +670,8 @@ export const MarketView = ({
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
 			liquidationPoint={liquidationPoint}
-			availableBorrow={availableBorrow} />}
+			availableBorrow={availableBorrow}
+			onCloseVault={handleCloseTroveFromRepayModal} />}
 
 		{showRepayDoneModal && <TxDone
 			title={t("repaidSuccessfully")}
