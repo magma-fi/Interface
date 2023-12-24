@@ -107,5 +107,6 @@
 	"onClosing": "You're not allowed to close your Trove during recovery mode.",
 	"noOpenning": "You're not allowed to open a Trove with less than {ccrPercent} Collateral Ratio during recovery mode. Please increase your Trove's Collateral Ratio.",
 	"noOpenningToFall": "You're not allowed to open a Trove that would cause the Total Collateral Ratio to fall below {ccrPercent}. Please increase your Trove's Collateral Ratio.",
-	"noClosingToFall": "You're not allowed to close a Trove if it would cause the Total Collateralization Ratio to fall below {ccrPercent}. Please wait until the Total Collateral Ratio increases."
+	"noClosingToFall": "You're not allowed to close a Trove if it would cause the Total Collateralization Ratio to fall below {ccrPercent}. Please wait until the Total Collateral Ratio increases.",
+	"sending": "sending"
 }

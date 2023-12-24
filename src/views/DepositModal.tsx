@@ -58,7 +58,7 @@ export const DepositeModal = ({
 	const [valueForced, setValueForced] = useState(-1);
 	const [depositValue, setDepositValue] = useState(0);
 	const [borrowValue, setBorrowValue] = useState(0);
-	const [showExpandBorrowView, setShowExpandBorrowView] = useState(false);
+	const [showExpandBorrowView, setShowExpandBorrowView] = useState(depositAndBorrow);
 	const previousTrove = useRef<Trove>(trove);
 	const previousAvailableBorrow = previousTrove.current.collateral.mul(price).div(CRITICAL_COLLATERAL_RATIO);
 	const [newAvailableBorrow, setNewAvailableBorrow] = useState(previousAvailableBorrow);
@@ -102,7 +102,7 @@ export const DepositeModal = ({
 		setValueForced(-1);
 		setDepositValue(0);
 		setBorrowValue(0);
-		setShowExpandBorrowView(false);
+		setShowExpandBorrowView(depositAndBorrow);
 		setNewAvailableBorrow(previousAvailableBorrow);
 		setDefaultBorrowAmount(-1);
 		setErrorMessages(undefined);
@@ -428,7 +428,7 @@ export const DepositeModal = ({
 						style={{ width: "100%" }}>
 						<img src="images/deposit.png" />
 
-						{t("deposit")}
+						{depositAndBorrow ? t("depositAndBorrow") : t("deposit")}
 					</button>
 				</TroveAction> : <button
 					className="primaryButton bigButton"
@@ -436,7 +436,7 @@ export const DepositeModal = ({
 					disabled>
 					<img src="images/deposit.png" />
 
-					{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("depositing") + "...") : t("deposit")}
+					{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t(depositAndBorrow ? "sending" : "depositing") + "...") : t(depositAndBorrow ? "depositAndBorrow" : "deposit")}
 				</button>}
 	</Modal> : <></>
 };
