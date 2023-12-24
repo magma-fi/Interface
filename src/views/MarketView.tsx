@@ -104,8 +104,11 @@ export const MarketView = ({
 	const liquidationPrice = debtToLiquidate.div(trove.collateral);
 
 	const maxAvailableBorrow = troveCollateralValue.div(liquidationPoint);
-	const availableBorrow = maxAvailableBorrow.gt(trove.debt) ? maxAvailableBorrow.mul(Decimal.ONE.sub(borrowingRate)).sub(trove.debt) : Decimal.ZERO;
+	const maxAvailableBorrowSubFee = maxAvailableBorrow.mul(Decimal.ONE.sub(borrowingRate));
+	const availableBorrow = maxAvailableBorrowSubFee.gt(trove.debt) ? maxAvailableBorrowSubFee.sub(trove.debt) : Decimal.ZERO;
 	const currentNetDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
+	const minNetDebt = constants?.MIN_NET_DEBT || Decimal.ZERO;
+	const maxAvailableRepay = currentNetDebt.gt(minNetDebt) ? currentNetDebt.sub(minNetDebt) : Decimal.ZERO;
 	const totalUtilizationRate = total.collateral.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? total.netDebt.div(total.collateral.mul(price)) : Decimal.ZERO;
 	const troveUtilizationRate = trove.collateral.gt(0) ? currentNetDebt.div(troveCollateralValue).mul(100) : Decimal.ZERO;
 	const troveUtilizationRateNumber = Number(troveUtilizationRate);
@@ -462,7 +465,8 @@ export const MarketView = ({
 							style={{ gap: "5px" }}>
 							<button
 								className="secondaryButton"
-								onClick={handleRepay}>
+								onClick={handleRepay}
+								disabled={maxAvailableRepay.eq(0)}>
 								<img src="images/repay.png" />
 
 								{t("repay") + " " + WEN.symbol}
@@ -655,7 +659,7 @@ export const MarketView = ({
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={Decimal.min(currentNetDebt, lusdBalance)}
+			max={Decimal.min(maxAvailableRepay, lusdBalance)}
 			onDone={handleRepayDone}
 			constants={constants}
 			availableWithdrawal={availableWithdrawal}

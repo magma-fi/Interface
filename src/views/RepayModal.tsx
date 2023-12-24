@@ -82,7 +82,6 @@ export const RepayModal = ({
 	const txErrorMessages = (description?.key || description?.string) && description as ErrorMessage;
 
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
-	console.debug("xxx errorMessages =", errorMessages, desireNetDebt.add(wenLiquidationReserve).add(fee).toString());
 
 	const errorInfo = txErrorMessages || errorMessages;
 
