@@ -110,5 +110,7 @@
 	"noClosingToFall": "You're not allowed to close a Trove if it would cause the Total Collateralization Ratio to fall below {ccrPercent}. Please wait until the Total Collateral Ratio increases.",
 	"sending": "sending",
 	"or": "or",
-	"swapIotx2Wen": "Swap {iotxAmount} IOTX to {wenAmount} WEN"
+	"swapIotx2Wen": "Swap {iotxAmount} IOTX to {wenAmount} WEN",
+	"swap": "Swap",
+	"swapping": "Swapping"
 }

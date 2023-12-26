@@ -17,6 +17,8 @@ import appConfig from "../appConfig.json";
 import { loadABI } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { IOTX, WEN } from "../libs/globalContants";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { parseEther } from "viem";
 
 export const CloseModal = ({
 	isOpen = false,
@@ -24,7 +26,8 @@ export const CloseModal = ({
 	trove,
 	fees,
 	validationContext,
-	chainId
+	chainId,
+	balance
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -32,10 +35,14 @@ export const CloseModal = ({
 	fees: Fees;
 	validationContext: ValidationContext;
 	chainId: number;
+	balance: Decimal;
 }) => {
 	const { t } = useLang();
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
+	const indexOfConfig: string = String(chainId);
+	const publicClient = usePublicClient();
+	const account = useAccount();
 
 	const updatedTrove = new Trove(Decimal.ZERO, Decimal.ZERO);
 	const borrowingRate = fees.borrowingRate();
@@ -47,43 +54,49 @@ export const CloseModal = ({
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const errorMessages = description as ErrorMessage;
-	const needSwap = errorMessages.key === "needMoreToClose";
+	const needSwap = errorMessages?.key === "needMoreToClose";
 	const wenDec = Math.pow(10, WEN.decimals || 18);
 	const iotxDec = Math.pow(10, IOTX.decimals || 18);
-	const howMuchWEN = Decimal.from(errorMessages.values!.amount).mul(wenDec);
-	const { provider } = useLiquity();
-	const [swapContract, setSwapContract] = useState<Contract | undefined>();
+	const howMuchWEN = errorMessages?.values?.amount ? Decimal.from(errorMessages.values!.amount).mul(wenDec) : Decimal.ZERO;
+	const { provider, walletClient } = useLiquity();
 	const [howMuchIOTX, setHowMuchIOTX] = useState(Decimal.ZERO);
+	const howMuchIOTXDecimal = howMuchIOTX.div(iotxDec);
+	const insufficientIOTX = howMuchIOTXDecimal.gt(balance);
+	const theCfg = appConfig.swap[indexOfConfig];
+	const address = theCfg?.liquidity?.address;
+	const [swapping, setSwapping] = useState(false);
+	// const [reloadTrigger, setReloadTrigger] = useState(false);
 
 	useEffect(() => {
 		if (!needSwap) return;
 
 		const getContract = async () => {
-			const theCfg = appConfig.swap[chainId as string];
-			const addr = theCfg.liquidity.address;
-			const abi = await loadABI(theCfg.liquidity.abi)
+			const abi = await loadABI(theCfg.liquidity.abi);
+			let res: bigint[] = [];
 
-			if (abi) {
-				const c = new Contract(addr, abi as ContractInterface, provider);
-				setSwapContract(c);
+			if (address && abi) {
+				try {
+					res = await publicClient.readContract({
+						address,
+						abi,
+						functionName: 'getAmountsIn',
+						args: [
+							howMuchWEN.toString(),
+							[appConfig.tokens.wrappedNativeCurrency[indexOfConfig].address, appConfig.tokens.wen[indexOfConfig].address]
+						]
+					}) as bigint[];
+				} catch (error) {
+					console.error(error);
+				}
+
+				if (res.length === 2) {
+					setHowMuchIOTX(Decimal.from(res[0].toString()));
+				}
 			}
 		};
 
 		getContract();
 	}, [needSwap]);
-
-	useEffect(() => {
-		if (!swapContract) return;
-
-		const getData = async () => {
-			const res = await swapContract.getAmountsIn(howMuchWEN.toString(), ["0xa00744882684c3e4747faefd68d283ea44099d03", "0x20143c45c2ce7984799079f256d8a68a918eeee6"]);
-			if (res?.length === 2) {
-				setHowMuchIOTX(Decimal.from(res[0].toString()));
-			}
-		};
-
-		getData();
-	}, [swapContract]);
 
 	const handleCloseModal = () => {
 		onClose();
@@ -96,8 +109,46 @@ export const CloseModal = ({
 		}
 	}, [transactionState.type])
 
-	const handleSwap = () => {
-		// 
+	const listenHash = async (txHash: string) => {
+		if (!txHash) return;
+
+		const receipt = await provider.getTransactionReceipt(txHash);
+		if (!receipt) {
+			return setTimeout(() => {
+				listenHash(txHash);
+			}, 5000);
+		}
+
+		if (receipt.status === 1) {
+			setSwapping(false);
+			// setReloadTrigger(!reloadTrigger);
+		}
+	};
+
+	const handleSwap = async () => {
+		if (!publicClient) return;
+
+		const abi = await loadABI(theCfg.liquidity.abi);
+
+		if (abi) {
+			const txHash = await walletClient.writeContract({
+				account: account.address,
+				address,
+				abi,
+				functionName: 'swapETHForExactTokens',
+				args: [
+					howMuchWEN.toString(),
+					[appConfig.tokens.wrappedNativeCurrency[indexOfConfig].address, appConfig.tokens.wen[indexOfConfig].address],
+					"0x09E50c45790BE9020e7d22FE6FdC61c5f980c191",
+					Math.floor(new Date().getTime() / 1000 + 15)
+				],
+				value: parseEther(howMuchIOTX.mul(1.02).div(iotxDec).toString()),
+			})
+
+			setSwapping(true);
+
+			return listenHash(txHash);
+		}
 	};
 
 	return isOpen ? <Modal
@@ -106,17 +157,26 @@ export const CloseModal = ({
 		<div
 			className="flex-column"
 			style={{ gap: "24px" }}>
-			<div>{description && t(errorMessages.key, errorMessages.values)}</div>
+			<div>{description && errorMessages && t(errorMessages.key, errorMessages.values)}</div>
 
-			{needSwap && <button
-				className="textButton smallTextButton"
-				style={{ textTransform: "none" }}
-				onClick={handleSwap}>
-				{t("swapIotx2Wen", {
-					iotxAmount: howMuchIOTX.div(iotxDec).toString(6),
-					wenAmount: howMuchWEN.div(wenDec).toString(6)
-				})}
-			</button>}
+			{needSwap && <div className="flex-row-align-left">
+				<div className="label">
+					{t("swapIotx2Wen", {
+						iotxAmount: howMuchIOTXDecimal.toString(2),
+						wenAmount: howMuchWEN.div(wenDec).toString(2)
+					})}
+				</div>
+
+				<button
+					className="textButton smallTextButton"
+					style={{ textTransform: "none" }}
+					onClick={handleSwap}
+					disabled={insufficientIOTX || swapping}>
+					{swapping ? t("swapping") + "..." : t("swap")}
+
+					{insufficientIOTX && "(" + t("balance") + ":&nbsp;" + balance.toString(2) + ")"}
+				</button>
+			</div>}
 		</div>
 
 		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction

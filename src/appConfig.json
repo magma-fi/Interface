@@ -15,6 +15,18 @@
 			"http": "https://babel-api.testnet.iotex.io"
 		}
 	},
+	"tokens": {
+		"wrappedNativeCurrency": {
+			"4689": {
+				"address": "0xa00744882684c3e4747faefd68d283ea44099d03"
+			}
+		},
+		"wen": {
+			"4689": {
+				"address": "0x20143c45c2ce7984799079f256d8a68a918eeee6"
+			}
+		}
+	},
 	"swap": {
 		"4689": {
 			"liquidity": {

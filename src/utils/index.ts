@@ -1,5 +1,6 @@
 import { JsonFragment } from "@ethersproject/abi";
 import { Trove, Decimal, CRITICAL_COLLATERAL_RATIO } from "lib-base";
+import { Abi, Narrow } from "viem";
 
 export const shortenAddress = (address: string) => address.substr(0, 6) + "..." + address.substr(-4);
 
@@ -36,7 +37,7 @@ export const feeFrom = (original: Trove, edited: Trove, borrowingRate: Decimal):
 	}
 };
 
-export const loadABI = async (url: string): Promise<JsonFragment | undefined> => {
+export const loadABI = async (url: string): Promise<Narrow<Abi | readonly unknown[]> | undefined> => {
 	try {
 		return await (await fetch(url)).json();
 	} catch (error) {

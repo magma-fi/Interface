@@ -725,6 +725,7 @@ export const MarketView = ({
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			chainId={chainId} />}
+			chainId={chainId}
+			balance={accountBalance} />}
 	</>
 };
