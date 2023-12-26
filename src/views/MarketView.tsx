@@ -725,6 +725,8 @@ export const MarketView = ({
 			onClose={handleCloseClosureModal}
 			trove={trove}
 			fees={fees}
-			validationContext={validationContext} />}
+			validationContext={validationContext}
+			chainId={chainId}
+			balance={accountBalance} />}
 	</>
 };

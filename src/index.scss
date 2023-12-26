@@ -328,6 +328,11 @@ h4 {
   img {
     width: 16px;
   }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 }
 
 .smallTextButton {
