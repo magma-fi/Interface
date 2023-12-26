@@ -22,6 +22,7 @@ import { graphqlAsker } from "../libs/graphqlAsker";
 import { useAccount, useChainId } from "wagmi";
 import { CloseModal } from "./CloseModal";
 import { TransactiionListItem } from "./TransactiionListItem";
+import appConfig from "../appConfig.json";
 
 export const MarketView = ({
 	market,
@@ -69,6 +70,7 @@ export const MarketView = ({
 		fees,
 		lusdBalance
 	} = useLiquitySelector(selector);
+	const chainId = useChainId();
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
 	const [depositAndBorrow, setDepositAndBorrow] = useState(true);
@@ -89,7 +91,7 @@ export const MarketView = ({
 	// const recoveryMode = totalCollateralRatio.div(CRITICAL_COLLATERAL_RATIO);
 	const recoveryMode = total.collateralRatioIsBelowCritical(price);
 	const CCR = constants?.CCR?.gt(0) ? constants?.CCR : CRITICAL_COLLATERAL_RATIO;
-	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : MINIMUM_COLLATERAL_RATIO
+	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO;
 	const recoveryModeAt = CCR.gt(0) ? Decimal.ONE.div(CCR) : Decimal.ZERO;
 	const liquidationPoint = recoveryMode ? CCR : MCR;
 	const borrowingFeePct = new Percent(borrowingRate);
@@ -136,7 +138,6 @@ export const MarketView = ({
 
 	const availableWithdrawal = calculateAvailableWithdrawal(trove, price, liquidationPoint);
 	const availableWithdrawalFiat = availableWithdrawal.mul(price);
-	const chainId = useChainId();
 	const { address } = useAccount();
 	const [txs, setTxs] = useState<TroveChangeTx[]>([]);
 	useEffect(() => {
