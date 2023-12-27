@@ -5,7 +5,7 @@
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
 import { ErrorMessage, ValidationContext } from "../libs/types";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Decimal, Trove } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
@@ -16,7 +16,7 @@ import { Contract, ContractInterface } from "@ethersproject/contracts";
 import appConfig from "../appConfig.json";
 import { loadABI } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
-import { IOTX, WEN } from "../libs/globalContants";
+import { IOTX, WEN, globalContants } from "../libs/globalContants";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { parseEther } from "viem";
 
@@ -27,7 +27,8 @@ export const CloseModal = ({
 	fees,
 	validationContext,
 	chainId,
-	balance
+	balance,
+	price
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -36,6 +37,7 @@ export const CloseModal = ({
 	validationContext: ValidationContext;
 	chainId: number;
 	balance: Decimal;
+	price: Decimal;
 }) => {
 	const { t } = useLang();
 	const txId = useMemo(() => String(new Date().getTime()), []);
@@ -43,6 +45,7 @@ export const CloseModal = ({
 	const indexOfConfig: string = String(chainId);
 	const publicClient = usePublicClient();
 	const account = useAccount();
+	const [agree, setAgree] = useState(false);
 
 	const updatedTrove = new Trove(Decimal.ZERO, Decimal.ZERO);
 	const borrowingRate = fees.borrowingRate();
@@ -125,6 +128,10 @@ export const CloseModal = ({
 		}
 	};
 
+	const handeTermChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+		setAgree(evt.target.checked);
+	};
+
 	const handleSwap = async () => {
 		if (!publicClient) return;
 
@@ -155,27 +162,55 @@ export const CloseModal = ({
 		title={t("closeVault")}
 		onClose={handleCloseModal}>
 		<div
-			className="flex-column"
-			style={{ gap: "24px" }}>
+			className="depositModal flex-column"
+			style={{
+				gap: "24px",
+				flexDirection: "column"
+			}}>
 			<div>{description && errorMessages && t(errorMessages.key, errorMessages.values)}</div>
 
-			{needSwap && <div className="flex-row-align-left">
-				<div className="label">
+			{needSwap && <div className="flex-column-align-left">
+				<div>
 					{t("swapIotx2Wen", {
 						iotxAmount: howMuchIOTXDecimal.toString(2),
 						wenAmount: howMuchWEN.div(wenDec).toString(2)
 					})}
 				</div>
 
-				<button
-					className="textButton smallTextButton"
-					style={{ textTransform: "none" }}
-					onClick={handleSwap}
-					disabled={insufficientIOTX || swapping}>
-					{swapping ? t("swapping") + "..." : t("swap")}
+				<div className="label small">
+					{IOTX.symbol + " " + t("price") + ": " + price.toString(2) + " " + globalContants.USD}
+				</div>
 
-					{insufficientIOTX && "(" + t("balance") + ":&nbsp;" + balance.toString(2) + ")"}
-				</button>
+				<div className="label small">
+					{IOTX.symbol + " " + t("balance") + ": " + balance.toString(2)}
+				</div>
+
+				<div style={{
+					width: "100%"
+				}}>
+					<label
+						className="label small"
+						htmlFor="term"
+						style={{ whiteSpace: "normal" }}>
+						{t("knowSlippage")}&nbsp;
+					</label>
+
+					<input
+						id="term"
+						type="checkbox"
+						style={{ display: "inline-box" }}
+						onChange={handeTermChange} />
+
+					<span>&nbsp;&nbsp;</span>
+
+					<button
+						className="textButton smallTextButton"
+						style={{ textTransform: "none", display: "inline-box" }}
+						onClick={handleSwap}
+						disabled={insufficientIOTX || swapping || !agree}>
+						{swapping ? t("swapping") + "..." : t("swap")}
+					</button>
+				</div>
 			</div>}
 		</div>
 

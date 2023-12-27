@@ -86,7 +86,9 @@ export const DropdownMenu = ({
 				onMouseEnter={handleMouseEnter}
 				style={{
 					top: "auto",
-					bottom: "0"
+					bottom: "0",
+					right: "0",
+					left: "auto"
 				}}>
 				{options.map((option, index) => {
 					return <div

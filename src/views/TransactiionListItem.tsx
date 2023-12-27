@@ -56,8 +56,7 @@ export const TransactiionListItem = ({
 	}, [col, data.troveOperation, deb]);
 
 	return <a
-		className="flex-row-space-between"
-		style={{ cursor: "pointer" }}
+		className="transactionListItem"
 		href={client.chain?.blockExplorers?.default.url + "/tx/" + data.transaction.id}
 		target="_blank">
 		<div
@@ -77,7 +76,7 @@ export const TransactiionListItem = ({
 			</div>}
 		</div>
 
-		<div className="flex-column-align-right">
+		<div className="txValues">
 			<div className="flex-row-align-left">
 				{col !== 0 && <div style={{ color: col > 0 ? "#F25454" : "#8ED434" }}>
 					{Math.abs(col).toFixed(2)}&nbsp;{market.symbol}

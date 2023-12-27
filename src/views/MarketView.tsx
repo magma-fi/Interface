@@ -749,6 +749,7 @@ export const MarketView = ({
 			fees={fees}
 			validationContext={validationContext}
 			chainId={chainId}
-			balance={accountBalance} />}
+			balance={accountBalance}
+			price={price} />}
 	</>
 };
