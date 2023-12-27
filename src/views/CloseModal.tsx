@@ -12,12 +12,11 @@ import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
 import { TroveAction } from "../components/Trove/TroveAction";
 import { useMyTransactionState } from "../components/Transaction";
-import { Contract, ContractInterface } from "@ethersproject/contracts";
 import appConfig from "../appConfig.json";
 import { loadABI } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { IOTX, WEN, globalContants } from "../libs/globalContants";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { erc20ABI, useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { parseEther } from "viem";
 
 export const CloseModal = ({
@@ -64,11 +63,9 @@ export const CloseModal = ({
 	const { provider, walletClient } = useLiquity();
 	const [howMuchIOTX, setHowMuchIOTX] = useState(Decimal.ZERO);
 	const howMuchIOTXDecimal = howMuchIOTX.div(iotxDec);
-	const insufficientIOTX = howMuchIOTXDecimal.gt(balance);
 	const theCfg = appConfig.swap[indexOfConfig];
 	const address = theCfg?.liquidity?.address;
 	const [swapping, setSwapping] = useState(false);
-	// const [reloadTrigger, setReloadTrigger] = useState(false);
 
 	useEffect(() => {
 		if (!needSwap) return;
@@ -112,19 +109,37 @@ export const CloseModal = ({
 		}
 	}, [transactionState.type])
 
-	const listenHash = async (txHash: string) => {
+	const swap = async () => {
+		const txHash = await walletClient.writeContract({
+			account: account.address,
+			address: appConfig.swap[indexOfConfig].swapAndCloseTool.address,
+			abi: appConfig.swap[indexOfConfig].swapAndCloseTool.abi,
+			functionName: 'swapAndCloseTrove',
+			args: [],
+			value: parseEther(howMuchIOTX.mul(1.02).div(iotxDec).toString())
+		})
+
+		return listenHash(txHash, false);
+	};
+
+	const listenHash = async (txHash: string, approve = true) => {
 		if (!txHash) return;
 
 		const receipt = await provider.getTransactionReceipt(txHash);
+
 		if (!receipt) {
 			return setTimeout(() => {
-				listenHash(txHash);
+				listenHash(txHash, approve);
 			}, 5000);
 		}
 
 		if (receipt.status === 1) {
-			setSwapping(false);
-			// setReloadTrigger(!reloadTrigger);
+			if (approve) {
+				await swap();
+			} else {
+				setSwapping(false);
+				onClose();
+			}
 		}
 	};
 
@@ -135,27 +150,20 @@ export const CloseModal = ({
 	const handleSwap = async () => {
 		if (!publicClient) return;
 
-		const abi = await loadABI(theCfg.liquidity.abi);
+		const txHash = await walletClient.writeContract({
+			account: account.address,
+			address: appConfig.tokens.wen[indexOfConfig].address,
+			abi: erc20ABI,
+			functionName: 'approve',
+			args: [
+				appConfig.swap[indexOfConfig].swapAndCloseTool.address,
+				parseEther(trove.netDebt.toString())
+			],
+		})
 
-		if (abi) {
-			const txHash = await walletClient.writeContract({
-				account: account.address,
-				address,
-				abi,
-				functionName: 'swapETHForExactTokens',
-				args: [
-					howMuchWEN.toString(),
-					[appConfig.tokens.wrappedNativeCurrency[indexOfConfig].address, appConfig.tokens.wen[indexOfConfig].address],
-					"0x09E50c45790BE9020e7d22FE6FdC61c5f980c191",
-					Math.floor(new Date().getTime() / 1000 + 15)
-				],
-				value: parseEther(howMuchIOTX.mul(1.02).div(iotxDec).toString()),
-			})
+		setSwapping(true);
 
-			setSwapping(true);
-
-			return listenHash(txHash);
-		}
+		return listenHash(txHash);
 	};
 
 	return isOpen ? <Modal
@@ -200,19 +208,10 @@ export const CloseModal = ({
 						type="checkbox"
 						style={{ display: "inline-box" }}
 						onChange={handeTermChange} />
-
-					<span>&nbsp;&nbsp;</span>
-
-					<button
-						className="textButton smallTextButton"
-						style={{ textTransform: "none", display: "inline-box" }}
-						onClick={handleSwap}
-						disabled={insufficientIOTX || swapping || !agree}>
-						{swapping ? t("swapping") + "..." : t("swap")}
-					</button>
 				</div>
 			</div>}
 		</div>
+
 
 		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
 			transactionId={txId}
@@ -226,13 +225,19 @@ export const CloseModal = ({
 
 				{t("closeVault")}
 			</button>
-		</TroveAction> : <button
+		</TroveAction> : (agree && !swapping ? <button
+			className="primaryButton bigButton"
+			style={{ width: "100%" }}
+			onClick={handleSwap}>
+			<img src="images/repay-dark.png" />
+			{t("closeVault")}
+		</button> : <button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
 			disabled>
 			<img src="images/repay-dark.png" />
 
-			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("closing") + "...") : t("closeVault")}
-		</button>}
+			{(transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" || swapping) ? (t("closing") + "...") : t("closeVault")}
+		</button>)}
 	</Modal> : <></>
 };
