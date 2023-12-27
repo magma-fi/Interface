@@ -45,7 +45,8 @@ export type TroveInTx = {
 
 export enum TroveOperation {
 	OpenTrove = "openTrove",
-	AdjustTrove = "adjustTrove"
+	AdjustTrove = "adjustTrove",
+	CloseTrove = "closeTrove"
 }
 
 export type TxForSubgraph = {

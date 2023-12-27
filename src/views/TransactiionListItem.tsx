@@ -21,12 +21,14 @@ export const TransactiionListItem = ({
 	const time = theTime.getHours() + ":" + theTime.getMinutes();
 	const col = Number(data.collateralChange);
 	const deb = Number(data.debtChange);
+
 	const badgeTypes = useMemo(() => {
 		const type: BadgeType[] = [];
 
 		switch (data.troveOperation) {
 			case TroveOperation.OpenTrove:
 			case TroveOperation.AdjustTrove:
+			case TroveOperation.CloseTrove:
 				if (col > 0) {
 					type.push(BadgeType.Deposit);
 				}
@@ -46,7 +48,7 @@ export const TransactiionListItem = ({
 				break;
 
 			default:
-				// type = [data.troveOperation as string as BadgeType];
+				console.warn("未匹配的troveOperation", data.troveOperation);
 				break;
 		}
 
@@ -78,11 +80,11 @@ export const TransactiionListItem = ({
 		<div className="flex-column-align-right">
 			<div className="flex-row-align-left">
 				{col !== 0 && <div style={{ color: col > 0 ? "#F25454" : "#8ED434" }}>
-					{Math.abs(col)}&nbsp;{market.symbol}
+					{Math.abs(col).toFixed(2)}&nbsp;{market.symbol}
 				</div>}
 
 				{deb !== 0 && <div style={{ color: deb > 0 ? "#F25454" : "#8ED434" }}>
-					{Math.abs(deb)}&nbsp;{WEN.symbol}
+					{Math.abs(deb).toFixed(2)}&nbsp;{WEN.symbol}
 				</div>}
 			</div>
 
