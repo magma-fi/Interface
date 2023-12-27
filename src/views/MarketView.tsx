@@ -92,6 +92,7 @@ export const MarketView = ({
 	const recoveryMode = total.collateralRatioIsBelowCritical(price);
 	const CCR = constants?.CCR?.gt(0) ? constants?.CCR : CRITICAL_COLLATERAL_RATIO;
 	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO;
+	const mcrPercent = Decimal.ONE.div(MCR)
 	const recoveryModeAt = CCR.gt(0) ? Decimal.ONE.div(CCR) : Decimal.ZERO;
 	const liquidationPoint = recoveryMode ? CCR : MCR;
 	const borrowingFeePct = new Percent(borrowingRate);
@@ -140,6 +141,7 @@ export const MarketView = ({
 	const availableWithdrawalFiat = availableWithdrawal.mul(price);
 	const { address } = useAccount();
 	const [txs, setTxs] = useState<TroveChangeTx[]>([]);
+
 	useEffect(() => {
 		if (!address) return;
 
@@ -349,19 +351,17 @@ export const MarketView = ({
 										))}
 									</Pie>
 
-									{needle(Number(recoveryModeAt.mul(360)), 50, 50, '#F25454')}
+									{needle(Number(mcrPercent.mul(360)), 50, 50, '#F25454')}
 								</PieChart>
 
 								<div className="label">{troveUtilizationRateNumber.toFixed(2)}%</div>
 							</div>
 
 							<div className="flex-column">
-								<div className="label labelSmall">{t("liquidationAt")}&nbsp;{Decimal.ONE.div(MCR).mul(100).toString(2)}%</div>
-
 								<div className="flex-row-align-left label labelSmall">
-									<div>{t("recoveryMode")}</div>
+									<div className="label labelSmall">{t("liquidationAt")}</div>
 
-									<div style={{ color: "#F25454" }}>{recoveryModeAt.mul(100).toString(2)}%</div>
+									<div style={{ color: "#F25454" }}>{mcrPercent.mul(100).toString(2)}%</div>
 								</div>
 							</div>
 						</div>
