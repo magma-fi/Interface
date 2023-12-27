@@ -66,6 +66,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     lusdInStabilityPool,
     price
   } = useLiquitySelector(select);
+  const factor = 0.95;
   const { liquity } = useLiquity();
   const [loading, setLoading] = useState(true);
   const [troves, setTroves] = useState<UserTrove[]>();
@@ -78,14 +79,14 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     const tempArr: UserTrove[] = [];
     troves?.forEach(trove => {
       if (recoveryMode) {
-        const collateralRatio = trove.collateralRatio(price);
+        const collateralRatio = trove.collateralRatio(price).mul(factor);
 
         if (collateralRatio.gte(constants?.MCR || MINIMUM_COLLATERAL_RATIO) && collateralRatio.lt(totalCollateralRatio)) {
           tempArr.push(trove);
         }
       } else {
         // if (trove.collateralRatioIsBelowMinimum(price)) {
-        if (trove.collateralRatio(price).lt(constants?.MCR)) {
+        if (trove.collateralRatio(price).lt(constants?.MCR.div(factor))) {
           tempArr.push(trove);
         }
       }
