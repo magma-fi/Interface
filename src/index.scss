@@ -170,6 +170,15 @@ h4 {
   gap: 0.5rem;
 }
 
+.flex-column-align-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
 .app {
   display: flex;
   flex-direction: row-reverse;

@@ -112,5 +112,6 @@
 	"or": "or",
 	"swapIotx2Wen": "Swap {iotxAmount} IOTX to {wenAmount} WEN",
 	"swap": "Swap",
-	"swapping": "Swapping"
+	"swapping": "Swapping",
+	"watchWenToWallet": "Watch WEN in the Wallet"
 }

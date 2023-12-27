@@ -23,6 +23,7 @@ import { useAccount, useChainId } from "wagmi";
 import { CloseModal } from "./CloseModal";
 import { TransactiionListItem } from "./TransactiionListItem";
 import appConfig from "../appConfig.json";
+import { useLiquity } from "../hooks/LiquityContext";
 
 export const MarketView = ({
 	market,
@@ -70,6 +71,7 @@ export const MarketView = ({
 		fees,
 		lusdBalance
 	} = useLiquitySelector(selector);
+	const { walletClient } = useLiquity()
 	const chainId = useChainId();
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
@@ -250,6 +252,17 @@ export const MarketView = ({
 		setShowWithdrawDoneModal(false);
 		setWithdrawnAmount(0);
 		setTxHash("");
+	};
+
+	const handleWatchAsset = async () => {
+		await walletClient?.watchAsset({
+			type: "ERC20",
+			options: {
+				address: appConfig.tokens.wen[String(chainId)].address,
+				decimals: WEN.decimals || 18,
+				symbol: WEN.symbol
+			}
+		});
 	};
 
 	return <>
@@ -656,11 +669,20 @@ export const MarketView = ({
 			onClose={handleGoBackVault}
 			illustration="images/borrow-successful.png"
 			whereGoBack={t("back2Vault")}>
-			<TxLabel
-				txHash={txHash}
-				title={t("borrowed")}
-				logo={WEN.logo}
-				amount={trove.debt.toString(2) + " " + WEN.symbol} />
+			<div className="flex-column-align-center">
+				<TxLabel
+					txHash={txHash}
+					title={t("borrowed")}
+					logo={WEN.logo}
+					amount={trove.debt.toString(2) + " " + WEN.symbol} />
+
+				<button
+					className="textButton smallTextButton"
+					style={{ textTransform: "none" }}
+					onClick={handleWatchAsset}>
+					{t("watchWenToWallet")}
+				</button>
+			</div>
 		</TxDone>}
 
 		{showRepayModal && <RepayModal
