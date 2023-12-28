@@ -63,3 +63,5 @@ export type TroveChangeTx = {
 	sequenceNumber: number;
 	transaction: TxForSubgraph;
 }
+
+export type LiquidatableTrove = UserTrove & { liquidatable: boolean; }

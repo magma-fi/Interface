@@ -15,6 +15,8 @@ import { Abbreviation } from "./Abbreviation";
 import { useLang } from "../hooks/useLang";
 import { PublicClient, useChainId, usePublicClient } from "wagmi";
 import { IOTX, WEN } from "../libs/globalContants";
+import appConfig from "../appConfig.json";
+import { LiquidatableTrove } from "../libs/types";
 
 // const rowHeight = "40px";
 
@@ -75,25 +77,31 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
   const [page, setPage] = useState(0);
   const chainId = useChainId();
   const client: PublicClient = usePublicClient({ chainId });
-  const liquidatableTroves: UserTrove[] = useMemo(() => {
-    const tempArr: UserTrove[] = [];
-    troves?.forEach(trove => {
-      if (recoveryMode) {
-        const collateralRatio = trove.collateralRatio(price).mul(factor);
+  const mcr = constants?.MCR?.gt(0) ? constants.MCR : appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO;
 
-        if (collateralRatio.gte(constants?.MCR || MINIMUM_COLLATERAL_RATIO) && collateralRatio.lt(totalCollateralRatio)) {
-          tempArr.push(trove);
+  const liquidatableTroves: LiquidatableTrove[] = useMemo(() => {
+    const tempArr: LiquidatableTrove[] = [];
+    troves?.forEach((trove) => {
+      if (recoveryMode) {
+        const collateralRatio = trove.collateralRatio(price);
+
+        if (collateralRatio.gte(mcr) && collateralRatio.lt(totalCollateralRatio)) {
+          (trove as LiquidatableTrove).liquidatable = true;
+          tempArr.push(trove as LiquidatableTrove);
         }
       } else {
-        // if (trove.collateralRatioIsBelowMinimum(price)) {
-        if (trove.collateralRatio(price).lt(constants?.MCR.div(factor))) {
-          tempArr.push(trove);
+        const theRatio = trove.collateralRatio(price);
+
+        if (theRatio.lt(mcr.div(factor))) {
+          tempArr.push(trove as LiquidatableTrove);
+
+          if (theRatio.lt(mcr)) (trove as LiquidatableTrove).liquidatable = true;
         }
       }
     });
 
     return tempArr;
-  }, [constants?.MCR, price, recoveryMode, totalCollateralRatio, troves]);
+  }, [mcr, price, recoveryMode, totalCollateralRatio, troves]);
 
   const numberOfTroves = liquidatableTroves?.length || 0;
   const numberOfPages = Math.ceil(numberOfTroves / pageSize) || 1;
@@ -288,25 +296,11 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
               </div>
 
               <div className="tableCell">
-                {/* <Transaction
-                id={`liquidate-${trove.ownerAddress}`}
-                tooltip="Liquidate"
-                requires={[
-                  recoveryMode ? liquidatableInRecoveryMode(
-                    trove,
-                    price,
-                    totalCollateralRatio,
-                    lusdInStabilityPool
-                  ) : liquidatableInNormalMode(trove, price)
-                ]}
-                send={liquity.send.liquidate.bind(liquity.send, trove.ownerAddress)}>
-                <button className="secondaryButton">{t("liquidate")}</button>
-              </Transaction> */}
                 <button
                   id={trove.ownerAddress}
                   className="secondaryButton"
                   onClick={handleLiquidate}
-                  disabled={transactionState.type !== "idle"}>
+                  disabled={transactionState.type !== "idle" || !trove.liquidatable}>
                   {t("liquidate")}
                 </button>
               </div>
@@ -340,8 +334,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
           <button
             className="textButton"
             onClick={nextPage}
-            disabled={clampedPage >= numberOfPages - 1}
-          >
+            disabled={clampedPage >= numberOfPages - 1}>
             <Icon name="chevron-right" size="lg" />
           </button>
         </>}
