@@ -140,7 +140,11 @@ export const UnstakeModal = ({
 
 					<ChangedValueLabel
 						previousValue={stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool).toString(2) + "%"}
-						newValue={stabilityDeposit.currentLUSD.sub(unstakeAmount).mulDiv(100, lusdInStabilityPool.add(unstakeAmount)).toString(2) + "%"} />
+						newValue={(
+							stabilityDeposit.currentLUSD.gt(unstakeAmount)
+								? stabilityDeposit.currentLUSD.sub(unstakeAmount).mulDiv(100, lusdInStabilityPool.add(unstakeAmount))
+								: Decimal.ZERO
+						).toString(2) + "%"} />
 				</div>
 			</div>
 		</div>
