@@ -8,9 +8,10 @@ import { StakeView } from "./StakeView";
 import { useChainId, useNetwork } from "wagmi";
 import { LiquidationsView } from "./LiquidationsView";
 import { useContract } from "../hooks/useContract";
-import { BorrowerOperations, LUSDToken } from "lib-ethers/dist/types";
+import { BorrowerOperations, LUSDToken, TroveManager } from "lib-ethers/dist/types";
 import { useLiquity } from "../hooks/LiquityContext";
 import BorrowerOperationsAbi from "lib-ethers/abi/BorrowerOperations.json";
+import TroveManagerAbi from "lib-ethers/abi/TroveManager.json";
 import LUSDTokenAbi from "lib-ethers/abi/LUSDToken.json";
 import { Decimal } from "lib-base";
 import { WEN, globalContants } from "../libs/globalContants";
@@ -35,6 +36,22 @@ export const MainView = () => {
 		liquity.connection.addresses.borrowerOperations,
 		BorrowerOperationsAbi
 	);
+
+	// const [troveManagerDefault, troveManagerStatus] = useContract<TroveManager>(
+	// 	liquity.connection.addresses.troveManager,
+	// 	TroveManagerAbi
+	// );
+
+	// useEffect(() => {
+	// 	const getData = async () => {
+	// 		if (troveManagerStatus === "LOADED") {
+	// 			const res = await troveManagerDefault?.getEntireSystemColl();
+	// 			console.debug("xxx", Decimal.from(res?.toString()).toString());
+	// 		}
+	// 	};
+
+	// 	getData();
+	// }, [troveManagerStatus]);
 
 	useEffect(() => {
 		if (!window.localStorage.getItem(globalContants.TERMS_SHOWED)) {

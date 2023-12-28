@@ -640,11 +640,20 @@ export const MarketView = ({
 			onClose={handleGoBackVault}
 			illustration="images/deposit-successful.png"
 			whereGoBack={t("back2Vault")}>
-			<TxLabel
-				txHash={txHash}
-				title={t("deposited")}
-				logo="images/iotx.png"
-				amount={trove.collateral.toString(2) + " " + IOTX.symbol} />
+			<div className="flex-column-align-center">
+				<TxLabel
+					txHash={txHash}
+					title={t("deposited")}
+					logo="images/iotx.png"
+					amount={trove.collateral.toString(2) + " " + IOTX.symbol} />
+
+				{depositAndBorrow && <button
+					className="textButton smallTextButton"
+					style={{ textTransform: "none" }}
+					onClick={handleWatchAsset}>
+					{t("watchWenToWallet")}
+				</button>}
+			</div>
 		</TxDone>}
 
 		{showBorrowModal && <BorrowModal

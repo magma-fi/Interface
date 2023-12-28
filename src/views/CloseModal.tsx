@@ -170,11 +170,8 @@ export const CloseModal = ({
 		title={t("closeVault")}
 		onClose={handleCloseModal}>
 		<div
-			className="depositModal flex-column"
-			style={{
-				gap: "24px",
-				flexDirection: "column"
-			}}>
+			className="flex-column"
+			style={{ gap: "24px" }}>
 			<div>{description && errorMessages && t(errorMessages.key, errorMessages.values)}</div>
 
 			{needSwap && <div className="flex-column-align-left">
