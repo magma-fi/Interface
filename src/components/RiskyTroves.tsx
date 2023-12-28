@@ -77,7 +77,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
   const [page, setPage] = useState(0);
   const chainId = useChainId();
   const client: PublicClient = usePublicClient({ chainId });
-  const mcr = constants?.MCR?.gt(0) ? constants.MCR : appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO;
+  const mcr = constants?.MCR?.gt(0) ? constants.MCR : Decimal.from(appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO);
 
   const liquidatableTroves: LiquidatableTrove[] = useMemo(() => {
     const tempArr: LiquidatableTrove[] = [];
