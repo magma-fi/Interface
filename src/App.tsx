@@ -88,10 +88,10 @@ getConfig().then(config => {
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [iotexTestnet, iotex],
   [
-    // jsonRpcProvider({
-    //   rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
-    // }),
     publicProvider(),
+    jsonRpcProvider({
+      rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
+    }),
   ]
 );
 
@@ -102,7 +102,8 @@ const wagmiCfg = createConfig({
     new WalletConnectConnector({
       chains,
       options: {
-        projectId: "be127bb67c5a2f375d3360f2c180525e"
+        projectId: "a1362d88b5470c1006e169ce345815ae",
+        showQrModal: true
       }
     })
   ],
