@@ -102,5 +102,7 @@ export const globalContants = {
 	ADDRESS_PLACEHOLDER: "0x43D46D96157f497070BfD0725C34C4A9d1013292",
 	LIQUIDATION_AT: 0.8,
 	BIG_NUMBER_0: BigNumber.from(0),
-	TERMS_SHOWED: "termsShowed"
+	TERMS_SHOWED: "termsShowed",
+	IOTX_DECIMALS: Math.pow(10, IOTX.decimals || 18),
+	WEN_DECIMALS: Math.pow(10, WEN.decimals || 18),
 };

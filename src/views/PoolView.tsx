@@ -1,24 +1,18 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLang } from "../hooks/useLang";
-import { ModalAction, WEN, globalContants } from "../libs/globalContants";
+import { IOTX, ModalAction, WEN, globalContants } from "../libs/globalContants";
 import { Coin } from "../libs/types";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
-import { selectForTroveChangeValidation } from "../components/Trove/validation/validateTroveChange";
 import { useLiquitySelector } from "@liquity/lib-react";
 import { StakeModal } from "./StakeModal";
 import { selectForStabilityDepositChangeValidation } from "../components/Stability/validation/validateStabilityDepositChange";
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { UnstakeModal } from "./UnstakeModal";
-import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { useContract } from "../hooks/useContract";
-import { HintHelpers, LUSDToken, SortedTroves, TroveManager } from "lib-ethers/dist/types";
+import { StabilityPool } from "lib-ethers/dist/types";
 import { useLiquity } from "../hooks/LiquityContext";
-import LUSDTokenAbi from "lib-ethers/abi/LUSDToken.json";
-import TroveManagerAbi from "lib-ethers/abi/TroveManager.json";
-import HintHelpersAbi from "lib-ethers/abi/HintHelpers.json";
-import SortedTrovesAbi from "lib-ethers/abi/SortedTroves.json";
-import { BigNumber } from "@ethersproject/bignumber";
+import StabilityPoolAbi from "lib-ethers/abi/StabilityPool.json";
 import { Decimal } from "lib-base"
 import { useAccount } from "wagmi";
 
@@ -27,8 +21,9 @@ type ModalOpenning = {
 	isShow: boolean;
 }
 
-export const PoolView = ({ market }: {
+export const PoolView = ({ market, constants }: {
 	market: Coin;
+	constants: Record<string, Decimal>
 }) => {
 	const { t } = useLang();
 
@@ -39,7 +34,7 @@ export const PoolView = ({ market }: {
 				stabilityDeposit,
 				lusdInStabilityPool,
 				numberOfTroves,
-				price
+				price,
 			} = state;
 
 			return {
@@ -61,29 +56,29 @@ export const PoolView = ({ market }: {
 		price,
 		validationContext
 	} = useLiquitySelector(selector);
-
+	const { address } = useAccount();
 	const [showModal, setShowModal] = useState<ModalOpenning | null>(null);
 	const [showTxResult, setTxResult] = useState<ModalOpenning | null>(null);
 	const [amountInTx, setAmountInTx] = useState(0);
 	const [txHash, setTxHash] = useState("");
 	const { liquity } = useLiquity();
-	const [wenTotalSupply, setWENTotalSupply] = useState(Decimal.ZERO)
-	// const { address } = useAccount();
+	const wenTotalSupply = constants?.wenTotalSupply || Decimal.ZERO;
+	const [rewardsFromCollateral, setRewardsFromCollateral] = useState(Decimal.ZERO);
 
-	const [lusdTokenDefault, lusdTokenDefaultStatus] = useContract<LUSDToken>(
-		liquity.connection.addresses.lusdToken,
-		LUSDTokenAbi
+	const [stabilityPoolDefault, stabilityPoolStatus] = useContract<StabilityPool>(
+		liquity.connection.addresses.stabilityPool,
+		StabilityPoolAbi
 	);
 
-	const [hintHelpersDefault, hintHelpersDefaultStatus] = useContract<HintHelpers>(
-		liquity.connection.addresses.hintHelpers,
-		HintHelpersAbi
-	);
+	// const [hintHelpersDefault, hintHelpersDefaultStatus] = useContract<HintHelpers>(
+	// 	liquity.connection.addresses.hintHelpers,
+	// 	HintHelpersAbi
+	// );
 
-	const [troveManagerDefault, troveManagerDefaultStatus] = useContract<TroveManager>(
-		liquity.connection.addresses.troveManager,
-		TroveManagerAbi
-	);
+	// const [troveManagerDefault, troveManagerDefaultStatus] = useContract<TroveManager>(
+	// 	liquity.connection.addresses.troveManager,
+	// 	TroveManagerAbi
+	// );
 
 	// const [sortedTrovesDefault, sortedTrovesDefaultStatus] = useContract<SortedTroves>(
 	// 	liquity.connection.addresses.sortedTroves,
@@ -114,14 +109,16 @@ export const PoolView = ({ market }: {
 
 	useEffect(() => {
 		const read = async () => {
-			if (lusdTokenDefault && lusdTokenDefaultStatus === "LOADED") {
-				const res = await lusdTokenDefault.totalSupply();
-				setWENTotalSupply(Decimal.from(res.toString()).div(Math.pow(10, WEN.decimals ?? 0)));
+			if (stabilityPoolStatus === "LOADED" && address) {
+				const res = await stabilityPoolDefault?.getDepositorETHGain(address);
+				if (res) {
+					setRewardsFromCollateral(Decimal.from(res.toString()).div(globalContants.IOTX_DECIMALS));
+				}
 			}
 		};
 
 		read();
-	}, [lusdTokenDefault, lusdTokenDefaultStatus]);
+	}, [address, stabilityPoolDefault, stabilityPoolStatus]);
 
 	const handleShowModal = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		setShowModal({
@@ -235,6 +232,28 @@ export const PoolView = ({ market }: {
 								onClick={handleUnstake}>
 								{t("unstake")}
 							</button>
+						</div>
+					</div>
+
+					<div className="flex-column">
+						<h4 className="fat">{t("rewardsFromCollateral")}</h4>
+
+						<div className="label">{t("rewardsDescription")}</div>
+
+						<div
+							className="flex-row-space-between"
+							style={{ alignItems: "center" }}>
+							<div className="flex-row-align-left">
+								<img
+									src={IOTX.logo}
+									width="40px" />
+
+								<div className="flex-column-align-left">
+									<div>{rewardsFromCollateral.mul(price).toString(2)}&nbsp;{globalContants.USD}</div>
+
+									<div className="label labelSmall">{rewardsFromCollateral.toString(2)}&nbsp;{IOTX.symbol}</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

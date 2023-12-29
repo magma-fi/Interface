@@ -110,7 +110,7 @@ export const MainView = () => {
 				}}>
 					<Switch>
 						<Route path="/stake">
-							<StakeView />
+							<StakeView constants={constants} />
 						</Route>
 
 						<Route path="/liquidations">
