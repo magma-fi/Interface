@@ -24,6 +24,7 @@ import { CloseModal } from "./CloseModal";
 import { TransactiionListItem } from "./TransactiionListItem";
 import appConfig from "../appConfig.json";
 import { useLiquity } from "../hooks/LiquityContext";
+import React from "react";
 
 export const MarketView = ({
 	market,
@@ -94,6 +95,7 @@ export const MarketView = ({
 	const recoveryMode = total.collateralRatioIsBelowCritical(price);
 	const CCR = constants?.CCR?.gt(0) ? constants?.CCR : CRITICAL_COLLATERAL_RATIO;
 	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO;
+	const TVL = constants?.TVL || Decimal.ZERO;
 	const mcrPercent = Decimal.ONE.div(MCR)
 	const recoveryModeAt = CCR.gt(0) ? Decimal.ONE.div(CCR) : Decimal.ZERO;
 	const liquidationPoint = recoveryMode ? CCR : MCR;
@@ -555,8 +557,8 @@ export const MarketView = ({
 						<div className="description">{t("totalDeposits")}</div>
 
 						<div className="flex-column-align-right">
-							<div>{total.collateral.mul(price).shorten()}&nbsp;{globalContants.USD}</div>
-							<div className="comments">{total.collateral.shorten()}&nbsp;{market?.symbol}</div>
+							<div>{TVL.mul(price).shorten()}&nbsp;{globalContants.USD}</div>
+							<div className="comments">{TVL.shorten()}&nbsp;{market?.symbol}</div>
 						</div>
 					</div>
 
