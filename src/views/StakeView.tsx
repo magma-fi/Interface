@@ -5,8 +5,10 @@ import { useLang } from "../hooks/useLang";
 import { Troves, WEN, globalContants } from "../libs/globalContants";
 import { Coin } from "../libs/types";
 import { PoolView } from "./PoolView";
+import { Record } from "../components/Bonds/Record";
+import { Decimal } from "lib-base";
 
-export const StakeView = () => {
+export const StakeView = ({ constants }: { constants: Record<string, Decimal> }) => {
 	const { t } = useLang();
 	const [currentTrove, setCurrentTrove] = useState<Coin>(globalContants.COINS.IOTX);
 
@@ -28,6 +30,8 @@ export const StakeView = () => {
 			options={Troves}
 			onSelect={handleSelectTrove} />
 
-		<PoolView market={currentTrove} />
+		<PoolView
+			market={currentTrove}
+			constants={constants} />
 	</div>
 };
