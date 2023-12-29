@@ -37,21 +37,10 @@ export const MainView = () => {
 		BorrowerOperationsAbi
 	);
 
-	// const [troveManagerDefault, troveManagerStatus] = useContract<TroveManager>(
-	// 	liquity.connection.addresses.troveManager,
-	// 	TroveManagerAbi
-	// );
-
-	// useEffect(() => {
-	// 	const getData = async () => {
-	// 		if (troveManagerStatus === "LOADED") {
-	// 			const res = await troveManagerDefault?.getEntireSystemColl();
-	// 			console.debug("xxx", Decimal.from(res?.toString()).toString());
-	// 		}
-	// 	};
-
-	// 	getData();
-	// }, [troveManagerStatus]);
+	const [troveManagerDefault, troveManagerStatus] = useContract<TroveManager>(
+		liquity.connection.addresses.troveManager,
+		TroveManagerAbi
+	);
 
 	useEffect(() => {
 		if (!window.localStorage.getItem(globalContants.TERMS_SHOWED)) {
@@ -66,6 +55,7 @@ export const MainView = () => {
 			let wenGasGompensation;
 			let mcr;
 			let ccr;
+			let tvl;
 
 			if (borrowerOperationsStatus === "LOADED") {
 				minNetDebt = await borrowerOperationsDefault?.MIN_NET_DEBT()
@@ -78,6 +68,10 @@ export const MainView = () => {
 				totalSupply = await wenTokenDefault?.totalSupply();
 			}
 
+			if (troveManagerStatus === "LOADED") {
+				tvl = await troveManagerDefault?.getEntireSystemColl();
+			}
+
 			setConstants({
 				...constants,
 				MIN_NET_DEBT: Decimal.from(minNetDebt?.toString() || 0).div(dec),
@@ -85,11 +79,12 @@ export const MainView = () => {
 				MCR: Decimal.from(mcr?.toString() || 0).div(dec),
 				wenTotalSupply: Decimal.from(totalSupply?.toString() || 0).div(dec),
 				CCR: Decimal.from(ccr?.toString() || 0).div(dec),
+				TVL: Decimal.from(tvl?.toString() || 0).div(dec),
 			});
 		};
 
 		getContants();
-	}, [borrowerOperationsDefault, borrowerOperationsStatus, wenTokenStatus, wenTokenDefault]);
+	}, [borrowerOperationsDefault, borrowerOperationsStatus, wenTokenStatus, wenTokenDefault, troveManagerStatus, troveManagerStatus]);
 
 	const handleConnectWallet = () => {
 		setShowConnectModal(true);
@@ -115,7 +110,7 @@ export const MainView = () => {
 				}}>
 					<Switch>
 						<Route path="/stake">
-							<StakeView />
+							<StakeView constants={constants} />
 						</Route>
 
 						<Route path="/liquidations">
