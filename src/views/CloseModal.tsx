@@ -16,7 +16,7 @@ import appConfig from "../appConfig.json";
 import { loadABI } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { IOTX, WEN, globalContants } from "../libs/globalContants";
-import { erc20ABI, useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { erc20ABI, useAccount, usePublicClient } from "wagmi";
 import { parseEther } from "viem";
 
 export const CloseModal = ({

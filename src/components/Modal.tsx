@@ -16,7 +16,7 @@ export const Modal = ({
   return <div className="modalOverlay">
     <div className="modal">
       <div className="titleBar">
-        <h2>{title}</h2>
+        <h2 style={{ maxWidth: "16rem" }}>{title}</h2>
 
         <button
           className="textButton"

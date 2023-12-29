@@ -10,11 +10,12 @@ import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { UnstakeModal } from "./UnstakeModal";
 import { useContract } from "../hooks/useContract";
-import { StabilityPool } from "lib-ethers/dist/types";
+import { HintHelpers, SortedTroves, StabilityPool, TroveManager } from "lib-ethers/dist/types";
 import { useLiquity } from "../hooks/LiquityContext";
 import StabilityPoolAbi from "lib-ethers/abi/StabilityPool.json";
-import { Decimal } from "lib-base"
-import { useAccount } from "wagmi";
+import { Decimal, LUSD_LIQUIDATION_RESERVE } from "lib-base"
+import { Address, useAccount } from "wagmi";
+import { SwapWEN2IOTXModal } from "./SwapWEN2IOTXModal";
 
 type ModalOpenning = {
 	action: ModalAction;
@@ -35,6 +36,7 @@ export const PoolView = ({ market, constants }: {
 				lusdInStabilityPool,
 				numberOfTroves,
 				price,
+				trove
 			} = state;
 
 			return {
@@ -43,6 +45,7 @@ export const PoolView = ({ market, constants }: {
 				lusdInStabilityPool,
 				numberOfTroves,
 				price,
+				trove,
 				validationContext: selectForStabilityDepositChangeValidation(state)
 			};
 		};
@@ -54,6 +57,7 @@ export const PoolView = ({ market, constants }: {
 		lusdInStabilityPool,
 		numberOfTroves,
 		price,
+		trove,
 		validationContext
 	} = useLiquitySelector(selector);
 	const { address } = useAccount();
@@ -61,51 +65,23 @@ export const PoolView = ({ market, constants }: {
 	const [showTxResult, setTxResult] = useState<ModalOpenning | null>(null);
 	const [amountInTx, setAmountInTx] = useState(0);
 	const [txHash, setTxHash] = useState("");
-	const { liquity } = useLiquity();
+	const { liquity, walletClient } = useLiquity();
 	const wenTotalSupply = constants?.wenTotalSupply || Decimal.ZERO;
 	const [rewardsFromCollateral, setRewardsFromCollateral] = useState(Decimal.ZERO);
+	const netDebt = trove.debt.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? trove.netDebt : Decimal.ZERO
 
 	const [stabilityPoolDefault, stabilityPoolStatus] = useContract<StabilityPool>(
 		liquity.connection.addresses.stabilityPool,
 		StabilityPoolAbi
 	);
 
-	// const [hintHelpersDefault, hintHelpersDefaultStatus] = useContract<HintHelpers>(
-	// 	liquity.connection.addresses.hintHelpers,
-	// 	HintHelpersAbi
-	// );
 
-	// const [troveManagerDefault, troveManagerDefaultStatus] = useContract<TroveManager>(
-	// 	liquity.connection.addresses.troveManager,
-	// 	TroveManagerAbi
-	// );
-
-	// const [sortedTrovesDefault, sortedTrovesDefaultStatus] = useContract<SortedTroves>(
-	// 	liquity.connection.addresses.sortedTroves,
-	// 	SortedTrovesAbi
-	// );
-
-	// const handleRedeemCollateral = async () => {
-	// 	if (!hintHelpersDefault || !troveManagerDefault || !sortedTrovesDefault || !address) return;
-
-	// 	// const wenAmount = stabilityDeposit.currentLUSD.toString();
-	// 	// const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault.getRedemptionHints(wenAmount, price.toString(), 0);
-	// 	// const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault.findInsertPosition(
-	// 	// 	partialRedemptionHintNICR,
-	// 	// 	address,
-	// 	// 	address
-	// 	// )
-	// 	// const redemptionTx = await troveManagerDefault.redeemCollateral(
-	// 	// 	wenAmount,
-	// 	// 	firstRedemptionHint,
-	// 	// 	upperPartialRedemptionHint,
-	// 	// 	lowerPartialRedemptionHint,
-	// 	// 	partialRedemptionHintNICR,
-	// 	// 	0,
-	// 	// 	"1000000000000000000"
-	// 	// )
-	// 	// liquity.populate.redeemLUSD()
-	// };
+	const handleRedeemCollateral = (evt: React.MouseEvent<HTMLButtonElement>) => {
+		setShowModal({
+			action: evt.currentTarget.id as ModalAction,
+			isShow: true
+		} as ModalOpenning);
+	};
 
 	useEffect(() => {
 		const read = async () => {
@@ -182,14 +158,14 @@ export const PoolView = ({ market, constants }: {
 						</button>
 
 						<button
-							disabled
-							// {
-							// 	!hintHelpersDefault
-							// 	|| hintHelpersDefaultStatus !== "LOADED"
-							// 	|| !troveManagerDefault
-							// 	|| troveManagerDefaultStatus !== "LOADED"
-							// }
-							// onClick={handleRedeemCollateral}
+							id={ModalAction.SwapWEN2IOTX}
+							disabled={
+								hintHelpersDefaultStatus !== "LOADED"
+								|| troveManagerDefaultStatus !== "LOADED"
+								|| sortedTrovesDefaultStatus !== "LOADED"
+								|| netDebt.eq(0)
+							}
+							onClick={handleRedeemCollateral}
 							className="secondaryButton">
 							<img src="images/swap-orange.png" />
 
@@ -310,6 +286,17 @@ export const PoolView = ({ market, constants }: {
 				logo={WEN.logo}
 				amount={amountInTx + " " + WEN.symbol} />
 		</TxDone>}
+
+		{showModal?.action === ModalAction.SwapWEN2IOTX && showModal.isShow && <SwapWEN2IOTXModal
+			isOpen={showModal.isShow}
+			onClose={handleCloseModal}
+			accountBalance={lusdBalance}
+			onDone={handleModalDone}
+			stabilityDeposit={stabilityDeposit}
+			validationContext={validationContext}
+			lusdInStabilityPool={lusdInStabilityPool}
+			max={netDebt}
+			price={price} />}
 
 		{showModal?.action === ModalAction.Unstake && showModal.isShow && <UnstakeModal
 			isOpen={showModal.isShow}

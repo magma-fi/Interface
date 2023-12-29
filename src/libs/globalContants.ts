@@ -3,7 +3,8 @@ import { BigNumber } from "@ethersproject/bignumber";
 
 export enum ModalAction {
 	Stake = "stake",
-	Unstake = "unstake"
+	Unstake = "unstake",
+	SwapWEN2IOTX = "swapWen2Iotx"
 }
 
 export enum Langs {

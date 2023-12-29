@@ -1,4 +1,14 @@
 :root {
+  --text-error: #F25454;
+  --surface-alert-error: radial-gradient(119.19% 93.93% at 1.51% 0%, rgba(245, 123, 123, 0.08) 0%, rgba(245, 123, 123, 0.00) 100%), linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.00) 100%), #120F15;
+  --surface-alert-error-stroke: rgba(142, 56, 59, 0.50);
+  --text-warning: #E4BC62;
+  --surface-alert-warning: radial-gradient(119.19% 93.93% at 1.51% 0%, rgba(254, 140, 0, 0.08) 0%, rgba(254, 140, 0, 0.00) 100%), linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.00) 100%), #120F15;
+  --surface-alert-warning-stroke: rgba(254, 140, 0, 0.10);
+  --text-success: #8ED434;
+  --text-info: #59CDFF;
+  --surface-alert-success: radial-gradient(119.19% 93.93% at 1.51% 0%, rgba(142, 212, 52, 0.08) 0%, rgba(142, 212, 52, 0.00) 100%), linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.00) 100%), #120F15;
+  --surface-alert-success-stroke: rgba(142, 212, 52, 0.10);
   --background-color: #0d040c;
   --color: #F6F6F7;
   --error-color: #F25454;
@@ -918,6 +928,51 @@ input {
     align-items: flex-end;
     gap: 0.5rem;
   }
+}
+
+.snackBar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: fit-content;
+  max-width: 30rem;
+  padding: 8px 16px 8px 8px;
+  align-items: center;
+  gap: 16px;
+  border-radius: 16px;
+  box-shadow: 19px 24px 72px 0px rgba(4, 0, 8, 0.40);
+  font-family: Metropolis400;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+
+  img {
+    width: 26px;
+  }
+}
+
+.infoSnackBar {
+  border: 1px solid var(--surface-alert-success-stroke);
+  background: var(--surface-alert-success);
+  color: var(--text-info);
+}
+
+.successSnackBar {
+  border: 1px solid var(--surface-alert-success-stroke);
+  background: var(--surface-alert-success);
+  color: var(--text-success);
+}
+
+.warningSnackBar {
+  border: 1px solid var(--surface-alert-warning-stroke);
+  background: var(--surface-alert-warning);
+  color: var(--text-warning);
+}
+
+.errorSnackBar {
+  border: 1px solid var(--surface-alert-error-stroke);
+  background: var(--surface-alert-error);
+  color: var(--text-error);
 }
 
 @media (prefers-color-scheme: dark) {

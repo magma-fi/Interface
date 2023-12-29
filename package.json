@@ -30,7 +30,7 @@
     "recharts": "^2.10.1",
     "theme-ui": "^0.16.1",
     "viem": "^1.19.4",
-    "wagmi": "^1.4.7"
+    "wagmi": "^1.4.12"
   },
   "devDependencies": {
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
