@@ -586,7 +586,7 @@ export const MarketView = ({
 					</div>
 
 					<div className="flex-row-space-between">
-						<div className="description">{t("loanToValue")}(LTV)</div>
+						<div className="description">{t("loanToValue")}&nbsp;(LTV)</div>
 
 						<div>{total.collateral.gt(0) ? total.debt.div(total.collateral.mul(price)).mul(100).toString(2) : 0}%</div>
 					</div>

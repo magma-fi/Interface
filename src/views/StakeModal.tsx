@@ -87,7 +87,7 @@ export const StakeModal = ({
 			<div className="description">{t("withdrawAnytime")}</div>
 
 			<TxLabel
-				title={t("currentInterest") + "(APY)"}
+				title={t("currentInterest") + " (APY)"}
 				logo="images/chart.png"
 				amount={"0"} />
 
