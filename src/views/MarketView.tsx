@@ -632,7 +632,7 @@ export const MarketView = ({
 			depositAndBorrow={depositAndBorrow}
 			liquidationPrice={liquidationPrice}
 			availableWithdrawal={availableWithdrawal}
-			availableBorrow={availableBorrow}
+			availableBorrow={availableBorrow.mul(0.95)}
 			recoveryMode={recoveryMode}
 			liquidationPoint={liquidationPoint} />}
 
@@ -665,7 +665,7 @@ export const MarketView = ({
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={availableBorrow}
+			max={availableBorrow.mul(0.95)}
 			onDone={handleBorrowDone}
 			constants={constants}
 			liquidationPrice={liquidationPrice}
