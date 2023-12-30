@@ -5,7 +5,7 @@ import { UserAccount } from "../components/UserAccount";
 import { Route, BrowserRouter, Switch } from "react-router-dom";
 import { BorrowView } from "./BorrowView";
 import { StakeView } from "./StakeView";
-import { useNetwork } from "wagmi";
+import { Chain, useNetwork } from "wagmi";
 import { LiquidationsView } from "./LiquidationsView";
 import { useContract } from "../hooks/useContract";
 import { BorrowerOperations, LUSDToken, TroveManager } from "lib-ethers/dist/types";
@@ -17,10 +17,10 @@ import { Decimal } from "lib-base";
 import { WEN, globalContants } from "../libs/globalContants";
 import { TermsModal } from "./TermsModal";
 
-export const MainView = () => {
+export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const [showConnectModal, setShowConnectModal] = useState(false);
 	const [showTerms, setShowTerms] = useState(false);
-	const { chain, chains } = useNetwork();
+	const { chain } = useNetwork();
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
 	const { liquity, chainId } = useLiquity();
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});

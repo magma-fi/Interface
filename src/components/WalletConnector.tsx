@@ -1,6 +1,3 @@
-import { ConnectKitButton } from "connectkit";
-import { Box, Button, Flex } from "theme-ui";
-import { Icon } from "./Icon";
 import { useAccount, useConnect } from "wagmi";
 
 type WalletConnectorProps = {

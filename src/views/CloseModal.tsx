@@ -16,7 +16,7 @@ import appConfig from "../appConfig.json";
 import { loadABI } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { IOTX, WEN, globalContants } from "../libs/globalContants";
-import { erc20ABI, useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { erc20ABI, useAccount } from "wagmi";
 import { parseEther } from "viem";
 
 export const CloseModal = ({
@@ -38,11 +38,11 @@ export const CloseModal = ({
 	balance: Decimal;
 	price: Decimal;
 }) => {
+	const { provider, walletClient, publicClient } = useLiquity();
 	const { t } = useLang();
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
 	const indexOfConfig: string = String(chainId);
-	const publicClient = usePublicClient();
 	const account = useAccount();
 	const [agree, setAgree] = useState(false);
 
@@ -60,7 +60,6 @@ export const CloseModal = ({
 	const wenDec = Math.pow(10, WEN.decimals || 18);
 	const iotxDec = Math.pow(10, IOTX.decimals || 18);
 	const howMuchWEN = errorMessages?.values?.amount ? Decimal.from(errorMessages.values!.amount).mul(wenDec) : Decimal.ZERO;
-	const { provider, walletClient } = useLiquity();
 	const [howMuchIOTX, setHowMuchIOTX] = useState(Decimal.ZERO);
 	const howMuchIOTXDecimal = howMuchIOTX.div(iotxDec);
 	const theCfg = appConfig.swap[indexOfConfig];
@@ -76,7 +75,7 @@ export const CloseModal = ({
 
 			if (address && abi) {
 				try {
-					res = await publicClient.readContract({
+					res = await publicClient!.readContract({
 						address,
 						abi,
 						functionName: 'getAmountsIn',
@@ -110,7 +109,7 @@ export const CloseModal = ({
 	}, [transactionState.type])
 
 	const swap = async () => {
-		const txHash = await walletClient.writeContract({
+		const txHash = await walletClient!.writeContract({
 			account: account.address,
 			address: appConfig.swap[indexOfConfig].swapAndCloseTool.address,
 			abi: appConfig.swap[indexOfConfig].swapAndCloseTool.abi,
@@ -150,7 +149,7 @@ export const CloseModal = ({
 	const handleSwap = async () => {
 		if (!publicClient) return;
 
-		const txHash = await walletClient.writeContract({
+		const txHash = await walletClient!.writeContract({
 			account: account.address,
 			address: appConfig.tokens.wen[indexOfConfig].address,
 			abi: erc20ABI,

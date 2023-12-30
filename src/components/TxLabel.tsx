@@ -1,6 +1,5 @@
-import { useChainId, usePublicClient } from "wagmi";
 import { useLang } from "../hooks/useLang";
-import { PublicClient } from "viem";
+import { useLiquity } from "../hooks/LiquityContext";
 
 export const TxLabel = ({
 	txHash,
@@ -14,8 +13,7 @@ export const TxLabel = ({
 	amount: string;
 }) => {
 	const { t } = useLang();
-	const chainId = useChainId();
-	const client: PublicClient = usePublicClient({ chainId });
+	const { publicClient } = useLiquity();
 
 	return <div className="txLabel">
 		<div className="flex-row-align-left">
@@ -32,7 +30,7 @@ export const TxLabel = ({
 
 		{txHash && <a
 			className="textButton"
-			href={client.chain?.blockExplorers?.default.url + "/tx/" + txHash}
+			href={publicClient!.chain?.blockExplorers?.default.url + "/tx/" + txHash}
 			target="_blank">
 			{t("viewInExplorer")}
 

@@ -23,6 +23,7 @@ import { useAsyncValue } from "./hooks/AsyncValue";
 import { appController } from "./libs/appController";
 import { TransactionProvider } from "./components/Transaction";
 import appConfig from "./appConfig.json";
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 // const isDemoMode = import.meta.env.VITE_APP_DEMO_MODE === "true";
 
@@ -180,7 +181,9 @@ const App = () => {
     // unsupportedMainnetFallback={<UnsupportedMainnetFallback />}
     >
       <TransactionProvider>
-        <LiquityFrontend loader={loader} />
+        <LiquityFrontend
+          chains={chains}
+          loader={loader} />
       </TransactionProvider>
     </LiquityProvider>
     {/* </WalletConnector> */}

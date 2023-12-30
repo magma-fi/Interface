@@ -3,7 +3,7 @@ import { Coin, TroveChangeTx, TroveOperation } from "../libs/types";
 import { Badge } from "../components/Badge";
 import { BadgeType, WEN, globalContants } from "../libs/globalContants";
 import { Decimal } from "lib-base";
-import { useChainId, usePublicClient } from "wagmi";
+import { useLiquity } from "../hooks/LiquityContext";
 
 export const TransactiionListItem = ({
 	data,
@@ -14,8 +14,7 @@ export const TransactiionListItem = ({
 	market: Coin;
 	price: Decimal;
 }) => {
-	const chainId = useChainId();
-	const client: PublicClient = usePublicClient({ chainId });
+	const { chainId, publicClient } = useLiquity();
 	const theTime = useMemo(() => new Date(data.transaction.timestamp * 1000), [data.transaction.timestamp]);
 	const date = theTime.toLocaleDateString();
 	const time = theTime.getHours() + ":" + theTime.getMinutes();
@@ -57,7 +56,7 @@ export const TransactiionListItem = ({
 
 	return <a
 		className="transactionListItem"
-		href={client.chain?.blockExplorers?.default.url + "/tx/" + data.transaction.id}
+		href={publicClient!.chain?.blockExplorers?.default.url + "/tx/" + data.transaction.id}
 		target="_blank">
 		<div
 			className="flex-column-align-left"

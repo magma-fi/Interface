@@ -141,8 +141,12 @@ export class BatchedProvider extends BaseProvider {
   private _numberOfActualCalls = 0;
   private _timeOfLastRatioCheck?: number;
 
+  private name?: string = "";
+
   constructor(underlyingProvider: BaseProvider, chainId = 0, batchingDelayMs = 10) {
-    super(getNetwork(chainId));
+    const tempNetwork = getNetwork(chainId);
+    super(tempNetwork);
+    this.name = tempNetwork.name;
 
     this.underlyingProvider = underlyingProvider;
     this.chainId = chainId;
@@ -271,6 +275,18 @@ export class BatchedProvider extends BaseProvider {
   }
 
   detectNetwork(): Promise<Network> {
-    return this.underlyingProvider.detectNetwork();
+    // return this.underlyingProvider.detectNetwork();
+    // Network = {
+    //   name: string,
+    //   chainId: number,
+    //   ensAddress?: string,
+    //   _defaultProvider?: (providers: any, options?: any) => any
+    // }
+    return new Promise((resolve, reject) => {
+      return resolve({
+        name: this.name,
+        chainId: this.chainId
+      } as Network)
+    });
   }
 }
