@@ -113,7 +113,7 @@
 	"swapIotx2Wen": "Swap {iotxAmount} IOTX to {wenAmount} WEN",
 	"swap": "Swap",
 	"swapping": "Swapping",
-	"watchWenToWallet": "Watch WEN in the Wallet",
+	"watchWenToWallet": "Add WEN to your wallet",
 	"knowSlippage": "I am aware that there might be losses and slippage during the exchange",
 	"rewardsFromCollateral": "Rewards from Collateral",
 	"rewardsDescription": "These are credited automatically in you deposits"
