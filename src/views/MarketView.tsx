@@ -115,8 +115,8 @@ export const MarketView = ({
 	const currentNetDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
 	const minNetDebt = constants?.MIN_NET_DEBT || Decimal.ZERO;
 	const maxAvailableRepay = currentNetDebt.gt(minNetDebt) ? currentNetDebt.sub(minNetDebt) : Decimal.ZERO;
-	const totalUtilizationRate = total.collateral.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? total.netDebt.div(total.collateral.mul(price)) : Decimal.ZERO;
-	const troveUtilizationRate = trove.collateral.gt(0) ? currentNetDebt.div(troveCollateralValue).mul(100) : Decimal.ZERO;
+	const totalUtilizationRate = total.collateral.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? total.debt.div(total.collateral.mul(price)) : Decimal.ZERO;
+	const troveUtilizationRate = trove.collateral.gt(0) ? trove.debt.div(troveCollateralValue).mul(100) : Decimal.ZERO;
 	const troveUtilizationRateNumber = Number(troveUtilizationRate);
 
 	const RADIAN = Math.PI / 180;
