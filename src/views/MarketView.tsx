@@ -19,7 +19,7 @@ import { WithdrawModal } from "./WithdrawModal";
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { graphqlAsker } from "../libs/graphqlAsker";
-import { useAccount, useChainId } from "wagmi";
+import { useAccount } from "wagmi";
 import { CloseModal } from "./CloseModal";
 import { TransactiionListItem } from "./TransactiionListItem";
 import appConfig from "../appConfig.json";
@@ -72,8 +72,7 @@ export const MarketView = ({
 		fees,
 		lusdBalance
 	} = useLiquitySelector(selector);
-	const { walletClient } = useLiquity()
-	const chainId = useChainId();
+	const { walletClient, chainId } = useLiquity()
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
 	const [depositAndBorrow, setDepositAndBorrow] = useState(true);

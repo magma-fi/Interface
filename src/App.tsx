@@ -89,10 +89,25 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
   [iotex, iotexTestnet],
   [
     publicProvider(),
-    jsonRpcProvider({
-      rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
-    }),
-  ]
+    // jsonRpcProvider({
+    //   rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
+    // })
+  ],
+  // {
+  //   batch: {
+  //     multicall: {
+  //       batchSize: 512
+  //     }
+  //   },
+  //   pollingInterval: 10000,
+  //   rank: {
+  //     interval: 5000
+  //   },
+  //   retryCount: 5,
+  //   retryDelay: 3000,
+  //   stallTimeout: 5000
+  // }
+  { batch: { multicall: true } }
 );
 
 const wagmiCfg = createConfig({

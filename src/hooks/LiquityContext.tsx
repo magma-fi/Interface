@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Provider } from "@ethersproject/abstract-provider";
-import { FallbackProvider } from "@ethersproject/providers";
 import { BaseProvider } from "@ethersproject/providers";
 import { PublicClient, WalletClient, useAccount, useChainId, useConnect, useNetwork, usePublicClient, useWalletClient } from "wagmi";
 
@@ -24,6 +23,7 @@ type LiquityContextValue = {
   provider: Provider;
   liquity: EthersLiquityWithStore<BlockPolledLiquityStore>;
   walletClient?: WalletClient;
+  chainId: number;
 };
 
 const LiquityContext = createContext<LiquityContextValue | undefined>(undefined);
@@ -103,6 +103,7 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
         account: addr,
         provider: connection.provider,
         liquity,
+        chainId,
         walletClient: connection.signer as unknown as WalletClient
       }}>
       {children}

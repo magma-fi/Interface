@@ -13,7 +13,7 @@ import { LoadingOverlay } from "./LoadingOverlay";
 import { useTransactionState } from "./Transaction";
 import { Abbreviation } from "./Abbreviation";
 import { useLang } from "../hooks/useLang";
-import { PublicClient, useChainId, usePublicClient } from "wagmi";
+import { PublicClient, usePublicClient } from "wagmi";
 import { IOTX, WEN } from "../libs/globalContants";
 import appConfig from "../appConfig.json";
 import { LiquidatableTrove } from "../libs/types";
@@ -69,13 +69,12 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     price
   } = useLiquitySelector(select);
   const factor = 0.95;
-  const { liquity } = useLiquity();
+  const { liquity, chainId } = useLiquity();
   const [loading, setLoading] = useState(true);
   const [troves, setTroves] = useState<UserTrove[]>();
   const [reload, setReload] = useState({});
   const forceReload = useCallback(() => setReload({}), []);
   const [page, setPage] = useState(0);
-  const chainId = useChainId();
   const client: PublicClient = usePublicClient({ chainId });
   const mcr = constants?.MCR?.gt(0) ? constants.MCR : Decimal.from(appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO);
 

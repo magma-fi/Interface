@@ -20,7 +20,7 @@
     "connectkit": "1.3.0",
     "lambert-w-function": "3.0.0",
     "lib-base": "https://github.com/siyushin/lib-base.git#7dcd125fd358d152ba791e4c0a3d876be7fc9f14",
-    "lib-ethers": "https://github.com/magma-fi/lib-ethers.git#e6cf4bcda12c7c587c107f80523d41827b5488e6",
+    "lib-ethers": "https://github.com/magma-fi/lib-ethers.git#480818e2d6d2e732bf0f59185b58f1848997f052",
     "react": "17.0.2",
     "react-circular-progressbar": "2.0.3",
     "react-copy-to-clipboard": "5.0.3",
@@ -30,7 +30,7 @@
     "recharts": "^2.10.1",
     "theme-ui": "^0.16.1",
     "viem": "^1.19.4",
-    "wagmi": "^1.4.7"
+    "wagmi": "^1.4.12"
   },
   "devDependencies": {
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",

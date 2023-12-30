@@ -5,7 +5,7 @@ import { UserAccount } from "../components/UserAccount";
 import { Route, BrowserRouter, Switch } from "react-router-dom";
 import { BorrowView } from "./BorrowView";
 import { StakeView } from "./StakeView";
-import { useChainId, useNetwork } from "wagmi";
+import { useNetwork } from "wagmi";
 import { LiquidationsView } from "./LiquidationsView";
 import { useContract } from "../hooks/useContract";
 import { BorrowerOperations, LUSDToken, TroveManager } from "lib-ethers/dist/types";
@@ -21,9 +21,8 @@ export const MainView = () => {
 	const [showConnectModal, setShowConnectModal] = useState(false);
 	const [showTerms, setShowTerms] = useState(false);
 	const { chain, chains } = useNetwork();
-	const chainId = useChainId();
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
-	const { liquity } = useLiquity();
+	const { liquity, chainId } = useLiquity();
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});
 	const dec = Math.pow(10, WEN.decimals || 18);
 
