@@ -115,13 +115,13 @@ const wagmiCfg = createConfig({
   autoConnect: true,
   connectors: [
     new InjectedConnector({ chains }),
-    new WalletConnectConnector({
-      chains,
-      options: {
-        projectId: "a1362d88b5470c1006e169ce345815ae",
-        showQrModal: true
-      }
-    })
+    // new WalletConnectConnector({
+    //   chains,
+    //   options: {
+    //     projectId: "a1362d88b5470c1006e169ce345815ae",
+    //     showQrModal: true
+    //   }
+    // })
   ],
   publicClient,
   webSocketPublicClient
