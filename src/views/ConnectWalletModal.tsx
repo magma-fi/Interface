@@ -21,6 +21,7 @@ export const ConnectWalletModal = ({
 		onClose={onClose}>
 		{connectors.map((connector, index) => {
 			return <button
+				key={connector.name}
 				id={String(index)}
 				disabled={!connector.ready || isLoading}
 				className="textButton"
