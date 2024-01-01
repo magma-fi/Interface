@@ -40,7 +40,8 @@ export const SideBar: React.FC = ({ children }) => {
         url="/"
         fullWidth={true}
         showExternalLink={false}
-        active={pathname === "/"} />
+        active={pathname === "/"}
+        target="_self" />
 
       <NavLink
         label={t("stake") + " " + WEN.symbol}
@@ -48,7 +49,8 @@ export const SideBar: React.FC = ({ children }) => {
         url="/stake"
         fullWidth={true}
         showExternalLink={false}
-        active={pathname === "/stake"} />
+        active={pathname === "/stake"}
+        target="_self" />
 
       {/* <NavLink
         label={t("governance")}
@@ -64,7 +66,8 @@ export const SideBar: React.FC = ({ children }) => {
         url="/liquidations"
         fullWidth={true}
         showExternalLink={false}
-        active={pathname === "/liquidations"} />
+        active={pathname === "/liquidations"}
+        target="_self" />
 
       <div
         className="navLink mainMenuForMobile"

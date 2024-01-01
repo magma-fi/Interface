@@ -11,5 +11,6 @@ export const LangSelect = () => {
 	return <DropdownMenu
 		defaultValue={LangOptions.findIndex(item => item.title === appController.lang)}
 		options={LangOptions}
-		onChange={handleChangeLang} />
+		onChange={handleChangeLang}
+		children={undefined} />
 }

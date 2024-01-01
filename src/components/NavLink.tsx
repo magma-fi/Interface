@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 type NavLinkProps = {
 	icon: string;
 	label: string;
@@ -17,9 +19,9 @@ export function NavLink({
 	active = false,
 	target = "_self"
 }: NavLinkProps) {
-	return <a
+	return <Link
 		className={"navLink" + (active ? " active" : "") + (fullWidth ? " navLink-fullWidth" : "")}
-		href={url}
+		to={url}
 		target={target}>
 		{icon && <img src={icon} />}
 
@@ -28,5 +30,5 @@ export function NavLink({
 		{showExternalLink && <img
 			id="externalLink"
 			src="images/external-link.png" />}
-	</a>
+	</Link>
 }
