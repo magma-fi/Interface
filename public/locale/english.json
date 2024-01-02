@@ -116,5 +116,7 @@
 	"watchWenToWallet": "Add WEN to your wallet",
 	"knowSlippage": "I am aware that there might be losses and slippage during the exchange",
 	"rewardsFromCollateral": "Rewards from Collateral",
-	"rewardsDescription": "Credited to your wallet automatically"
+	"rewardsDescription": "Credited to your wallet automatically",
+	"connectYourWallet": "Connect Your Wallet",
+	"connectYourWalletDescription": "Choose your preferred way to interact with Magma Finance"
 }
