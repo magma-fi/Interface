@@ -65,7 +65,7 @@ export const PoolView = ({ market, constants }: {
 	const [showTxResult, setTxResult] = useState<ModalOpenning | null>(null);
 	const [amountInTx, setAmountInTx] = useState(0);
 	const [txHash, setTxHash] = useState("");
-	const { liquity, walletClient } = useLiquity();
+	const { liquity } = useLiquity();
 	const wenTotalSupply = constants?.wenTotalSupply || Decimal.ZERO;
 	const [rewardsFromCollateral, setRewardsFromCollateral] = useState(Decimal.ZERO);
 	const netDebt = trove.debt.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? trove.netDebt : Decimal.ZERO
@@ -290,7 +290,20 @@ export const PoolView = ({ market, constants }: {
 			validationContext={validationContext}
 			lusdInStabilityPool={lusdInStabilityPool}
 			max={netDebt}
-			price={price} />}
+			price={price}
+			trove={trove} />}
+
+		{showTxResult?.action === ModalAction.SwapWEN2IOTX && showTxResult.isShow && <TxDone
+			title={t("wenSwappedSuccessfully")}
+			onClose={handleCloseTxResult}
+			illustration="images/swap-success.png"
+			whereGoBack={t("back2StabilityPool")}>
+			<TxLabel
+				txHash={txHash}
+				title={t("youReceived")}
+				logo={WEN.logo}
+				amount={amountInTx + " " + IOTX.symbol} />
+		</TxDone>}
 
 		{showModal?.action === ModalAction.Unstake && showModal.isShow && <UnstakeModal
 			isOpen={showModal.isShow}

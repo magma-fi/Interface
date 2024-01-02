@@ -1,18 +1,19 @@
 /// <reference types="vitest" />
+var _a;
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
+// import { NodeModulesPolyfillPlugin } from "@esbuild-plugins/node-modules-polyfill";
 import RollupPluginPolyfillNode from "rollup-plugin-polyfill-node";
 // https://vitejs.dev/config/
 export default defineConfig({
     base: "./",
     plugins: [react()],
-    define: { "process.env": {} }, // Coinbase SDK wants this
-    optimizeDeps: {
-        esbuildOptions: {
-            plugins: [NodeModulesPolyfillPlugin()]
-        }
-    },
+    define: { "process.env": (_a = process.env) !== null && _a !== void 0 ? _a : {} }, // Coinbase SDK wants this
+    // optimizeDeps: {
+    //   esbuildOptions: {
+    //     plugins: [NodeModulesPolyfillPlugin()]
+    //   }
+    // },
     build: {
         commonjsOptions: {
             include: ["**.cjs", "**.js"]
@@ -24,7 +25,7 @@ export default defineConfig({
     resolve: {
         alias: {
             assert: "rollup-plugin-node-polyfills/polyfills/assert",
-            events: "rollup-plugin-node-polyfills/polyfills/events"
+            // events: "rollup-plugin-node-polyfills/polyfills/events"
         }
     },
     test: {
@@ -33,7 +34,7 @@ export default defineConfig({
         setupFiles: "./src/setupTests.ts",
         deps: {
             inline: [
-                "connectkit", // fixes import of "react/jsx-runtime"
+                // "connectkit", // fixes import of "react/jsx-runtime"
                 "rollup-plugin-node-polyfills"
             ]
         },

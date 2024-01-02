@@ -19,7 +19,7 @@ import { WithdrawModal } from "./WithdrawModal";
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { graphqlAsker } from "../libs/graphqlAsker";
-import { useAccount, useChainId } from "wagmi";
+import { useAccount } from "wagmi";
 import { CloseModal } from "./CloseModal";
 import { TransactiionListItem } from "./TransactiionListItem";
 import appConfig from "../appConfig.json";
@@ -72,8 +72,7 @@ export const MarketView = ({
 		fees,
 		lusdBalance
 	} = useLiquitySelector(selector);
-	const { walletClient } = useLiquity()
-	const chainId = useChainId();
+	const { walletClient, chainId } = useLiquity()
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
 	const [depositAndBorrow, setDepositAndBorrow] = useState(true);
@@ -116,8 +115,8 @@ export const MarketView = ({
 	const currentNetDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
 	const minNetDebt = constants?.MIN_NET_DEBT || Decimal.ZERO;
 	const maxAvailableRepay = currentNetDebt.gt(minNetDebt) ? currentNetDebt.sub(minNetDebt) : Decimal.ZERO;
-	const totalUtilizationRate = total.collateral.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? total.netDebt.div(total.collateral.mul(price)) : Decimal.ZERO;
-	const troveUtilizationRate = trove.collateral.gt(0) ? currentNetDebt.div(troveCollateralValue).mul(100) : Decimal.ZERO;
+	const totalUtilizationRate = total.collateral.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? total.debt.div(total.collateral.mul(price)) : Decimal.ZERO;
+	const troveUtilizationRate = trove.collateral.gt(0) ? trove.debt.div(troveCollateralValue).mul(100) : Decimal.ZERO;
 	const troveUtilizationRateNumber = Number(troveUtilizationRate);
 
 	const RADIAN = Math.PI / 180;
@@ -497,7 +496,10 @@ export const MarketView = ({
 
 					<div
 						className="flex-row-space-between"
-						style={{ alignItems: "flex-end" }}>
+						style={{
+							alignItems: "flex-end",
+							gap: "none"
+						}}>
 						<div className="flex-column-align-left">
 							<div className="label">{t("available2Withdraw")}</div>
 
@@ -587,7 +589,7 @@ export const MarketView = ({
 					</div>
 
 					<div className="flex-row-space-between">
-						<div className="description">{t("loanToValue")}(LTV)</div>
+						<div className="description">{t("loanToValue")}&nbsp;(LTV)</div>
 
 						<div>{total.collateral.gt(0) ? total.debt.div(total.collateral.mul(price)).mul(100).toString(2) : 0}%</div>
 					</div>
@@ -633,7 +635,7 @@ export const MarketView = ({
 			depositAndBorrow={depositAndBorrow}
 			liquidationPrice={liquidationPrice}
 			availableWithdrawal={availableWithdrawal}
-			availableBorrow={availableBorrow}
+			availableBorrow={availableBorrow.mul(0.95)}
 			recoveryMode={recoveryMode}
 			liquidationPoint={liquidationPoint} />}
 
@@ -666,7 +668,7 @@ export const MarketView = ({
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={availableBorrow}
+			max={availableBorrow.mul(0.95)}
 			onDone={handleBorrowDone}
 			constants={constants}
 			liquidationPrice={liquidationPrice}

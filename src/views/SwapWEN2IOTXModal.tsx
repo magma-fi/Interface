@@ -5,10 +5,10 @@
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
 import { ErrorMessage, ValidationContextForStabilityPool } from "../libs/types";
-import { WEN } from "../libs/globalContants";
+import { IOTX, WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect, useMemo } from "react";
-import { Decimal, StabilityDeposit } from "lib-base";
+import { Decimal, StabilityDeposit, UserTrove } from "lib-base";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { useMyTransactionState } from "../components/Transaction";
 import TroveManagerAbi from "lib-ethers/abi/TroveManager.json";
@@ -18,6 +18,9 @@ import { HintHelpers, SortedTroves, TroveManager } from "lib-ethers/dist/types";
 import { validateStabilityDepositChange } from "../components/Stability/validation/validateStabilityDepositChange";
 import { StabilityDepositAction } from "../components/Stability/StabilityDepositAction";
 import { SnackBar } from "../components/SnackBar";
+import { useContract } from "../hooks/useContract";
+import { useLiquity } from "../hooks/LiquityContext";
+import { Address, useAccount } from "wagmi";
 
 export const SwapWEN2IOTXModal = ({
 	isOpen = false,
@@ -28,7 +31,8 @@ export const SwapWEN2IOTXModal = ({
 	validationContext,
 	lusdInStabilityPool,
 	max,
-	price
+	price,
+	trove
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -39,13 +43,21 @@ export const SwapWEN2IOTXModal = ({
 	lusdInStabilityPool: Decimal;
 	max: Decimal;
 	price: Decimal;
+	trove: UserTrove;
 }) => {
 	const { t } = useLang();
+	const { address } = useAccount();
+	const { provider, liquity, walletClient } = useLiquity();
 	const [valueForced, setValueForced] = useState(-1);
 	const [swapAmount, setSwapAmount] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
 	const maxNumber = Number(max);
+	const [fee, setFee] = useState(Decimal.ZERO);
+	const redeemRate = trove.collateral.gt(0) ? trove.debt.div(trove.collateral) : Decimal.ZERO;
+	const feeDecimals = fee.div(globalContants.IOTX_DECIMALS);
+	const receive = Decimal.ONE.div(redeemRate).mul(swapAmount);
+	const [sending, setSending] = useState(false);
 
 	const [validChange, description] = validateStabilityDepositChange(
 		stabilityDeposit,
@@ -101,49 +113,66 @@ export const SwapWEN2IOTXModal = ({
 		}
 	}, [transactionState.type])
 
-	const handleSwap = () => {
+	useEffect(() => {
+		const getData = async () => {
+			if (troveManagerDefaultStatus === "LOADED" && troveManagerDefault) {
+				const res = await troveManagerDefault.REDEMPTION_FEE_FLOOR();
+				if (res) {
+					setFee(Decimal.from(res.toString()));
+				}
+			}
+		}
+
+		getData();
+	}, [troveManagerDefaultStatus, troveManagerDefault]);
+
+	const listenHash = async (txHash: string) => {
+		if (!txHash) return;
+
+		const receipt = await provider.getTransactionReceipt(txHash);
+
+		if (!receipt) {
+			return setTimeout(() => {
+				listenHash(txHash);
+			}, 5000);
+		}
+
+		if (receipt.status === 1) {
+			setSending(false);
+			onDone(txHash, Number(receive.toString()));
+		}
+	};
+
+	const handleSwap = async () => {
+		if (!hintHelpersDefault || !troveManagerDefault || !sortedTrovesDefault || !address || !walletClient) return;
+
+		setSending(true);
+
 		// const wenAmount = stabilityDeposit.currentLUSD.toString();
-		// console.debug("xxx 分解参数 wenAmount =", wenAmount);
-		// const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault.getRedemptionHints(wenAmount, price.mul(globalContants.IOTX_DECIMALS).toString(), 0);
-		// console.debug("xxx 分解参数 firstRedemptionHint =", firstRedemptionHint);
-		// const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault.findInsertPosition(
-		// 	partialRedemptionHintNICR,
-		// 	address,
-		// 	address
-		// )
-		// console.debug("xxx 参数",
-		// 	wenAmount,
-		// 	firstRedemptionHint,
-		// 	upperPartialRedemptionHint,
-		// 	lowerPartialRedemptionHint,
-		// 	partialRedemptionHintNICR,
-		// );
-		// // const redemptionTx = await troveManagerDefault.redeemCollateral(
-		// // 	wenAmount,
-		// // 	firstRedemptionHint,
-		// // 	upperPartialRedemptionHint,
-		// // 	lowerPartialRedemptionHint,
-		// // 	partialRedemptionHintNICR,
-		// // 	0,
-		// // 	"1000000000000000000"
-		// // )
-		// // 还需要approve!!!
-		// const txHash = await walletClient.writeContract({
-		// 	account: address,
-		// 	address: liquity.connection.addresses.troveManager as Address,
-		// 	abi: TroveManagerAbi,
-		// 	functionName: 'redeemCollateral',
-		// 	args: [
-		// 		wenAmount,
-		// 		firstRedemptionHint,
-		// 		upperPartialRedemptionHint,
-		// 		lowerPartialRedemptionHint,
-		// 		partialRedemptionHintNICR,
-		// 		0,
-		// 		"1000000000000000000"
-		// 	]
-		// })
-		// console.debug("xxx txHash =", txHash);
+		const wenAmount = Decimal.from(swapAmount).mul(globalContants.WEN_DECIMALS).toString();
+		const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault.getRedemptionHints(wenAmount, price.mul(globalContants.IOTX_DECIMALS).toString(), 0);
+		const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault.findInsertPosition(
+			partialRedemptionHintNICR,
+			address,
+			address
+		)
+		const txHash = await walletClient.writeContract({
+			account: address,
+			address: liquity.connection.addresses.troveManager as Address,
+			abi: TroveManagerAbi,
+			functionName: 'redeemCollateral',
+			args: [
+				wenAmount,
+				firstRedemptionHint,
+				upperPartialRedemptionHint,
+				lowerPartialRedemptionHint,
+				partialRedemptionHintNICR,
+				0,
+				feeDecimals.mul(wenAmount).toString()
+			]
+		})
+
+		return listenHash(txHash);
 	};
 
 	return isOpen ? <Modal
@@ -196,46 +225,51 @@ export const SwapWEN2IOTXModal = ({
 
 					<div
 						className="label"
-						style={{ color: "#F6F6F7" }}>1&nbsp;IOTX&nbsp;=&nbsp;{Decimal.ONE.div(price).toString(2)}&nbsp;{WEN.symbol}</div>
+						style={{ color: "#F6F6F7" }}>1&nbsp;IOTX&nbsp;=&nbsp;{redeemRate.toString(2)}&nbsp;{WEN.symbol}</div>
 				</div>
 
 				<div className="flex-row-space-between">
-					<div className="label">{t("walletBalance")}</div>
+					<div className="label">{t("conversionFee")}&nbsp;({feeDecimals.mul(100).toString(2)})%</div>
 
-					<ChangedValueLabel
-						previousValue={accountBalance.toString(2)}
-						newValue={(accountBalance.gt(swapAmount) ? accountBalance.sub(swapAmount) : Decimal.ZERO).toString(2) + " " + WEN.symbol} />
+					<div
+						className="label"
+						style={{ color: "#F6F6F7" }}>{feeDecimals.mul(max).toString(2)}&nbsp;{WEN.symbol}</div>
 				</div>
 
 				<div className="flex-row-space-between">
-					<div className="label">{t("shareOfStabilityPool")}</div>
+					<div className="label">{t("youSend")}</div>
 
-					<ChangedValueLabel
-						previousValue={stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool).toString(2) + "%"}
-						newValue={stabilityDeposit.currentLUSD.add(swapAmount).mulDiv(100, lusdInStabilityPool.add(swapAmount)).toString(2) + "%"} />
+					<div
+						className="label"
+						style={{ color: "#F6F6F7" }}>{swapAmount.toFixed(2)}&nbsp;{WEN.symbol}</div>
+				</div>
+
+				<div className="flex-row-space-between">
+					<div className="label">{t("youReceive")}</div>
+
+					<div
+						className="label"
+						style={{ color: "#F6F6F7" }}>{receive.toString(2)}&nbsp;{IOTX.symbol}</div>
 				</div>
 			</div>
 		</div>
 
-		{/* if (!hintHelpersDefault || !troveManagerDefault || !sortedTrovesDefault || !address || !walletClient) return; */}
-		{validChange && !transactionState.id && transactionState.type === "idle" ? <StabilityDepositAction
-			transactionId={txId}
-			change={validChange}>
-			<button
-				className="primaryButton bigButton"
-				style={{ width: "100%" }}
-				disabled={swapAmount === 0}>
-				<img src="images/stake-dark.png" />
-
-				{t("stake") + " " + WEN.symbol}
-			</button>
-		</StabilityDepositAction> : <button
+		<button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			disabled>
-			<img src="images/stake-dark.png" />
+			disabled={
+				swapAmount === 0
+				|| !hintHelpersDefault
+				|| !troveManagerDefault
+				|| !sortedTrovesDefault
+				|| !address
+				|| !walletClient
+				|| sending
+			}
+			onClick={handleSwap}>
+			<img src="images/swap-black.png" />
 
-			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("staking") + "...") : (t("stake") + " " + WEN.symbol)}
-		</button>}
+			{sending ? (t("sending") + "...") : (t("swapWen2Iotx"))}
+		</button>
 	</Modal> : <></>
 };

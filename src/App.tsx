@@ -4,7 +4,8 @@ import { iotexTestnet, iotex } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import { jsonRpcProvider } from "@wagmi/core/providers/jsonRpc"
+// import { MetaMaskConnector } from "wagmi/connectors/metaMask";
+// import { jsonRpcProvider } from "@wagmi/core/providers/jsonRpc"
 // import { ConnectKitProvider, getDefaultClient } from "connectkit";
 // import { Flex, Heading, Paragraph, Link } from "theme-ui";
 
@@ -22,7 +23,7 @@ import { AppLoader } from "./components/AppLoader";
 import { useAsyncValue } from "./hooks/AsyncValue";
 import { appController } from "./libs/appController";
 import { TransactionProvider } from "./components/Transaction";
-import appConfig from "./appConfig.json";
+// import appConfig from "./appConfig.json";
 
 // const isDemoMode = import.meta.env.VITE_APP_DEMO_MODE === "true";
 
@@ -86,22 +87,41 @@ getConfig().then(config => {
 // );
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [iotexTestnet, iotex],
+  [iotex, iotexTestnet],
   [
     publicProvider(),
-    jsonRpcProvider({
-      rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
-    })
-  ]
+    // jsonRpcProvider({
+    //   rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
+    // })
+  ],
+  // {
+  //   batch: {
+  //     multicall: {
+  //       batchSize: 512
+  //     }
+  //   },
+  //   pollingInterval: 10000,
+  //   rank: {
+  //     interval: 5000
+  //   },
+  //   retryCount: 5,
+  //   retryDelay: 3000,
+  //   stallTimeout: 5000
+  // }
+  { batch: { multicall: true } }
 );
 
 const wagmiCfg = createConfig({
   connectors: [
     new InjectedConnector({ chains }),
+    // new MetaMaskConnector({
+    //   chains,
+    //   options: { shimDisconnect: true }
+    // }),
     new WalletConnectConnector({
       chains,
       options: {
-        projectId: "d07ac995c00b420c74e487b047377333",
+        projectId: "a1362d88b5470c1006e169ce345815ae",
         showQrModal: true
       }
     })
@@ -165,7 +185,9 @@ const App = () => {
     // unsupportedMainnetFallback={<UnsupportedMainnetFallback />}
     >
       <TransactionProvider>
-        <LiquityFrontend loader={loader} />
+        <LiquityFrontend
+          chains={chains}
+          loader={loader} />
       </TransactionProvider>
     </LiquityProvider>
     {/* </WalletConnector> */}

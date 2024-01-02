@@ -12,7 +12,8 @@ const multicallAddress = {
   4: "0x42Ad527de7d4e9d9d011aC45B31D8551f8Fe9821",
   5: "0x77dCa2C955b15e9dE4dbBCf1246B4B85b651e50e",
   42: "0x2cc8688C5f75E365aaEEb4ea8D6a480405A48D2A",
-  4690: "0x7B0338afA9b19973592e26E7ACcf077C556aaAC9"
+  4690: "0x7B0338afA9b19973592e26E7ACcf077C556aaAC9",
+  4689: "0x63ccc9bd0dc151a2537aaf93375edb700c883f6a"
 };
 
 const hasMulticall = (chainId: number): chainId is keyof typeof multicallAddress =>
@@ -140,8 +141,12 @@ export class BatchedProvider extends BaseProvider {
   private _numberOfActualCalls = 0;
   private _timeOfLastRatioCheck?: number;
 
+  private name?: string = "";
+
   constructor(underlyingProvider: BaseProvider, chainId = 0, batchingDelayMs = 10) {
-    super(getNetwork(chainId));
+    const tempNetwork = getNetwork(chainId);
+    super(tempNetwork);
+    this.name = tempNetwork.name;
 
     this.underlyingProvider = underlyingProvider;
     this.chainId = chainId;
@@ -270,6 +275,18 @@ export class BatchedProvider extends BaseProvider {
   }
 
   detectNetwork(): Promise<Network> {
-    return this.underlyingProvider.detectNetwork();
+    // return this.underlyingProvider.detectNetwork();
+    // Network = {
+    //   name: string,
+    //   chainId: number,
+    //   ensAddress?: string,
+    //   _defaultProvider?: (providers: any, options?: any) => any
+    // }
+    return new Promise((resolve, reject) => {
+      return resolve({
+        name: this.name,
+        chainId: this.chainId
+      } as Network)
+    });
   }
 }

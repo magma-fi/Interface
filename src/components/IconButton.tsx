@@ -24,9 +24,10 @@ export const IconButton = ({
 
 	return <button
 		className="iconButton"
-		style={{ backgroundImage: "url(" + icon + ")" }}
 		onMouseEnter={handleMouseEnter}
 		onMouseOut={handleMouseOut}
 		onMouseDown={handleMouseDown}
-		onClick={onClick} />
+		onClick={onClick}>
+		<img src={icon} />
+	</button>
 };

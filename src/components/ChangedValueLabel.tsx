@@ -9,7 +9,8 @@ export const ChangedValueLabel = ({
 		className="flex-row-align-left"
 		style={{
 			justifyContent: "center",
-			alignItems: "center"
+			alignItems: "center",
+			whiteSpace: "nowrap"
 		}}>
 		<div className="label labelSmall">{previousValue}</div>
 

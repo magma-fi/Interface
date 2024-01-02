@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Provider } from "@ethersproject/abstract-provider";
-import { FallbackProvider } from "@ethersproject/providers";
 import { BaseProvider } from "@ethersproject/providers";
-import { PublicClient, WalletClient, useAccount, useChainId, useConnect, useNetwork, usePublicClient, useWalletClient } from "wagmi";
+import { PublicClient, WalletClient, useAccount, useChainId, useConnect, usePublicClient, useWalletClient } from "wagmi";
 
 import {
   BlockPolledLiquityStore,
@@ -14,7 +13,6 @@ import {
 import { LiquityFrontendConfig, getConfig } from "../config";
 import { BatchedProvider } from "../providers/BatchingProvider";
 import { useEthersProvider } from "../libs/ethers";
-import { MainView } from "../views/MainView";
 import { VoidSigner, ethers } from "ethers";
 import { globalContants } from "../libs/globalContants";
 
@@ -24,6 +22,8 @@ type LiquityContextValue = {
   provider: Provider;
   liquity: EthersLiquityWithStore<BlockPolledLiquityStore>;
   walletClient?: WalletClient;
+  chainId: number;
+  publicClient?: PublicClient;
 };
 
 const LiquityContext = createContext<LiquityContextValue | undefined>(undefined);
@@ -44,6 +44,7 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   const signer = useWalletClient();
   const chainId = useChainId();
   const wagmiProvider = useEthersProvider();
+  const publicClient = usePublicClient({ chainId });
   const addr = isConnected ? address : globalContants.ADDRESS_PLACEHOLDER;
 
   let customProvider: BaseProvider | undefined;
@@ -103,7 +104,9 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
         account: addr,
         provider: connection.provider,
         liquity,
-        walletClient: connection.signer as unknown as WalletClient
+        chainId,
+        walletClient: connection.signer as unknown as WalletClient,
+        publicClient
       }}>
       {children}
     </LiquityContext.Provider>

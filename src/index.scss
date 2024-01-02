@@ -119,7 +119,7 @@ h4 {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .two-columns-grid {
@@ -154,7 +154,7 @@ h4 {
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  gap: var(--flex-gap-larger);
+  // gap: var(--flex-gap-larger);
 }
 
 .flex-column {
@@ -405,13 +405,17 @@ h4 {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  // right: 0;
+  // bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  width: 100vw;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 1000;
 
   .modal {
     width: fit-content;
@@ -424,6 +428,7 @@ h4 {
     gap: var(--flex-gap-big);
     display: flex;
     flex-direction: column;
+    margin-top: 0;
 
     .titleBar {
       display: flex;
@@ -591,13 +596,27 @@ h4 {
 .iconButton {
   width: 48px;
   height: 48px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 18px;
-  background-color: transparent;
   cursor: pointer;
   border: none;
   outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 47px;
+  border: 1px solid var(--button-secondary-stroke);
+  background: var(--button-secondary-fill);
+
+  &:hover {
+    background: var(--button-secondary-fill-hover);
+  }
+
+  &:active {
+    background: var(--button-secondary-fill-pressed);
+  }
+
+  img {
+    width: 18px;
+  }
 }
 
 .subCard {
@@ -617,7 +636,7 @@ h4 {
 .label {
   color: var(--text-secondary);
   font-size: 0.875rem;
-  white-space: nowrap;
+  // white-space: nowrap;
   // text-transform: capitalize;
 }
 
@@ -991,6 +1010,22 @@ input {
     background-image: url("/images/bg-mobile.png");
   }
 
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+  }
+
+  h4 {
+    font-size: 1.25rem;
+  }
+
   .app {
     flex-direction: column;
     width: 100vw;
@@ -1114,7 +1149,7 @@ input {
   }
 
   .modalOverlay {
-    position: absolute;
+    // position: absolute;
 
     .modal {
       width: calc(100% - 6rem);
