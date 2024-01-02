@@ -4,7 +4,7 @@ import { iotexTestnet, iotex } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import { jsonRpcProvider } from "@wagmi/core/providers/jsonRpc"
+// import { jsonRpcProvider } from "@wagmi/core/providers/jsonRpc"
 // import { ConnectKitProvider, getDefaultClient } from "connectkit";
 // import { Flex, Heading, Paragraph, Link } from "theme-ui";
 
@@ -22,8 +22,7 @@ import { AppLoader } from "./components/AppLoader";
 import { useAsyncValue } from "./hooks/AsyncValue";
 import { appController } from "./libs/appController";
 import { TransactionProvider } from "./components/Transaction";
-import appConfig from "./appConfig.json";
-import { StaticJsonRpcProvider } from "@ethersproject/providers";
+// import appConfig from "./appConfig.json";
 
 // const isDemoMode = import.meta.env.VITE_APP_DEMO_MODE === "true";
 
