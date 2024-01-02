@@ -23,7 +23,7 @@ export const ConnectWalletModal = ({
 			let name = connector.name;
 
 			// 判断是不是ioPay
-			if (name === "Trust Wallet" && window.navigator.userAgent.indexOf("ioPay") >= 0) {
+			if (name === "Trust Wallet" && window.navigator.userAgent.indexOf("IoPay") >= 0) {
 				name = "ioPay";
 			}
 
