@@ -418,6 +418,7 @@ h4 {
     gap: var(--flex-gap-big);
     display: flex;
     flex-direction: column;
+    margin-top: 0;
 
     .titleBar {
       display: flex;

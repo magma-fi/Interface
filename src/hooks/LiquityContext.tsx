@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Provider } from "@ethersproject/abstract-provider";
 import { BaseProvider } from "@ethersproject/providers";
-import { PublicClient, WalletClient, useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
+import { PublicClient, WalletClient, useAccount, useChainId, useConnect, usePublicClient, useWalletClient } from "wagmi";
 
 import {
   BlockPolledLiquityStore,
@@ -46,6 +46,7 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   const wagmiProvider = useEthersProvider();
   const publicClient = usePublicClient({ chainId });
   const addr = isConnected ? address : globalContants.ADDRESS_PLACEHOLDER;
+  const { connect, connectors } = useConnect();
 
   let customProvider: BaseProvider | undefined;
   let customSigner: VoidSigner | undefined;
@@ -53,6 +54,11 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
     // 在未连接钱包的情况下，强制连接默认网络。
     customProvider = ethers.getDefaultProvider(globalContants.default_NETWORK_RPC);
     customSigner = new ethers.VoidSigner(globalContants.ADDRESS_PLACEHOLDER, customProvider);
+
+    if (window.navigator.userAgent.indexOf("IoPay") >= 0) {
+      // 如果是在ioPay里，则自动连接钱包。
+      connect({ connector: connectors[0] });
+    }
   }
   const provider = isConnected ? wagmiProvider : customProvider;
   const signerData = isConnected ? signer.data : customSigner;
