@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
 import { iotexTestnet, iotex } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
-// import { InjectedConnector } from "wagmi/connectors/injected";
+import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import { MetaMaskConnector } from "wagmi/connectors/metaMask";
+// import { MetaMaskConnector } from "wagmi/connectors/metaMask";
 // import { jsonRpcProvider } from "@wagmi/core/providers/jsonRpc"
 // import { ConnectKitProvider, getDefaultClient } from "connectkit";
 // import { Flex, Heading, Paragraph, Link } from "theme-ui";
@@ -114,10 +114,11 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
 const wagmiCfg = createConfig({
   autoConnect: true,
   connectors: [
-    new MetaMaskConnector({
-      chains,
-      options: { shimDisconnect: true }
-    }),
+    new InjectedConnector({ chains }),
+    // new MetaMaskConnector({
+    //   chains,
+    //   options: { shimDisconnect: true }
+    // }),
     new WalletConnectConnector({
       chains,
       options: {

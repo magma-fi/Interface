@@ -20,13 +20,20 @@ export const ConnectWalletModal = ({
 		title={t("connectWallet")}
 		onClose={onClose}>
 		{connectors.map((connector, index) => {
+			let name = connector.name;
+
+			// 判断是不是ioPay
+			if (name === "Trust Wallet" && window.navigator.userAgent.indexOf("ioPay") >= 0) {
+				name = "ioPay";
+			}
+
 			return <button
 				key={connector.name}
 				id={String(index)}
 				disabled={!connector.ready || isLoading}
 				className="textButton"
 				onClick={handleConnect}>
-				{connector.name}
+				{name}
 				{connector.id === pendingConnector?.id && " (" + t("connecting") + ")"}
 			</button>
 		})}
