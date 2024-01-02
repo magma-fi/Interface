@@ -46,7 +46,6 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   const wagmiProvider = useEthersProvider();
   const publicClient = usePublicClient({ chainId });
   const addr = isConnected ? address : globalContants.ADDRESS_PLACEHOLDER;
-  const { connect, connectors } = useConnect();
 
   let customProvider: BaseProvider | undefined;
   let customSigner: VoidSigner | undefined;
