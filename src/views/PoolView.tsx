@@ -159,12 +159,6 @@ export const PoolView = ({ market, constants }: {
 
 						<button
 							id={ModalAction.SwapWEN2IOTX}
-							disabled={
-								hintHelpersDefaultStatus !== "LOADED"
-								|| troveManagerDefaultStatus !== "LOADED"
-								|| sortedTrovesDefaultStatus !== "LOADED"
-								|| netDebt.eq(0)
-							}
 							onClick={handleRedeemCollateral}
 							className="secondaryButton">
 							<img src="images/swap-orange.png" />
