@@ -54,11 +54,6 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
     // 在未连接钱包的情况下，强制连接默认网络。
     customProvider = ethers.getDefaultProvider(globalContants.default_NETWORK_RPC);
     customSigner = new ethers.VoidSigner(globalContants.ADDRESS_PLACEHOLDER, customProvider);
-
-    if (window.navigator.userAgent.indexOf("IoPay") >= 0) {
-      // 如果是在ioPay里，则自动连接钱包。
-      connect({ connector: connectors[0] });
-    }
   }
   const provider = isConnected ? wagmiProvider : customProvider;
   const signerData = isConnected ? signer.data : customSigner;
@@ -98,6 +93,14 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
     return <>{unsupportedNetworkFallback}</>;
     // return <>{children}</>;
     // return <MainView />
+  }
+
+  if (connection
+    && !isConnected
+    && window.navigator.userAgent.indexOf("IoPay") >= 0
+    && connect
+    && connectors) {
+    connect({ connector: connectors[0] });
   }
 
   if (connection) {
