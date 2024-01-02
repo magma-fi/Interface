@@ -418,6 +418,7 @@ h4 {
     gap: var(--flex-gap-big);
     display: flex;
     flex-direction: column;
+    margin-top: 0;
 
     .titleBar {
       display: flex;
@@ -585,13 +586,27 @@ h4 {
 .iconButton {
   width: 48px;
   height: 48px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 18px;
-  background-color: transparent;
   cursor: pointer;
   border: none;
   outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 47px;
+  border: 1px solid var(--button-secondary-stroke);
+  background: var(--button-secondary-fill);
+
+  &:hover {
+    background: var(--button-secondary-fill-hover);
+  }
+
+  &:active {
+    background: var(--button-secondary-fill-pressed);
+  }
+
+  img {
+    width: 18px;
+  }
 }
 
 .subCard {

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Provider } from "@ethersproject/abstract-provider";
 import { BaseProvider } from "@ethersproject/providers";
-import { PublicClient, WalletClient, useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
+import { PublicClient, WalletClient, useAccount, useChainId, useConnect, usePublicClient, useWalletClient } from "wagmi";
 
 import {
   BlockPolledLiquityStore,

@@ -5,7 +5,7 @@ import { UserAccount } from "../components/UserAccount";
 import { Route, BrowserRouter, Switch } from "react-router-dom";
 import { BorrowView } from "./BorrowView";
 import { StakeView } from "./StakeView";
-import { Chain, useNetwork } from "wagmi";
+import { Chain, useAccount, useNetwork } from "wagmi";
 import { LiquidationsView } from "./LiquidationsView";
 import { useContract } from "../hooks/useContract";
 import { BorrowerOperations, LUSDToken, TroveManager } from "lib-ethers/dist/types";
@@ -18,6 +18,7 @@ import { WEN, globalContants } from "../libs/globalContants";
 import { TermsModal } from "./TermsModal";
 
 export const MainView = ({ chains }: { chains: Chain[] }) => {
+	const { isConnected } = useAccount();
 	const [showConnectModal, setShowConnectModal] = useState(false);
 	const [showTerms, setShowTerms] = useState(false);
 	const { chain } = useNetwork();
@@ -46,6 +47,12 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			setShowTerms(true);
 		}
 	}, []);
+
+	useEffect(() => {
+		if (!isConnected) {
+			setShowConnectModal(true);
+		}
+	}, [isConnected]);
 
 	useEffect(() => {
 		const getContants = async () => {

@@ -86,7 +86,17 @@ export const BorrowModal = ({
 	const stableTroveChange = useStableTroveChange(troveChange);
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
 
-	const newUR = ((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(updatedTrove.collateralRatio(price)) : Decimal.ZERO);
+	const newCollateralRatio = updatedTrove.collateralRatio(price);
+	const newUR = ((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(newCollateralRatio) : Decimal.ZERO);
+
+	const newTroveCollateralRatio = updatedTrove.debt.eq(0) ? Decimal.ZERO : newCollateralRatio;
+	const newTroveCollateralValue = updatedTrove.collateral.mul(price);
+	const line = Decimal.min(liquidationPoint, newTroveCollateralRatio);
+	const newDebtToLiquidate = Decimal.max(
+		updatedTrove.debt,
+		Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
+	);
+	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
 
 	useEffect(() => {
 		setForcedSlideValue(Number(newUR.toString()));
@@ -257,11 +267,9 @@ export const BorrowModal = ({
 				<div className="flex-row-space-between">
 					<div className="label">{t("liquidationPrice")}(1&nbsp;{market?.symbol})</div>
 
-					<div
-						className="label"
-						style={{ color: "#F6F6F7" }}>
-						{liquidationPrice.toString(2)}&nbsp;{globalContants.USD}
-					</div>
+					<ChangedValueLabel
+						previousValue={liquidationPrice.toString(2)}
+						newValue={newLiquidationPrice.toString(2) + " " + globalContants.USD} />
 				</div>
 
 				<div className="flex-row-space-between">

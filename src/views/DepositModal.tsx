@@ -96,6 +96,16 @@ export const DepositeModal = ({
 
 	const errorInfo = txErrorMessages || errorMessages;
 
+	const newCollateralRatio = updatedTrove.collateralRatio(price);
+	const newTroveCollateralRatio = updatedTrove.debt.eq(0) ? Decimal.ZERO : newCollateralRatio;
+	const newTroveCollateralValue = updatedTrove.collateral.mul(price);
+	const line = Decimal.min(liquidationPoint, newTroveCollateralRatio);
+	const newDebtToLiquidate = Decimal.max(
+		updatedTrove.debt,
+		Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
+	);
+	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
+
 	const init = () => {
 		setValueForced(-1);
 		setDepositValue(0);
@@ -326,7 +336,7 @@ export const DepositeModal = ({
 
 					<ChangedValueLabel
 						previousValue={troveUtilizationRateNumber.toFixed(2) + "%"}
-						newValue={((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(updatedTrove.collateralRatio(price)).mul(100).toString(2) : 0) + "%"} />
+						newValue={((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(newCollateralRatio).mul(100).toString(2) : 0) + "%"} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -356,11 +366,9 @@ export const DepositeModal = ({
 				<div className="flex-row-space-between">
 					<div className="label">{t("liquidationPrice")}(1&nbsp;{market?.symbol})</div>
 
-					<div
-						className="label"
-						style={{ color: "#F6F6F7" }}>
-						{liquidationPrice.toString(2)}&nbsp;{globalContants.USD}
-					</div>
+					<ChangedValueLabel
+						previousValue={liquidationPrice.toString(2)}
+						newValue={newLiquidationPrice.toString(2) + " " + globalContants.USD} />
 				</div>
 
 				{showExpandBorrowView && <>
