@@ -496,7 +496,10 @@ export const MarketView = ({
 
 					<div
 						className="flex-row-space-between"
-						style={{ alignItems: "flex-end" }}>
+						style={{
+							alignItems: "flex-end",
+							gap: "none"
+						}}>
 						<div className="flex-column-align-left">
 							<div className="label">{t("available2Withdraw")}</div>
 

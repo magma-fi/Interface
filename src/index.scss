@@ -144,7 +144,7 @@ h4 {
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  gap: var(--flex-gap-larger);
+  // gap: var(--flex-gap-larger);
 }
 
 .flex-column {
@@ -607,7 +607,7 @@ h4 {
 .label {
   color: var(--text-secondary);
   font-size: 0.875rem;
-  white-space: nowrap;
+  // white-space: nowrap;
   // text-transform: capitalize;
 }
 
@@ -934,6 +934,22 @@ input {
 @media (max-width: 575.98px) {
   body {
     background-image: url("/images/bg-mobile.png");
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+  }
+
+  h4 {
+    font-size: 1.25rem;
   }
 
   .app {
