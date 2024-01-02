@@ -95,14 +95,6 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
     // return <MainView />
   }
 
-  if (connection
-    && !isConnected
-    && window.navigator.userAgent.indexOf("IoPay") >= 0
-    && connect
-    && connectors) {
-    connect({ connector: connectors[0] });
-  }
-
   if (connection) {
     const liquity = EthersLiquity._from(connection);
     liquity.store.logging = true;
