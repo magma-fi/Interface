@@ -42,34 +42,37 @@ export const AmountInput = ({
 		) {
 			onInput(val);
 		} else {
-			setInputValue(String(currentValue));
-			setFiatValue(price.mul(currentValue).toString(2));
-
 			onInput(currentValue);
 		}
-	}, [allowIncrease, allowReduce, currentValue, onInput, price])
+	}, [allowIncrease, allowReduce, currentValue, onInput])
 
 	const updateValue = useCallback((val, send = true) => {
-		setInputValue(String(val));
-		setFiatValue(price.mul(val).toString(2));
-
-		if (send) {
-			// sendBack(val);
-			debounce.run(sendBack, 1500, val);
+		if (!isNaN(val) && ((max > 0 && val <= max) || max === 0)) {
+			if (send) {
+				sendBack(val);
+			}
+		} else {
+			updateValue(0, true);
 		}
-	}, [sendBack, price]);
+	}, [max, sendBack]);
 
 	useEffect(() => {
 		if (valueForced >= 0) {
+			setInputValue(String(valueForced));
+			setFiatValue(price.mul(valueForced).toString(2));
+
 			updateValue(valueForced, false);
 		}
-	}, [updateValue, valueForced]);
+	}, [price, updateValue, valueForced]);
 
 	const handleChange = (evt: React.FormEvent<HTMLInputElement>) => {
-		const val = Number(evt.currentTarget.value);
-		if (!isNaN(val) && ((max > 0 && val <= max) || max === 0)) {
-			updateValue(val);
-		}
+		const inputStr = evt.currentTarget.value;
+		const val = Number(inputStr);
+
+		setInputValue(inputStr);
+		setFiatValue(price.mul(val).toString(2));
+
+		debounce.run(updateValue, 1500, val);
 	};
 
 	return <div className="amountInputLayout">
