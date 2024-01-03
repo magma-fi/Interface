@@ -47,7 +47,7 @@ export const StakeModal = ({
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
 
 	const handleMax = () => {
-		const val = Number(accountBalance.toString());
+		const val = Number(accountBalance);
 		setValueForced(val);
 		setDepositAmount(val);
 		setErrorMessages(undefined);
