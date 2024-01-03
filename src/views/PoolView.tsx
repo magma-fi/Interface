@@ -284,12 +284,8 @@ export const PoolView = ({ market, constants }: {
 		{showModal?.action === ModalAction.SwapWEN2IOTX && showModal.isShow && <SwapWEN2IOTXModal
 			isOpen={showModal.isShow}
 			onClose={handleCloseModal}
-			accountBalance={lusdBalance}
 			onDone={handleModalDone}
-			stabilityDeposit={stabilityDeposit}
-			validationContext={validationContext}
-			lusdInStabilityPool={lusdInStabilityPool}
-			max={netDebt}
+			max={Decimal.min(netDebt, lusdBalance)}
 			price={price}
 			trove={trove} />}
 

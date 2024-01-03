@@ -4,43 +4,30 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { ErrorMessage, ValidationContextForStabilityPool } from "../libs/types";
 import { IOTX, WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useMemo } from "react";
-import { Decimal, StabilityDeposit, UserTrove } from "lib-base";
-import { ChangedValueLabel } from "../components/ChangedValueLabel";
-import { useMyTransactionState } from "../components/Transaction";
+import { useState, useEffect } from "react";
+import { Decimal, UserTrove } from "lib-base";
 import TroveManagerAbi from "lib-ethers/abi/TroveManager.json";
 import HintHelpersAbi from "lib-ethers/abi/HintHelpers.json";
 import SortedTrovesAbi from "lib-ethers/abi/SortedTroves.json";
 import { HintHelpers, SortedTroves, TroveManager } from "lib-ethers/dist/types";
-import { validateStabilityDepositChange } from "../components/Stability/validation/validateStabilityDepositChange";
-import { StabilityDepositAction } from "../components/Stability/StabilityDepositAction";
 import { SnackBar } from "../components/SnackBar";
 import { useContract } from "../hooks/useContract";
 import { useLiquity } from "../hooks/LiquityContext";
-import { Address, useAccount } from "wagmi";
+import { Address, useAccount, useWaitForTransaction } from "wagmi";
 
 export const SwapWEN2IOTXModal = ({
 	isOpen = false,
 	onClose = () => { },
-	accountBalance = Decimal.ZERO,
 	onDone = () => { },
-	stabilityDeposit,
-	validationContext,
-	lusdInStabilityPool,
 	max,
 	price,
 	trove
 }: {
 	isOpen: boolean;
 	onClose: () => void;
-	accountBalance: Decimal;
 	onDone: (tx: string, swapAmount: number) => void;
-	stabilityDeposit: StabilityDeposit;
-	validationContext: ValidationContextForStabilityPool;
-	lusdInStabilityPool: Decimal;
 	max: Decimal;
 	price: Decimal;
 	trove: UserTrove;
@@ -50,8 +37,6 @@ export const SwapWEN2IOTXModal = ({
 	const { provider, liquity, walletClient } = useLiquity();
 	const [valueForced, setValueForced] = useState(-1);
 	const [swapAmount, setSwapAmount] = useState(0);
-	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId, true);
 	const maxNumber = Number(max);
 	const [fee, setFee] = useState(Decimal.ZERO);
 	const redeemRate = trove.collateral.gt(0) ? trove.debt.div(trove.collateral) : Decimal.ZERO;
@@ -59,21 +44,11 @@ export const SwapWEN2IOTXModal = ({
 	const receive = Decimal.ONE.div(redeemRate).mul(swapAmount);
 	const [sending, setSending] = useState(false);
 
-	const [validChange, description] = validateStabilityDepositChange(
-		stabilityDeposit,
-		stabilityDeposit.currentLUSD.add(swapAmount),
-		validationContext
-	);
-
-	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
-
 	const [hintHelpersDefault, hintHelpersDefaultStatus] = useContract<HintHelpers>(
 		liquity.connection.addresses.hintHelpers,
 		HintHelpersAbi
 	);
 
-	// DECIMAL_PRECISION()
-	// REDEMPTION_FEE_FLOOR()
 	const [troveManagerDefault, troveManagerDefaultStatus] = useContract<TroveManager>(
 		liquity.connection.addresses.troveManager,
 		TroveManagerAbi
@@ -88,30 +63,16 @@ export const SwapWEN2IOTXModal = ({
 		const val = maxNumber;
 		setValueForced(val);
 		setSwapAmount(val);
-		setErrorMessages(undefined);
 	};
 
 	const handleInputSwap = (val: number) => {
 		setValueForced(-1);
 		setSwapAmount(val);
-		setErrorMessages(undefined);
 	};
 
 	const handleCloseModal = () => {
-		setErrorMessages(undefined);
 		onClose();
 	};
-
-	useEffect(() => {
-		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
-			setErrorMessages({ string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage);
-		}
-
-		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string, swapAmount);
-			transactionState.resolved = true;
-		}
-	}, [transactionState.type])
 
 	useEffect(() => {
 		const getData = async () => {
@@ -144,34 +105,41 @@ export const SwapWEN2IOTXModal = ({
 	};
 
 	const handleSwap = async () => {
-		if (!hintHelpersDefault || !troveManagerDefault || !sortedTrovesDefault || !address || !walletClient) return;
+		setSending(true);
 
 		const wenAmount = Decimal.from(swapAmount).mul(globalContants.WEN_DECIMALS).toString();
-		const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault.getRedemptionHints(wenAmount, price.mul(globalContants.IOTX_DECIMALS).toString(), 0);
-		const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault.findInsertPosition(
+		const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault!.getRedemptionHints(wenAmount, price.mul(globalContants.IOTX_DECIMALS).toString(), 0);
+		const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault!.findInsertPosition(
 			partialRedemptionHintNICR,
-			address,
-			address
+			address!,
+			address!
 		)
-		const txHash = await walletClient.writeContract({
-			account: address,
-			address: liquity.connection.addresses.troveManager as Address,
-			abi: TroveManagerAbi,
-			functionName: 'redeemCollateral',
-			args: [
-				wenAmount,
-				firstRedemptionHint,
-				upperPartialRedemptionHint,
-				lowerPartialRedemptionHint,
-				partialRedemptionHintNICR,
-				0,
-				feeDecimals.mul(wenAmount).toString()
-			]
-		})
+
+		let txHash = "";
+		try {
+			txHash = await walletClient!.writeContract({
+				account: address,
+				address: liquity.connection.addresses.troveManager as Address,
+				abi: TroveManagerAbi,
+				functionName: 'redeemCollateral',
+				args: [
+					wenAmount,
+					firstRedemptionHint,
+					upperPartialRedemptionHint,
+					lowerPartialRedemptionHint,
+					partialRedemptionHintNICR,
+					0,
+					globalContants.WEN_DECIMALS.toFixed()
+				]
+			})
+		} catch (error) {
+			console.warn(error);
+		}
 
 		if (txHash) {
-			setSending(true);
 			return listenHash(txHash);
+		} else {
+			return setSending(false);
 		}
 	};
 
@@ -211,10 +179,10 @@ export const SwapWEN2IOTXModal = ({
 					onInput={handleInputSwap}
 					max={maxNumber}
 					warning={undefined}
-					error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
 					allowReduce={true}
 					currentValue={-1}
-					allowIncrease={true} />
+					allowIncrease={true}
+					error={undefined} />
 			</div>
 
 			<div
@@ -260,8 +228,11 @@ export const SwapWEN2IOTXModal = ({
 			disabled={
 				swapAmount === 0
 				|| !hintHelpersDefault
+				|| hintHelpersDefaultStatus !== "LOADED"
 				|| !troveManagerDefault
+				|| troveManagerDefaultStatus !== "LOADED"
 				|| !sortedTrovesDefault
+				|| sortedTrovesDefaultStatus !== "LOADED"
 				|| !address
 				|| !walletClient
 				|| sending
