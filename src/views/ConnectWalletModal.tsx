@@ -51,8 +51,12 @@ export const ConnectWalletModal = ({
 					disabled={!connector.ready || isLoading}
 					className="secondaryButton bigButton"
 					onClick={handleConnect}>
-					{name}
-					{connector.id === pendingConnector?.id && " (" + t("connecting") + ")"}
+					<img src={"images/" + name + ".png"} />
+
+					<span>
+						{name}
+						{connector.id === pendingConnector?.id && " (" + t("connecting") + ")"}
+					</span>
 				</button>
 			})}
 		</div>
