@@ -146,9 +146,6 @@ export const SwapWEN2IOTXModal = ({
 	const handleSwap = async () => {
 		if (!hintHelpersDefault || !troveManagerDefault || !sortedTrovesDefault || !address || !walletClient) return;
 
-		setSending(true);
-
-		// const wenAmount = stabilityDeposit.currentLUSD.toString();
 		const wenAmount = Decimal.from(swapAmount).mul(globalContants.WEN_DECIMALS).toString();
 		const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault.getRedemptionHints(wenAmount, price.mul(globalContants.IOTX_DECIMALS).toString(), 0);
 		const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault.findInsertPosition(
@@ -172,7 +169,10 @@ export const SwapWEN2IOTXModal = ({
 			]
 		})
 
-		return listenHash(txHash);
+		if (txHash) {
+			setSending(true);
+			return listenHash(txHash);
+		}
 	};
 
 	return isOpen ? <Modal
