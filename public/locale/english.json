@@ -68,7 +68,7 @@
 	"closeVault": "Close Vault",
 	"closing": "closing",
 	"needMoreToClose": "You need {amount} WEN more to close your vault.",
-	"swapWen2Iotx": "Swap WEN to IOTX",
+	"swapWen2Iotx": "Exchange WEN for IOTX",
 	"withdrawAnytime": "Withdraw any time after the initial 7 day cooldown period.",
 	"currentInterest": "Current Interest",
 	"stakeAmount": "Stake Amount",
