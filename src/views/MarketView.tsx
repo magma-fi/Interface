@@ -588,11 +588,11 @@ export const MarketView = ({
 						<div>{LUSD_LIQUIDATION_RESERVE.toString(2)}</div>
 					</div>
 
-					<div className="flex-row-space-between">
+					{/* <div className="flex-row-space-between">
 						<div className="description">{t("loanToValue")}&nbsp;(LTV)</div>
 
 						<div>{total.collateral.gt(0) ? total.debt.div(total.collateral.mul(price)).mul(100).toString(2) : 0}%</div>
-					</div>
+					</div> */}
 
 					<div className="flex-row-space-between">
 						<div className="description">{market.symbol}&nbsp;{t("price")}</div>
