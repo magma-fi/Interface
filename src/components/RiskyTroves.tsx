@@ -68,7 +68,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     price
   } = useLiquitySelector(select);
   const factor = 0.95;
-  const { liquity, chainId,publicClient } = useLiquity();
+  const { liquity, chainId, publicClient } = useLiquity();
   const [loading, setLoading] = useState(true);
   const [troves, setTroves] = useState<UserTrove[]>();
   const [reload, setReload] = useState({});
@@ -335,14 +335,6 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
             <Icon name="chevron-right" size="lg" />
           </button>
         </>}
-
-        {/* <Button
-          variant="titleIcon"
-          sx={{ opacity: loading ? 0 : 1, ml: [0, 3] }}
-          onClick={forceReload}
-        >
-          <Icon name="redo" size="lg" />
-        </Button> */}
       </div>
     </div>}
   </>;
