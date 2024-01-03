@@ -246,7 +246,7 @@ export const PoolView = ({ market, constants }: {
 					</div>
 
 					<div className="flex-row-space-between">
-						<div className="label">{t("totalUtilizationRate")}</div>
+						<div className="label">{t("wenStakingRate")}</div>
 
 						<div style={{ color: "#F25454" }}>{(wenTotalSupply.gt(0) ? lusdInStabilityPool.div(wenTotalSupply).mul(100).toString(2) : 0) + "%"}</div>
 					</div>

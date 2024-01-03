@@ -128,5 +128,6 @@
 	"youSend": "You Send",
 	"youReceive": "You Receive",
 	"wenSwappedSuccessfully": "WEN Swapped Successfully",
-	"youReceived": "You Received"
+	"youReceived": "You Received",
+	"wenStakingRate": "WEN Staking Rate"
 }
