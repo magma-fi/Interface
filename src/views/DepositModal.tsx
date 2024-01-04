@@ -246,7 +246,8 @@ export const DepositeModal = ({
 
 			const newMaxAvailableBorrow = newCollateral.mul(price).div(liquidationPoint).mul(remainBorrowingRate);
 			const newBorrow = newMaxAvailableBorrow.gt(wenLiquidationReserve) ? newMaxAvailableBorrow.sub(wenLiquidationReserve) : Decimal.ZERO;
-			setNewAvailableBorrow(newBorrow.gt(previousNetDebt) ? newBorrow.sub(previousNetDebt).mul(0.95) : Decimal.ZERO);
+			// setNewAvailableBorrow(newBorrow.gt(previousNetDebt) ? newBorrow.sub(previousNetDebt).mul(0.95) : Decimal.ZERO);
+			setNewAvailableBorrow(newBorrow.gt(previousNetDebt) ? newBorrow.sub(previousNetDebt) : Decimal.ZERO);
 		}
 
 		if (borrowValue >= 0) {

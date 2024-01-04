@@ -117,7 +117,7 @@ export const WithdrawModal = ({
 		if (!trove) return;
 
 		if (withdrawAmount >= 0) {
-			const col = trove.collateral.sub(withdrawAmount);
+			const col = trove.collateral.gt(withdrawAmount) ? trove.collateral.sub(withdrawAmount) : Decimal.ZERO;
 			const previousCol = previousTrove.current?.collateral;
 			const unsavedChanges = Difference.between(col, previousCol);
 			const nextCol = applyUnsavedCollateralChanges(unsavedChanges, trove);
@@ -156,6 +156,7 @@ export const WithdrawModal = ({
 			transactionState.resolved = true;
 		}
 	}, [transactionState.type])
+	// console.debug("xxx withdrawAmount =", withdrawAmount);
 
 	return isOpen ? <Modal
 		title={t("withdraw") + " " + market.symbol}
