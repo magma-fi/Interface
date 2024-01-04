@@ -20,7 +20,7 @@
     "connectkit": "1.3.0",
     "lambert-w-function": "3.0.0",
     "lib-base": "https://github.com/siyushin/lib-base.git#7dcd125fd358d152ba791e4c0a3d876be7fc9f14",
-    "lib-ethers": "https://github.com/magma-fi/lib-ethers.git#f7bfc60c4e0a1a370410147eaf3b19b33aa7f9fd",
+    "lib-ethers": "https://github.com/magma-fi/lib-ethers.git#9ffd2d124fb4855d33ce59fc31e786248353ff1f",
     "react": "17.0.2",
     "react-circular-progressbar": "2.0.3",
     "react-copy-to-clipboard": "5.0.3",
