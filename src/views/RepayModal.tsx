@@ -65,9 +65,11 @@ export const RepayModal = ({
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
 	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || Decimal.ONE;
+	const minNetDebt = constants?.MIN_NET_DEBT || Decimal.ONE;
 	const isDebtIncrease = desireNetDebt.gt(trove.netDebt);
 	const debtIncreaseAmount = isDebtIncrease ? desireNetDebt.sub(trove.netDebt) : Decimal.ZERO;
 	const borrowingRate = fees.borrowingRate();
+	const MinSafe = minNetDebt.add(minNetDebt.mul(borrowingRate)).div(trove.collateral.mul(price));
 	const fee = isDebtIncrease
 		? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
 		: Decimal.ZERO;
@@ -137,13 +139,9 @@ export const RepayModal = ({
 	}, [trove, repayAmount, price]);
 
 	const handleSlideUtilRate = (val: number) => {
-		const newDebt = Number(
-			previousTrove.current.netDebt.sub(
-				previousTrove.current?.netDebt
-					.mul(val)
-					.div(troveUtilizationRateNumber)
-			)
-		);
+		const wantNetDebt = previousTrove.current.collateral.mul(price).mul(val).add(wenLiquidationReserve)
+		const netDebtDifferent = previousTrove.current.netDebt.gt(wantNetDebt) ? previousTrove.current.netDebt.sub(wantNetDebt) : Decimal.ZERO;
+		const newDebt = Number(netDebtDifferent);
 		setRepayAmount(newDebt);
 		setRepaidAmount(newDebt);
 		setValueForced(newDebt);
@@ -231,8 +229,8 @@ export const RepayModal = ({
 					</div>
 
 					<Slider
-						min={0}
-						max={Number(maxSafe.toString())}
+						min={Number(MinSafe)}
+						max={Number(maxSafe)}
 						onChange={handleSlideUtilRate}
 						forcedValue={sliderForcedValue}
 						allowReduce={true}

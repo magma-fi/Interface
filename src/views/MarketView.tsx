@@ -117,8 +117,9 @@ export const MarketView = ({
 	const availableBorrow = maxAvailableBorrowSubFee.gt(trove.debt) ? maxAvailableBorrowSubFee.sub(trove.debt) : Decimal.ZERO;
 	const currentNetDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
 	const minNetDebt = constants?.MIN_NET_DEBT || Decimal.ZERO;
-	const maxAvailableRepay = currentNetDebt.gt(minNetDebt.add(MCR)) ? currentNetDebt.sub(minNetDebt).sub(MCR) : Decimal.ZERO;
-	const totalUtilizationRate = total.collateral.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? total.debt.div(total.collateral.mul(price)) : Decimal.ZERO;
+	const reserve = constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE;
+	const maxAvailableRepay = currentNetDebt.gt(minNetDebt.add(reserve)) ? currentNetDebt.sub(minNetDebt).sub(reserve) : Decimal.ZERO;
+	const totalUtilizationRate = total.collateral.gt(reserve) ? total.debt.div(total.collateral.mul(price)) : Decimal.ZERO;
 	const troveUtilizationRate = trove.collateral.gt(0) ? trove.debt.div(troveCollateralValue).mul(100) : Decimal.ZERO;
 	const troveUtilizationRateNumber = Number(troveUtilizationRate);
 
@@ -489,7 +490,7 @@ export const MarketView = ({
 							<button
 								className="secondaryButton"
 								onClick={handleRepay}
-								disabled={maxAvailableRepay.eq(0)}>
+								disabled={maxAvailableRepay.lt(0.01)}>
 								<img src="images/repay.png" />
 
 								{t("repay") + " " + WEN.symbol}
@@ -677,7 +678,8 @@ export const MarketView = ({
 			liquidationPrice={liquidationPrice}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
-			liquidationPoint={liquidationPoint}
+			// liquidationPoint={liquidationPoint}
+			liquidationPoint={appLiquidationPoint}
 			availableBorrow={availableBorrow} />}
 
 		{showBorrowDoneModal && <TxDone
@@ -714,7 +716,8 @@ export const MarketView = ({
 			constants={constants}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
-			liquidationPoint={liquidationPoint}
+			// liquidationPoint={liquidationPoint}
+			liquidationPoint={appLiquidationPoint}
 			availableBorrow={availableBorrow}
 			onCloseVault={handleCloseTroveFromRepayModal} />}
 
@@ -743,7 +746,8 @@ export const MarketView = ({
 			constants={constants}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
-			liquidationPoint={liquidationPoint}
+			// liquidationPoint={liquidationPoint}
+			liquidationPoint={appLiquidationPoint}
 			availableBorrow={availableBorrow} />}
 
 		{showWithdrawDoneModal && <TxDone

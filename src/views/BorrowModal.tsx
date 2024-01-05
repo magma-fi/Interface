@@ -223,7 +223,7 @@ export const BorrowModal = ({
 
 					<Slider
 						min={0}
-						max={Number(maxSafe.toString())}
+						max={Number(maxSafe)}
 						onChange={handleSlideUtilRate}
 						forcedValue={forcedSlideValue}
 						allowReduce={false}
