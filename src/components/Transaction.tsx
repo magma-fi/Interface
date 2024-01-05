@@ -340,7 +340,7 @@ export function Transaction<C extends React.ReactElement<ButtonlikeProps>>({
 
 // Doesn't work on Kovan:
 // https://github.com/MetaMask/metamask-extension/issues/5579
-const tryToGetRevertReason = async (provider: Provider, tx: TransactionReceipt) => {
+export const tryToGetRevertReason = async (provider: Provider, tx: TransactionReceipt) => {
   try {
     const result = await provider.call(tx, tx.blockNumber);
 

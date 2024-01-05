@@ -10,7 +10,7 @@ import { shortenAddress } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { Icon } from "./Icon";
 import { LoadingOverlay } from "./LoadingOverlay";
-import { useTransactionState } from "./Transaction";
+import { TransactionState, tryToGetRevertReason, useTransactionState } from "./Transaction";
 import { Abbreviation } from "./Abbreviation";
 import { useLang } from "../hooks/useLang";
 import { IOTX, WEN } from "../libs/globalContants";
@@ -68,11 +68,11 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     price
   } = useLiquitySelector(select);
   const factor = 0.95;
-  const { liquity, chainId, publicClient } = useLiquity();
+  const { liquity, chainId, publicClient, provider } = useLiquity();
   const [loading, setLoading] = useState(true);
   const [troves, setTroves] = useState<UserTrove[]>();
-  const [reload, setReload] = useState({});
-  const forceReload = useCallback(() => setReload({}), []);
+  const [reload, setReload] = useState(false);
+  // const forceReload = useCallback(() => setReload({}), []);
   const [page, setPage] = useState(0);
   const mcr = constants?.MCR?.gt(0) ? constants.MCR : Decimal.from(appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO);
 
@@ -109,13 +109,13 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
 
   // 交易结束或失败后重置transactionState。
   useEffect(() => {
-    if (transactionState.id === txId && (transactionState.type === "confirmed" || transactionState.type === "failed")) {
+    if (transactionState.id === txId && (transactionState.type === "failed" || transactionState.type === "cancelled")) {
       setTransactionState({ type: "idle" });
       setResetTx(!resetTx);
+    }
 
-      setTimeout(() => {
-        setReload({});
-      }, 5000);
+    if (transactionState.id === txId && (transactionState.type === "confirmed")) {
+      setReload(!reload);
     }
   }, [transactionState.id, transactionState.type, txId])
 
@@ -163,11 +163,11 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     };
     // Omit blockTag from deps on purpose
     // eslint-disable-next-line
-  }, [liquity, clampedPage, pageSize, reload]);
+  }, [liquity, clampedPage, pageSize, reload, numberOfTroves]);
 
-  useEffect(() => {
-    forceReload();
-  }, [forceReload, numberOfTroves]);
+  // useEffect(() => {
+  //   forceReload();
+  // }, [forceReload, numberOfTroves]);
 
   // const [copied, setCopied] = useState<string>();
 
@@ -186,6 +186,48 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
   //     };
   //   }
   // }, [copied]);
+
+  const waitForConfirmation = async () => {
+    const id = transactionState.type !== "idle" ? transactionState.id : undefined;
+    const tx = (transactionState.type === "waitingForConfirmation" || transactionState.type === "confirmedOneShot") ? transactionState.tx : undefined;
+
+    if (!id || !tx) return;
+
+    const txHash = tx?.rawSentTransaction as unknown as string;
+
+    try {
+      // const receipt = await tx.waitForReceipt();
+      const receipt = await provider.getTransactionReceipt(txHash);
+      if (!receipt) {
+        return setTimeout(() => {
+          waitForConfirmation();
+        }, 5000);
+      }
+
+      if (receipt.status === 1) {
+        setTransactionState({
+          type: "confirmedOneShot",
+          id,
+          tx
+        });
+      } else {
+        const reason = await tryToGetRevertReason(provider, receipt);
+
+        console.error(`Tx ${txHash} failed`);
+        if (reason) {
+          console.error(`Revert reason: ${reason}`);
+        }
+
+        setTransactionState({
+          type: "failed",
+          id,
+          error: new Error(reason ? `Reverted: ${reason}` : "Failed")
+        });
+      }
+    } catch (rawError) {
+      console.warn(rawError);
+    }
+  };
 
   const handleLiquidate = (evt: React.MouseEvent<HTMLButtonElement>) => {
     const owner = evt.currentTarget.id;
@@ -209,9 +251,11 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
           id,
           tx
         });
+
+        await waitForConfirmation();
       } catch (error) {
         if (hasMessage(error) && error.message.includes("User denied transaction signature")) {
-          setTransactionState({ type: "cancelled", id });
+          setTransactionState({ type: "cancelled", id } as TransactionState);
         } else {
           console.error(error);
 
