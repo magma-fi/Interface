@@ -134,11 +134,13 @@
 	"constants": {
 		"4689": {
 			"MAGMA_MINIMUM_COLLATERAL_RATIO": 1.3,
-			"appMMROffset": 0.91
+			"appMMROffset": 0.91,
+			"appMCR": 1.428571428571429
 		},
 		"4690": {
 			"MAGMA_MINIMUM_COLLATERAL_RATIO": 1.3,
-			"appMMROffset": 0.91
+			"appMMROffset": 0.91,
+			"appMCR": 1.428571428571429
 		}
 	}
 }

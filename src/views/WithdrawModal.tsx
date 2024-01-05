@@ -207,7 +207,7 @@ export const WithdrawModal = ({
 
 					<Slider
 						min={0}
-						max={Number(maxSafe.toString())}
+						max={Number(maxSafe)}
 						onChange={handleSlideUtilRate}
 						forcedValue={sliderForcedValue}
 						allowReduce={false}
