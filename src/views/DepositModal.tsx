@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, ValidationContext } from "../libs/types";
+import { Coin, ErrorMessage, JsonObject, ValidationContext } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -17,6 +17,8 @@ import { TroveAction } from "../components/Trove/TroveAction";
 import { calculateAvailableBorrow, calculateAvailableWithdrawal, feeFrom } from "../utils";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { useMyTransactionState } from "../components/Transaction";
+import appConfig from "../appConfig.json";
+import { useLiquity } from "../hooks/LiquityContext";
 
 export const DepositeModal = ({
 	isOpen = false,
@@ -53,6 +55,7 @@ export const DepositeModal = ({
 	liquidationPoint: Decimal;
 	availableBorrow: Decimal;
 }) => {
+	const { chainId } = useLiquity();
 	const { t } = useLang();
 	// const amountDeposited = Number(trove.collateral);
 	const [valueForced, setValueForced] = useState(-1);
@@ -246,8 +249,7 @@ export const DepositeModal = ({
 
 			const newMaxAvailableBorrow = newCollateral.mul(price).div(liquidationPoint).mul(remainBorrowingRate);
 			const newBorrow = newMaxAvailableBorrow.gt(wenLiquidationReserve) ? newMaxAvailableBorrow.sub(wenLiquidationReserve) : Decimal.ZERO;
-			// setNewAvailableBorrow(newBorrow.gt(previousNetDebt) ? newBorrow.sub(previousNetDebt).mul(0.95) : Decimal.ZERO);
-			setNewAvailableBorrow(newBorrow.gt(previousNetDebt) ? newBorrow.sub(previousNetDebt) : Decimal.ZERO);
+			setNewAvailableBorrow(newBorrow.gt(previousNetDebt) ? newBorrow.sub(previousNetDebt).mul((appConfig.constants as JsonObject)[String(chainId)].appMMROffset) : Decimal.ZERO);
 		}
 
 		if (borrowValue >= 0) {

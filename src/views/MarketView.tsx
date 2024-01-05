@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useLiquitySelector } from "@liquity/lib-react";
 import { useLang } from "../hooks/useLang";
-import { Coin, TroveChangeTx } from "../libs/types";
+import { Coin, JsonObject, TroveChangeTx } from "../libs/types";
 import { useEffect, useMemo, useState } from "react";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
 import { selectForTroveChangeValidation } from "../components/Trove/validation/validateTroveChange";
@@ -93,7 +93,9 @@ export const MarketView = ({
 	// const recoveryMode = totalCollateralRatio.div(CRITICAL_COLLATERAL_RATIO);
 	const recoveryMode = total.collateralRatioIsBelowCritical(price);
 	const CCR = constants?.CCR?.gt(0) ? constants?.CCR : CRITICAL_COLLATERAL_RATIO;
-	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO;
+	const appConfigConstants = (appConfig.constants as JsonObject)[String(chainId)];
+	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : appConfigConstants.MAGMA_MINIMUM_COLLATERAL_RATIO;
+	const appMMROffset = appConfigConstants.appMMROffset;
 	const TVL = constants?.TVL || Decimal.ZERO;
 	const mcrPercent = Decimal.ONE.div(MCR)
 	const recoveryModeAt = CCR.gt(0) ? Decimal.ONE.div(CCR) : Decimal.ZERO;
@@ -205,7 +207,6 @@ export const MarketView = ({
 	};
 
 	const handleWithdrawDone = (tx: string, withdrawAmount: number) => {
-		// console.debug("xxx handleWithdrawDone =", withdrawAmount);
 		setTxHash(tx);
 		setShowWithdrawModal(false);
 		setShowWithdrawDoneModal(true);
@@ -636,7 +637,7 @@ export const MarketView = ({
 			depositAndBorrow={depositAndBorrow}
 			liquidationPrice={liquidationPrice}
 			availableWithdrawal={availableWithdrawal}
-			availableBorrow={availableBorrow.mul(0.95)}
+			availableBorrow={availableBorrow.mul(appMMROffset)}
 			// availableBorrow={availableBorrow}
 			recoveryMode={recoveryMode}
 			liquidationPoint={liquidationPoint} />}
@@ -670,8 +671,7 @@ export const MarketView = ({
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={availableBorrow.mul(0.95)}
-			// max={availableBorrow}
+			max={availableBorrow.mul(appMMROffset)}
 			onDone={handleBorrowDone}
 			constants={constants}
 			liquidationPrice={liquidationPrice}
@@ -738,7 +738,7 @@ export const MarketView = ({
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={availableWithdrawal.mul(0.95)}
+			max={availableWithdrawal.mul(appMMROffset)}
 			onDone={handleWithdrawDone}
 			constants={constants}
 			availableWithdrawal={availableWithdrawal}

@@ -222,11 +222,12 @@ export const RepayModal = ({
 						style={{ alignItems: "center" }}>
 						<div className="label fat">{t("utilizationRate")}</div>
 
-						<button
+						{/* <button
 							className="textButton smallTextButton"
 							onClick={handleMax}>
 							{t("maxSafe")}:&nbsp;{maxSafe.mul(100).toString(2)}%
-						</button>
+						</button> */}
+						<div className="label">{t("maxSafe")}:&nbsp;{maxSafe.mul(100).toString(2)}%</div>
 					</div>
 
 					<Slider

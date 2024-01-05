@@ -84,7 +84,11 @@ export const BorrowModal = ({
 		constants
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
-	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
+	let txErrorMessage: ErrorMessage;
+	const errorMessages = useMemo(() => {
+		if (description) return description as ErrorMessage;
+	}, [description]);
+	const errorMsg = errorMessages || txErrorMessage!;
 
 	const newCollateralRatio = updatedTrove.collateralRatio(price);
 	const newUR = ((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(newCollateralRatio) : Decimal.ZERO);
@@ -105,7 +109,6 @@ export const BorrowModal = ({
 	const init = () => {
 		setValueForced(-1);
 		setBorrowAmount(-1);
-		setErrorMessages(undefined);
 	};
 
 	useEffect(init, []);
@@ -114,7 +117,6 @@ export const BorrowModal = ({
 		const val = Number(max);
 		setValueForced(val);
 		setBorrowAmount(val);
-		setErrorMessages(undefined);
 	};
 
 	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -153,7 +155,6 @@ export const BorrowModal = ({
 	const handleInputBorrowValue = (val: number) => {
 		setValueForced(-1);
 		setBorrowAmount(val);
-		setErrorMessages(undefined);
 	};
 
 	const handleCloseModal = () => {
@@ -163,7 +164,7 @@ export const BorrowModal = ({
 
 	useEffect(() => {
 		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
-			setErrorMessages({ string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage);
+			txErrorMessage = { string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage;
 		}
 
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
@@ -200,7 +201,7 @@ export const BorrowModal = ({
 						onInput={handleInputBorrowValue}
 						max={Number(max.toString())}
 						warning={undefined}
-						error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
+						error={errorMsg && (errorMsg.string || t(errorMsg.key!, errorMsg.values))}
 						allowReduce={true}
 						currentValue={-1}
 						allowIncrease={true} />
@@ -212,11 +213,12 @@ export const BorrowModal = ({
 						style={{ alignItems: "center" }}>
 						<div className="label fat">{t("utilizationRate")}</div>
 
-						<button
+						{/* <button
 							className="textButton smallTextButton"
 							onClick={handleMax}>
 							{t("maxSafe")}:&nbsp;{maxSafe.mul(100).toString(2)}%
-						</button>
+						</button> */}
+						<div className="label">{t("maxSafe")}:&nbsp;{maxSafe.mul(100).toString(2)}%</div>
 					</div>
 
 					<Slider
