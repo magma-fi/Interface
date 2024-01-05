@@ -65,3 +65,5 @@ export type TroveChangeTx = {
 }
 
 export type LiquidatableTrove = UserTrove & { liquidatable: boolean; }
+
+export type JsonObject = { [key: string]: any };

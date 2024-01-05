@@ -905,6 +905,14 @@ h4 {
   }
 }
 
+.withdrawModal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 415px;
+  gap: "24px";
+}
+
 .mainMenu {
   display: flex;
   flex-direction: column;
@@ -1165,6 +1173,10 @@ input {
     .subContainer {
       width: 100%;
     }
+  }
+
+  .withdrawModal {
+    width: 100%;
   }
 
   .subCard {
