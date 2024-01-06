@@ -153,17 +153,17 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
       }
 
       if (receipt.status === 1) {
-        if (transactionState.type === "confirmedOneShot") {
-          setTransactionState({ type: "confirmed", id });
-        } else {
-          setTransactionState({
-            type: "confirmedOneShot",
-            id,
-            tx
-          });
-
-          return callMyself();
+        if (transactionState.type === "confirmedOneShot" && id) {
+          return setTransactionState({ type: "confirmed", id });
         }
+
+        setTransactionState({
+          type: "confirmedOneShot",
+          id,
+          tx
+        });
+
+        return callMyself();
       } else {
         const reason = await tryToGetRevertReason(provider, receipt);
 
