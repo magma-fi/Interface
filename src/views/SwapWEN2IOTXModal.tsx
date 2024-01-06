@@ -43,6 +43,7 @@ export const SwapWEN2IOTXModal = ({
 	const feeDecimals = fee.div(globalContants.IOTX_DECIMALS);
 	const receive = Decimal.ONE.div(redeemRate).mul(swapAmount);
 	const [sending, setSending] = useState(false);
+	const [iotxAsUnit, setIOTXAsUnit] = useState(true);
 
 	const [hintHelpersDefault, hintHelpersDefaultStatus] = useContract<HintHelpers>(
 		liquity.connection.addresses.hintHelpers,
@@ -143,6 +144,10 @@ export const SwapWEN2IOTXModal = ({
 		}
 	};
 
+	const handleSwapUnits = () => {
+		setIOTXAsUnit(!iotxAsUnit);
+	};
+
 	return isOpen ? <Modal
 		title={t("swapWen2Iotx")}
 		onClose={handleCloseModal}>
@@ -191,9 +196,29 @@ export const SwapWEN2IOTXModal = ({
 				<div className="flex-row-space-between">
 					<div className="label">{t("currentRate")}</div>
 
-					<div
-						className="label"
-						style={{ color: "#F6F6F7" }}>1&nbsp;IOTX&nbsp;=&nbsp;{redeemRate.toString(2)}&nbsp;{WEN.symbol}</div>
+					<div className="flex-row-align-left">
+						<button
+							className="textButton inLineTextButton"
+							onClick={handleSwapUnits}>
+							<img src="images/swap.png" />
+						</button>
+
+						<div
+							className="label"
+							style={{ color: "#F6F6F7" }}>
+							<span>1&nbsp;</span>
+
+							{iotxAsUnit ? IOTX.symbol : WEN.symbol}
+
+							<span>&nbsp;=&nbsp;</span>
+
+							{(iotxAsUnit ? redeemRate : Decimal.ONE.div(redeemRate)).toString(2)}
+
+							<span>&nbsp;</span>
+
+							{iotxAsUnit ? WEN.symbol : IOTX.symbol}
+						</div>
+					</div>
 				</div>
 
 				<div className="flex-row-space-between">
