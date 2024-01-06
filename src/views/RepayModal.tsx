@@ -18,6 +18,8 @@ import { Slider } from "../components/Slider";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { useMyTransactionState } from "../components/Transaction";
 
+let repaidAmount = 0;
+
 export const RepayModal = ({
 	isOpen = false,
 	onClose = () => { },
@@ -43,7 +45,7 @@ export const RepayModal = ({
 	fees: Fees;
 	validationContext: ValidationContext;
 	max: Decimal;
-	onDone: (tx: string, repayAmount: number) => void;
+	onDone: (tx: string, repaidAmount: number) => void;
 	constants?: Record<string, Decimal>;
 	recoveryMode: boolean;
 	liquidationPoint: Decimal;
@@ -54,7 +56,6 @@ export const RepayModal = ({
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
 	const [repayAmount, setRepayAmount] = useState(-1);
-	const [repaidAmount, setRepaidAmount] = useState(0);
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
 	const [desireNetDebt, setDesireNetDebt] = useState(netDebt);
@@ -107,7 +108,7 @@ export const RepayModal = ({
 		const val = Number(max);
 		setValueForced(val);
 		setRepayAmount(val);
-		setRepaidAmount(val);
+		repaidAmount = val;
 		setErrorMessages(undefined);
 	};
 
@@ -129,7 +130,7 @@ export const RepayModal = ({
 	useEffect(() => {
 		if (!trove) return;
 
-		if (repayAmount >= 0 && netDebt.gte(repaidAmount)) {
+		if (repayAmount >= 0 && netDebt.gte(repayAmount)) {
 			const newNetDebt = netDebt.sub(repayAmount);
 			const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
 			const unsavedChanges = Difference.between(newNetDebt, previousNetDebt);
@@ -143,7 +144,7 @@ export const RepayModal = ({
 		const netDebtDifferent = previousTrove.current.netDebt.gt(wantNetDebt) ? previousTrove.current.netDebt.sub(wantNetDebt) : Decimal.ZERO;
 		const newDebt = Number(netDebtDifferent);
 		setRepayAmount(newDebt);
-		setRepaidAmount(newDebt);
+		repaidAmount = newDebt;
 		setValueForced(newDebt);
 		setErrorMessages(undefined);
 	};
@@ -151,7 +152,7 @@ export const RepayModal = ({
 	const handleInputRepay = (val: number) => {
 		setValueForced(-1);
 		setRepayAmount(val);
-		setRepaidAmount(val);
+		repaidAmount = val;
 		setErrorMessages(undefined);
 	};
 
@@ -166,7 +167,6 @@ export const RepayModal = ({
 		}
 
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			init();
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, repaidAmount);
 			transactionState.resolved = true;
 		}

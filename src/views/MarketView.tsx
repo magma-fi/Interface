@@ -289,7 +289,8 @@ export const MarketView = ({
 						id="0"
 						className="primaryButton bigButton"
 						style={{ width: "100%" }}
-						onClick={handleDeposit}>
+						onClick={handleDeposit}
+						disabled={accountBalance.eq(0)}>
 						<img src="images/deposit.png" />
 
 						{t("deposit") + " " + market?.symbol}
@@ -450,7 +451,8 @@ export const MarketView = ({
 							style={{ gap: "5px" }}>
 							<button
 								className="primaryButton"
-								onClick={handleBorrow}>
+								onClick={handleBorrow}
+								disabled={availableBorrow.lt(0.01)}>
 								<img src="images/borrow-dark.png" />
 
 								{t("borrow") + " " + WEN.symbol}
@@ -526,7 +528,7 @@ export const MarketView = ({
 							<button
 								className="secondaryButton"
 								onClick={handleWithdraw}
-								disabled={availableWithdrawal.eq(0)}>
+								disabled={availableWithdrawal.lt(0.01)}>
 								<img src="images/withdraw.png" />
 
 								{t("withdraw") + " " + IOTX.symbol}

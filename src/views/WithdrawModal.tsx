@@ -19,6 +19,8 @@ import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { debounce } from "../libs/debounce";
 import { useMyTransactionState } from "../components/Transaction";
 
+let amountWithdrawn = 0;
+
 export const WithdrawModal = ({
 	isOpen = false,
 	onClose = () => { },
@@ -99,6 +101,7 @@ export const WithdrawModal = ({
 	const handleMax = () => {
 		setValueForced(maxNumber);
 		setWithdrawAmount(maxNumber);
+		amountWithdrawn = maxNumber;
 	};
 
 	const applyUnsavedCollateralChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -135,12 +138,14 @@ export const WithdrawModal = ({
 			)
 		);
 		setWithdrawAmount(newCol);
+		amountWithdrawn = newCol;
 		setValueForced(newCol);
 	};
 
 	const handleInputWithdraw = (val: number) => {
 		setValueForced(-1);
 		setWithdrawAmount(val);
+		amountWithdrawn = val;
 	};
 
 	const handleCloseModal = () => {
@@ -154,7 +159,7 @@ export const WithdrawModal = ({
 		}
 
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string, withdrawAmount);
+			onDone(transactionState.tx.rawSentTransaction as unknown as string, amountWithdrawn);
 			transactionState.resolved = true;
 		}
 	}, [transactionState.type])
