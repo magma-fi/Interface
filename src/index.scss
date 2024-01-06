@@ -359,6 +359,16 @@ h4 {
   font-size: 0.875rem;
 }
 
+.inLineTextButton {
+  padding: 0;
+  margin: 0;
+  border-bottom: none;
+
+  img {
+    width: 0.75rem;
+  }
+}
+
 .primaryButton {
   outline: none;
   color: var(--button-primary-text);
