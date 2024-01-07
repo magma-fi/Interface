@@ -28,6 +28,7 @@ export const TransactiionListItem = ({
 			case TroveOperation.OpenTrove:
 			case TroveOperation.AdjustTrove:
 			case TroveOperation.CloseTrove:
+			case TroveOperation.RedeemCollateral:
 				if (col > 0) {
 					type.push(BadgeType.Deposit);
 				}
