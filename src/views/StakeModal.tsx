@@ -15,6 +15,8 @@ import { TxLabel } from "../components/TxLabel";
 import { validateStabilityDepositChange } from "../components/Stability/validation/validateStabilityDepositChange";
 import { StabilityDepositAction } from "../components/Stability/StabilityDepositAction";
 
+let amountStaked = 0;
+
 export const StakeModal = ({
 	isOpen = false,
 	onClose = () => { },
@@ -47,16 +49,20 @@ export const StakeModal = ({
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
 
 	const handleMax = () => {
-		const val = Number(accountBalance.toString());
+		const val = Number(accountBalance);
 		setValueForced(val);
 		setDepositAmount(val);
 		setErrorMessages(undefined);
+
+		amountStaked = val;
 	};
 
 	const handleInputDeposit = (val: number) => {
 		setValueForced(-1);
 		setDepositAmount(val);
 		setErrorMessages(undefined);
+
+		amountStaked = val;
 	};
 
 	const handleCloseModal = () => {
@@ -70,7 +76,7 @@ export const StakeModal = ({
 		}
 
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string, depositAmount);
+			onDone(transactionState.tx.rawSentTransaction as unknown as string, amountStaked);
 			transactionState.resolved = true;
 		}
 	}, [transactionState.type])

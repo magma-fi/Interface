@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useLiquitySelector } from "@liquity/lib-react";
 import { useLang } from "../hooks/useLang";
-import { Coin, TroveChangeTx } from "../libs/types";
+import { Coin, JsonObject, TroveChangeTx } from "../libs/types";
 import { useEffect, useMemo, useState } from "react";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
 import { selectForTroveChangeValidation } from "../components/Trove/validation/validateTroveChange";
@@ -72,7 +72,7 @@ export const MarketView = ({
 		fees,
 		lusdBalance
 	} = useLiquitySelector(selector);
-	const { walletClient, chainId } = useLiquity()
+	const { walletClient, chainId, liquity } = useLiquity()
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
 	const [depositAndBorrow, setDepositAndBorrow] = useState(true);
@@ -93,11 +93,14 @@ export const MarketView = ({
 	// const recoveryMode = totalCollateralRatio.div(CRITICAL_COLLATERAL_RATIO);
 	const recoveryMode = total.collateralRatioIsBelowCritical(price);
 	const CCR = constants?.CCR?.gt(0) ? constants?.CCR : CRITICAL_COLLATERAL_RATIO;
-	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO;
+	const appConfigConstants = (appConfig.constants as JsonObject)[String(chainId)];
+	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : appConfigConstants.MAGMA_MINIMUM_COLLATERAL_RATIO;
+	const appMMROffset = appConfigConstants.appMMROffset;
 	const TVL = constants?.TVL || Decimal.ZERO;
 	const mcrPercent = Decimal.ONE.div(MCR)
 	const recoveryModeAt = CCR.gt(0) ? Decimal.ONE.div(CCR) : Decimal.ZERO;
 	const liquidationPoint = recoveryMode ? CCR : MCR;
+	const appLiquidationPoint = recoveryMode ? CCR : appConfigConstants.appMCR;
 	const borrowingFeePct = new Percent(borrowingRate);
 
 	const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateralRatio(price);
@@ -109,13 +112,14 @@ export const MarketView = ({
 	);
 	const liquidationPrice = trove.collateral.gt(0) ? debtToLiquidate.div(trove.collateral) : Decimal.ZERO;
 
-	const maxAvailableBorrow = troveCollateralValue.div(liquidationPoint);
+	const maxAvailableBorrow = troveCollateralValue.div(liquidationPoint).mul(appMMROffset);
 	const maxAvailableBorrowSubFee = maxAvailableBorrow.mul(Decimal.ONE.sub(borrowingRate));
 	const availableBorrow = maxAvailableBorrowSubFee.gt(trove.debt) ? maxAvailableBorrowSubFee.sub(trove.debt) : Decimal.ZERO;
 	const currentNetDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
 	const minNetDebt = constants?.MIN_NET_DEBT || Decimal.ZERO;
-	const maxAvailableRepay = currentNetDebt.gt(minNetDebt) ? currentNetDebt.sub(minNetDebt) : Decimal.ZERO;
-	const totalUtilizationRate = total.collateral.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? total.debt.div(total.collateral.mul(price)) : Decimal.ZERO;
+	const reserve = constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE;
+	const maxAvailableRepay = currentNetDebt.gt(minNetDebt.add(reserve)) ? currentNetDebt.sub(minNetDebt).sub(reserve) : Decimal.ZERO;
+	const totalUtilizationRate = total.collateral.gt(reserve) ? total.debt.div(total.collateral.mul(price)) : Decimal.ZERO;
 	const troveUtilizationRate = trove.collateral.gt(0) ? trove.debt.div(troveCollateralValue).mul(100) : Decimal.ZERO;
 	const troveUtilizationRateNumber = Number(troveUtilizationRate);
 
@@ -140,7 +144,7 @@ export const MarketView = ({
 		return [<path d={`M ${xpc} ${ypc} L${xp} ${yp}`} stroke={color} strokeWidth="2" fill={color} />];
 	};
 
-	const availableWithdrawal = calculateAvailableWithdrawal(trove, price, liquidationPoint);
+	const availableWithdrawal = calculateAvailableWithdrawal(trove, price, appLiquidationPoint);
 	const availableWithdrawalFiat = availableWithdrawal.mul(price);
 	const { address } = useAccount();
 	const [txs, setTxs] = useState<TroveChangeTx[]>([]);
@@ -259,7 +263,7 @@ export const MarketView = ({
 		await walletClient?.watchAsset({
 			type: "ERC20",
 			options: {
-				address: appConfig.tokens.wen[String(chainId)].address,
+				address: liquity.connection.addresses.lusdToken,
 				decimals: WEN.decimals || 18,
 				symbol: WEN.symbol
 			}
@@ -285,7 +289,8 @@ export const MarketView = ({
 						id="0"
 						className="primaryButton bigButton"
 						style={{ width: "100%" }}
-						onClick={handleDeposit}>
+						onClick={handleDeposit}
+						disabled={accountBalance.eq(0)}>
 						<img src="images/deposit.png" />
 
 						{t("deposit") + " " + market?.symbol}
@@ -446,7 +451,8 @@ export const MarketView = ({
 							style={{ gap: "5px" }}>
 							<button
 								className="primaryButton"
-								onClick={handleBorrow}>
+								onClick={handleBorrow}
+								disabled={availableBorrow.lt(0.01)}>
 								<img src="images/borrow-dark.png" />
 
 								{t("borrow") + " " + WEN.symbol}
@@ -486,7 +492,7 @@ export const MarketView = ({
 							<button
 								className="secondaryButton"
 								onClick={handleRepay}
-								disabled={maxAvailableRepay.eq(0)}>
+								disabled={maxAvailableRepay.lt(0.01)}>
 								<img src="images/repay.png" />
 
 								{t("repay") + " " + WEN.symbol}
@@ -522,7 +528,7 @@ export const MarketView = ({
 							<button
 								className="secondaryButton"
 								onClick={handleWithdraw}
-								disabled={availableWithdrawal.eq(0)}>
+								disabled={availableWithdrawal.lt(0.01)}>
 								<img src="images/withdraw.png" />
 
 								{t("withdraw") + " " + IOTX.symbol}
@@ -635,7 +641,7 @@ export const MarketView = ({
 			depositAndBorrow={depositAndBorrow}
 			liquidationPrice={liquidationPrice}
 			availableWithdrawal={availableWithdrawal}
-			availableBorrow={availableBorrow.mul(0.95)}
+			availableBorrow={availableBorrow}
 			recoveryMode={recoveryMode}
 			liquidationPoint={liquidationPoint} />}
 
@@ -668,13 +674,14 @@ export const MarketView = ({
 			trove={trove}
 			fees={fees}
 			validationContext={validationContext}
-			max={availableBorrow.mul(0.95)}
+			max={availableBorrow}
 			onDone={handleBorrowDone}
 			constants={constants}
 			liquidationPrice={liquidationPrice}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
-			liquidationPoint={liquidationPoint}
+			// liquidationPoint={liquidationPoint}
+			liquidationPoint={appLiquidationPoint}
 			availableBorrow={availableBorrow} />}
 
 		{showBorrowDoneModal && <TxDone
@@ -711,7 +718,8 @@ export const MarketView = ({
 			constants={constants}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
-			liquidationPoint={liquidationPoint}
+			// liquidationPoint={liquidationPoint}
+			liquidationPoint={appLiquidationPoint}
 			availableBorrow={availableBorrow}
 			onCloseVault={handleCloseTroveFromRepayModal} />}
 
@@ -740,7 +748,8 @@ export const MarketView = ({
 			constants={constants}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
-			liquidationPoint={liquidationPoint}
+			// liquidationPoint={liquidationPoint}
+			liquidationPoint={appLiquidationPoint}
 			availableBorrow={availableBorrow} />}
 
 		{showWithdrawDoneModal && <TxDone

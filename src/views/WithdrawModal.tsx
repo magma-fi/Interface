@@ -19,6 +19,8 @@ import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { debounce } from "../libs/debounce";
 import { useMyTransactionState } from "../components/Transaction";
 
+let amountWithdrawn = 0;
+
 export const WithdrawModal = ({
 	isOpen = false,
 	onClose = () => { },
@@ -76,7 +78,12 @@ export const WithdrawModal = ({
 		constants
 	);
 	const stableTroveChange = useStableTroveChange(troveChange);
-	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
+
+	let txErrorMessage: ErrorMessage;
+	const errorMsg = useMemo(() => {
+		if (description) return description as ErrorMessage;
+	}, [description]);
+	const errorMessages = errorMsg || txErrorMessage!;
 
 	const utilRate = Decimal.ONE.div(updatedTrove.collateralRatio(price));
 
@@ -87,7 +94,6 @@ export const WithdrawModal = ({
 	const init = () => {
 		setValueForced(-1);
 		setWithdrawAmount(-1);
-		setErrorMessages(undefined);
 	};
 
 	useEffect(init, []);
@@ -95,7 +101,7 @@ export const WithdrawModal = ({
 	const handleMax = () => {
 		setValueForced(maxNumber);
 		setWithdrawAmount(maxNumber);
-		setErrorMessages(undefined);
+		amountWithdrawn = maxNumber;
 	};
 
 	const applyUnsavedCollateralChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -117,7 +123,7 @@ export const WithdrawModal = ({
 		if (!trove) return;
 
 		if (withdrawAmount >= 0) {
-			const col = trove.collateral.sub(withdrawAmount);
+			const col = trove.collateral.gt(withdrawAmount) ? trove.collateral.sub(withdrawAmount) : Decimal.ZERO;
 			const previousCol = previousTrove.current?.collateral;
 			const unsavedChanges = Difference.between(col, previousCol);
 			const nextCol = applyUnsavedCollateralChanges(unsavedChanges, trove);
@@ -132,13 +138,14 @@ export const WithdrawModal = ({
 			)
 		);
 		setWithdrawAmount(newCol);
+		amountWithdrawn = newCol;
 		setValueForced(newCol);
 	};
 
 	const handleInputWithdraw = (val: number) => {
 		setValueForced(-1);
 		setWithdrawAmount(val);
-		setErrorMessages(undefined);
+		amountWithdrawn = val;
 	};
 
 	const handleCloseModal = () => {
@@ -148,11 +155,11 @@ export const WithdrawModal = ({
 
 	useEffect(() => {
 		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
-			setErrorMessages({ string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage);
+			txErrorMessage = { string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage;
 		}
 
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string, withdrawAmount);
+			onDone(transactionState.tx.rawSentTransaction as unknown as string, amountWithdrawn);
 			transactionState.resolved = true;
 		}
 	}, [transactionState.type])
@@ -160,9 +167,7 @@ export const WithdrawModal = ({
 	return isOpen ? <Modal
 		title={t("withdraw") + " " + market.symbol}
 		onClose={handleCloseModal}>
-		<div
-			className="flex-column"
-			style={{ gap: "24px" }}>
+		<div className="withdrawModal">
 			<div className="flex-column">
 				<div className="flex-column-align-left">
 					<div
@@ -197,16 +202,17 @@ export const WithdrawModal = ({
 						style={{ alignItems: "center" }}>
 						<div className="label fat">{t("utilizationRate")}</div>
 
-						<button
+						{/* <button
 							className="textButton smallTextButton"
 							onClick={handleMax}>
 							{t("maxSafe")}:&nbsp;{maxSafe.mul(100).toString(2)}%
-						</button>
+						</button> */}
+						<div className="label">{t("maxSafe")}:&nbsp;{maxSafe.mul(100).toString(2)}%</div>
 					</div>
 
 					<Slider
 						min={0}
-						max={Number(maxSafe.toString())}
+						max={Number(maxSafe)}
 						onChange={handleSlideUtilRate}
 						forcedValue={sliderForcedValue}
 						allowReduce={false}

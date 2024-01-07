@@ -46,7 +46,8 @@ export type TroveInTx = {
 export enum TroveOperation {
 	OpenTrove = "openTrove",
 	AdjustTrove = "adjustTrove",
-	CloseTrove = "closeTrove"
+	CloseTrove = "closeTrove",
+	RedeemCollateral = "redeemCollateral"
 }
 
 export type TxForSubgraph = {
@@ -65,3 +66,5 @@ export type TroveChangeTx = {
 }
 
 export type LiquidatableTrove = UserTrove & { liquidatable: boolean; }
+
+export type JsonObject = { [key: string]: any };

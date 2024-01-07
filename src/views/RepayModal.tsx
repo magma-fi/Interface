@@ -18,6 +18,8 @@ import { Slider } from "../components/Slider";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { useMyTransactionState } from "../components/Transaction";
 
+let repaidAmount = 0;
+
 export const RepayModal = ({
 	isOpen = false,
 	onClose = () => { },
@@ -43,7 +45,7 @@ export const RepayModal = ({
 	fees: Fees;
 	validationContext: ValidationContext;
 	max: Decimal;
-	onDone: (tx: string, repayAmount: number) => void;
+	onDone: (tx: string, repaidAmount: number) => void;
 	constants?: Record<string, Decimal>;
 	recoveryMode: boolean;
 	liquidationPoint: Decimal;
@@ -54,7 +56,6 @@ export const RepayModal = ({
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
 	const [repayAmount, setRepayAmount] = useState(-1);
-	const [repaidAmount, setRepaidAmount] = useState(0);
 	const previousTrove = useRef<Trove>(trove);
 	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
 	const [desireNetDebt, setDesireNetDebt] = useState(netDebt);
@@ -65,9 +66,11 @@ export const RepayModal = ({
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
 	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || Decimal.ONE;
+	const minNetDebt = constants?.MIN_NET_DEBT || Decimal.ONE;
 	const isDebtIncrease = desireNetDebt.gt(trove.netDebt);
 	const debtIncreaseAmount = isDebtIncrease ? desireNetDebt.sub(trove.netDebt) : Decimal.ZERO;
 	const borrowingRate = fees.borrowingRate();
+	const MinSafe = minNetDebt.add(minNetDebt.mul(borrowingRate)).div(trove.collateral.mul(price));
 	const fee = isDebtIncrease
 		? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
 		: Decimal.ZERO;
@@ -105,7 +108,7 @@ export const RepayModal = ({
 		const val = Number(max);
 		setValueForced(val);
 		setRepayAmount(val);
-		setRepaidAmount(val);
+		repaidAmount = val;
 		setErrorMessages(undefined);
 	};
 
@@ -127,7 +130,7 @@ export const RepayModal = ({
 	useEffect(() => {
 		if (!trove) return;
 
-		if (repayAmount >= 0 && netDebt.gte(repaidAmount)) {
+		if (repayAmount >= 0 && netDebt.gte(repayAmount)) {
 			const newNetDebt = netDebt.sub(repayAmount);
 			const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
 			const unsavedChanges = Difference.between(newNetDebt, previousNetDebt);
@@ -137,15 +140,11 @@ export const RepayModal = ({
 	}, [trove, repayAmount, price]);
 
 	const handleSlideUtilRate = (val: number) => {
-		const newDebt = Number(
-			previousTrove.current.netDebt.sub(
-				previousTrove.current?.netDebt
-					.mul(val)
-					.div(troveUtilizationRateNumber)
-			)
-		);
+		const wantNetDebt = previousTrove.current.collateral.mul(price).mul(val).add(wenLiquidationReserve)
+		const netDebtDifferent = previousTrove.current.netDebt.gt(wantNetDebt) ? previousTrove.current.netDebt.sub(wantNetDebt) : Decimal.ZERO;
+		const newDebt = Number(netDebtDifferent);
 		setRepayAmount(newDebt);
-		setRepaidAmount(newDebt);
+		repaidAmount = newDebt;
 		setValueForced(newDebt);
 		setErrorMessages(undefined);
 	};
@@ -153,7 +152,7 @@ export const RepayModal = ({
 	const handleInputRepay = (val: number) => {
 		setValueForced(-1);
 		setRepayAmount(val);
-		setRepaidAmount(val);
+		repaidAmount = val;
 		setErrorMessages(undefined);
 	};
 
@@ -168,7 +167,6 @@ export const RepayModal = ({
 		}
 
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			init();
 			onDone(transactionState.tx.rawSentTransaction as unknown as string, repaidAmount);
 			transactionState.resolved = true;
 		}
@@ -222,16 +220,17 @@ export const RepayModal = ({
 						style={{ alignItems: "center" }}>
 						<div className="label fat">{t("utilizationRate")}</div>
 
-						<button
+						{/* <button
 							className="textButton smallTextButton"
 							onClick={handleMax}>
 							{t("maxSafe")}:&nbsp;{maxSafe.mul(100).toString(2)}%
-						</button>
+						</button> */}
+						<div className="label">{t("maxSafe")}:&nbsp;{maxSafe.mul(100).toString(2)}%</div>
 					</div>
 
 					<Slider
-						min={0}
-						max={Number(maxSafe.toString())}
+						min={Number(MinSafe)}
+						max={Number(maxSafe)}
 						onChange={handleSlideUtilRate}
 						forcedValue={sliderForcedValue}
 						allowReduce={true}

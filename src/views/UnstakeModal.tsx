@@ -15,6 +15,8 @@ import { TxLabel } from "../components/TxLabel";
 import { validateStabilityDepositChange } from "../components/Stability/validation/validateStabilityDepositChange";
 import { StabilityDepositAction } from "../components/Stability/StabilityDepositAction";
 
+let amountUnstaked = 0;
+
 export const UnstakeModal = ({
 	isOpen = false,
 	onClose = () => { },
@@ -49,12 +51,14 @@ export const UnstakeModal = ({
 		const val = Number(stabilityDeposit.currentLUSD.toString(0));
 		setValueForced(val);
 		setUnstakeAmount(val);
+		amountUnstaked = val;
 		setErrorMessages(undefined);
 	};
 
 	const handleInputDeposit = (val: number) => {
 		setValueForced(-1);
 		setUnstakeAmount(val);
+		amountUnstaked = val;
 		setErrorMessages(undefined);
 	};
 
@@ -69,7 +73,7 @@ export const UnstakeModal = ({
 		}
 
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string, unstakeAmount);
+			onDone(transactionState.tx.rawSentTransaction as unknown as string, amountUnstaked);
 			transactionState.resolved = true;
 		}
 	}, [transactionState.type])

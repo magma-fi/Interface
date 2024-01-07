@@ -17,14 +17,14 @@ export const TxLabel = ({
 
 	return <div className="txLabel">
 		<div className="flex-row-align-left">
-			<img
+			{logo && <img
 				src={logo}
-				width="40px" />
+				width="40px" />}
 
 			<div className="flex-column-align-left">
-				<div className="label">{title}</div>
+				{title && <div className="label">{title}</div>}
 
-				<div className="label labelSmall">{amount}</div>
+				{amount && <div className="label labelSmall">{amount}</div>}
 			</div>
 		</div>
 

@@ -4,7 +4,7 @@
 			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet"
 		},
 		"4689": {
-			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex"
+			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-v2"
 		}
 	},
 	"rpc": {
@@ -26,7 +26,7 @@
 				"address": "0x20143c45c2ce7984799079f256d8a68a918eeee6"
 			},
 			"4690": {
-				"address": "0xcb9177f585314b7e60a2cd54ad0aa0d87b4817be"
+				"address": "0x6A2338A8b1546621ED369DF7F7Fd8d6dA84c5657"
 			}
 		}
 	},
@@ -133,10 +133,14 @@
 	},
 	"constants": {
 		"4689": {
-			"MAGMA_MINIMUM_COLLATERAL_RATIO": 1.3
+			"MAGMA_MINIMUM_COLLATERAL_RATIO": 1.3,
+			"appMMROffset": 0.91,
+			"appMCR": 1.428571428571429
 		},
 		"4690": {
-			"MAGMA_MINIMUM_COLLATERAL_RATIO": 1.1
+			"MAGMA_MINIMUM_COLLATERAL_RATIO": 1.3,
+			"appMMROffset": 0.91,
+			"appMCR": 1.428571428571429
 		}
 	}
 }

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Provider } from "@ethersproject/abstract-provider";
 import { BaseProvider } from "@ethersproject/providers";
-import { PublicClient, WalletClient, useAccount, useChainId, useConnect, usePublicClient, useWalletClient } from "wagmi";
+import { PublicClient, WalletClient, useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 
 import {
   BlockPolledLiquityStore,
@@ -84,14 +84,8 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
     return <>{loader}</>;
   }
 
-  // if (config?.testnetOnly && chainId === 1) {
-  //   return <>{unsupportedMainnetFallback}</>;
-  // }
-
   if (!isConnected && !connection) {
     return <>{unsupportedNetworkFallback}</>;
-    // return <>{children}</>;
-    // return <MainView />
   }
 
   if (connection) {

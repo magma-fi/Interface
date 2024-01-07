@@ -1,44 +1,20 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  MINIMUM_COLLATERAL_RATIO,
-  UserTrove,
-  Decimal
-} from "lib-base";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import React, { useState, useEffect, useMemo } from "react";
+import { UserTrove, Decimal } from "lib-base";
 import { BlockPolledLiquityStoreState } from "lib-ethers";
 import { useLiquitySelector } from "@liquity/lib-react";
 import { shortenAddress } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { Icon } from "./Icon";
 import { LoadingOverlay } from "./LoadingOverlay";
-import { useTransactionState } from "./Transaction";
+import { TransactionState, tryToGetRevertReason, useTransactionState } from "./Transaction";
 import { Abbreviation } from "./Abbreviation";
 import { useLang } from "../hooks/useLang";
 import { IOTX, WEN } from "../libs/globalContants";
 import appConfig from "../appConfig.json";
-import { LiquidatableTrove } from "../libs/types";
-
-// const rowHeight = "40px";
-
-// const liquidatableInNormalMode = (trove: UserTrove, price: Decimal) =>
-//   [trove.collateralRatioIsBelowMinimum(price), "Collateral ratio not low enough"] as const;
-
-// const liquidatableInRecoveryMode = (
-//   trove: UserTrove,
-//   price: Decimal,
-//   totalCollateralRatio: Decimal,
-//   lusdInStabilityPool: Decimal
-// ) => {
-//   const collateralRatio = trove.collateralRatio(price);
-
-//   if (collateralRatio.gte(MINIMUM_COLLATERAL_RATIO) && collateralRatio.lt(totalCollateralRatio)) {
-//     return [
-//       trove.debt.lte(lusdInStabilityPool),
-//       "There's not enough WEN in the Stability pool to cover the debt"
-//     ] as const;
-//   } else {
-//     return liquidatableInNormalMode(trove, price);
-//   }
-// };
+import { JsonObject, LiquidatableTrove } from "../libs/types";
+import { TxDone } from "./TxDone";
+import { TxLabel } from "./TxLabel";
 
 type RiskyTrovesProps = {
   pageSize: number;
@@ -48,13 +24,11 @@ type RiskyTrovesProps = {
 const select = ({
   price,
   total,
-  lusdInStabilityPool,
   blockTag
 }: BlockPolledLiquityStoreState) => ({
   price,
   recoveryMode: total.collateralRatioIsBelowCritical(price),
   totalCollateralRatio: total.collateralRatio(price),
-  lusdInStabilityPool,
   blockTag
 });
 
@@ -64,17 +38,15 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     blockTag,
     recoveryMode,
     totalCollateralRatio,
-    lusdInStabilityPool,
     price
   } = useLiquitySelector(select);
   const factor = 0.95;
-  const { liquity, chainId,publicClient } = useLiquity();
+  const { liquity, chainId, publicClient, provider } = useLiquity();
   const [loading, setLoading] = useState(true);
   const [troves, setTroves] = useState<UserTrove[]>();
-  const [reload, setReload] = useState({});
-  const forceReload = useCallback(() => setReload({}), []);
+  const [reload, setReload] = useState(false);
   const [page, setPage] = useState(0);
-  const mcr = constants?.MCR?.gt(0) ? constants.MCR : Decimal.from(appConfig.constants[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO);
+  const mcr = constants?.MCR?.gt(0) ? constants.MCR : Decimal.from((appConfig.constants as JsonObject)[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO);
 
   const liquidatableTroves: LiquidatableTrove[] = useMemo(() => {
     const tempArr: LiquidatableTrove[] = [];
@@ -106,16 +78,20 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
   const [resetTx, setResetTx] = useState(false);
   const txId = useMemo(() => String(new Date().getTime()), [resetTx]);
   const [transactionState, setTransactionState] = useTransactionState();
+  const [showTxDone, setShowTxDone] = useState(false);
+  const [txAmount, setTxAmount] = useState("");
+  const [txHash, setTxHash] = useState("");
 
   // 交易结束或失败后重置transactionState。
   useEffect(() => {
-    if (transactionState.id === txId && (transactionState.type === "confirmed" || transactionState.type === "failed")) {
+    if (transactionState.id === txId && (transactionState.type === "failed" || transactionState.type === "cancelled")) {
       setTransactionState({ type: "idle" });
       setResetTx(!resetTx);
+    }
 
-      setTimeout(() => {
-        setReload({});
-      }, 5000);
+    if (transactionState.id === txId && (transactionState.type === "confirmed")) {
+      setReload(!reload);
+      setShowTxDone(true);
     }
   }, [transactionState.id, transactionState.type, txId])
 
@@ -163,34 +139,65 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     };
     // Omit blockTag from deps on purpose
     // eslint-disable-next-line
-  }, [liquity, clampedPage, pageSize, reload]);
+  }, [liquity, clampedPage, pageSize, reload, numberOfTroves]);
 
-  useEffect(() => {
-    forceReload();
-  }, [forceReload, numberOfTroves]);
+  const waitForConfirmation = async () => {
+    const id = transactionState.type !== "idle" ? transactionState.id : undefined;
+    const tx = (transactionState.type === "waitingForConfirmation" || transactionState.type === "confirmedOneShot") ? transactionState.tx : undefined;
 
-  // const [copied, setCopied] = useState<string>();
+    if (!id || !tx) return;
 
-  // useEffect(() => {
-  //   if (copied !== undefined) {
-  //     let cancelled = false;
+    const hash = tx?.rawSentTransaction as unknown as string;
 
-  //     setTimeout(() => {
-  //       if (!cancelled) {
-  //         setCopied(undefined);
-  //       }
-  //     }, 2000);
+    setTxHash(hash);
 
-  //     return () => {
-  //       cancelled = true;
-  //     };
-  //   }
-  // }, [copied]);
+    const callMyself = () => setTimeout(() => {
+      waitForConfirmation();
+    }, 5000);
+
+    try {
+      const receipt = await provider.getTransactionReceipt(hash);
+      if (!receipt) {
+        return callMyself();
+      }
+
+      if (receipt.status === 1) {
+        if (transactionState.type === "confirmedOneShot" && id) {
+          return setTransactionState({ type: "confirmed", id });
+        }
+
+        setTransactionState({
+          type: "confirmedOneShot",
+          id,
+          tx
+        });
+
+        return callMyself();
+      } else {
+        const reason = await tryToGetRevertReason(provider, receipt);
+
+        console.error(`Tx ${hash} failed`);
+        if (reason) {
+          console.error(`Revert reason: ${reason}`);
+        }
+
+        setTransactionState({
+          type: "failed",
+          id,
+          error: new Error(reason ? `Reverted: ${reason}` : "Failed")
+        });
+      }
+    } catch (rawError) {
+      console.warn(rawError);
+    }
+  };
 
   const handleLiquidate = (evt: React.MouseEvent<HTMLButtonElement>) => {
     const owner = evt.currentTarget.id;
     const send = liquity.send.liquidate.bind(liquity.send, owner)
     const id = txId;
+
+    setTxAmount(evt.currentTarget.dataset.amount!);
 
     const hasMessage = (error: unknown): error is { message: string } =>
       typeof error === "object" &&
@@ -209,9 +216,11 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
           id,
           tx
         });
+
+        waitForConfirmation();
       } catch (error) {
         if (hasMessage(error) && error.message.includes("User denied transaction signature")) {
-          setTransactionState({ type: "cancelled", id });
+          setTransactionState({ type: "cancelled", id } as TransactionState);
         } else {
           console.error(error);
 
@@ -227,6 +236,14 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     return sendTransaction();
   };
 
+  const handleCloseTxDone = () => {
+    setShowTxDone(false);
+    setTxHash("");
+    setTxAmount("");
+  };
+
+  console.debug("xxx transactionState.type =", transactionState)
+
   return <>
     {loading && <LoadingOverlay />}
 
@@ -236,26 +253,6 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
       </div>
 
       {liquidatableTroves && liquidatableTroves.length > 0 && <div className="table">
-        {/* <div className="tableHeader">
-          <tr>
-            <th>Owner</th>
-            <th>
-              <Abbreviation short="Coll.">Collateral</Abbreviation>
-              <Box sx={{ fontSize: [0, 1], fontWeight: "body", opacity: 0.5 }}>ETH</Box>
-            </th>
-            <th>
-              Debt
-              <Box sx={{ fontSize: [0, 1], fontWeight: "body", opacity: 0.5 }}>{COIN}</Box>
-            </th>
-            <th>
-              Coll.
-              <br />
-              Ratio
-            </th>
-            <th></th>
-          </tr>
-        </div> */}
-
         <div className="tableBody">
           {liquidatableTroves.map(trove => {
             return !trove.isEmpty && <div
@@ -266,7 +263,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
 
                 <a
                   className="textButton"
-                  href={publicClient.chain?.blockExplorers?.default.url + "/address/" + trove.ownerAddress}
+                  href={publicClient?.chain?.blockExplorers?.default.url + "/address/" + trove.ownerAddress}
                   target="_blank">
                   {shortenAddress(trove.ownerAddress)}
 
@@ -294,6 +291,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
 
               <div className="tableCell">
                 <button
+                  data-amount={trove.collateral.toString()}
                   id={trove.ownerAddress}
                   className="secondaryButton"
                   onClick={handleLiquidate}
@@ -308,7 +306,6 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
       </div>}
 
       {liquidatableTroves?.length === 0 && <p className="description">{t("noLiquidatableTrove")}</p>}
-
 
       <div className="paging">
         {numberOfTroves !== 0 && <>
@@ -335,15 +332,19 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
             <Icon name="chevron-right" size="lg" />
           </button>
         </>}
-
-        {/* <Button
-          variant="titleIcon"
-          sx={{ opacity: loading ? 0 : 1, ml: [0, 3] }}
-          onClick={forceReload}
-        >
-          <Icon name="redo" size="lg" />
-        </Button> */}
       </div>
     </div>}
+
+    {showTxDone && <TxDone
+      title={t("liquidatedSuccessfully")}
+      onClose={handleCloseTxDone}
+      illustration="images/general-success.png"
+      whereGoBack={t("back2RiskyVault")}>
+      <TxLabel
+        txHash={txHash}
+        title={t("liquidatedAmount")}
+        logo={IOTX.logo}
+        amount={txAmount + " " + IOTX.symbol} />
+    </TxDone>}
   </>;
 };

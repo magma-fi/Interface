@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLang } from "../hooks/useLang";
-import { IOTX, ModalAction, WEN, globalContants } from "../libs/globalContants";
+import { IOTX, MAGMA, ModalAction, WEN, globalContants } from "../libs/globalContants";
 import { Coin } from "../libs/types";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
 import { useLiquitySelector } from "@liquity/lib-react";
@@ -10,11 +10,13 @@ import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { UnstakeModal } from "./UnstakeModal";
 import { useContract } from "../hooks/useContract";
-import { StabilityPool } from "lib-ethers/dist/types";
+import { HintHelpers, SortedTroves, StabilityPool, TroveManager } from "lib-ethers/dist/types";
 import { useLiquity } from "../hooks/LiquityContext";
 import StabilityPoolAbi from "lib-ethers/abi/StabilityPool.json";
-import { Decimal } from "lib-base"
-import { useAccount } from "wagmi";
+import { Decimal, LUSD_LIQUIDATION_RESERVE } from "lib-base"
+import { Address, useAccount } from "wagmi";
+import { SwapWEN2IOTXModal } from "./SwapWEN2IOTXModal";
+import { useMyTransactionState, useTransactionFunction } from "../components/Transaction";
 
 type ModalOpenning = {
 	action: ModalAction;
@@ -35,6 +37,7 @@ export const PoolView = ({ market, constants }: {
 				lusdInStabilityPool,
 				numberOfTroves,
 				price,
+				trove
 			} = state;
 
 			return {
@@ -43,6 +46,7 @@ export const PoolView = ({ market, constants }: {
 				lusdInStabilityPool,
 				numberOfTroves,
 				price,
+				trove,
 				validationContext: selectForStabilityDepositChangeValidation(state)
 			};
 		};
@@ -54,71 +58,72 @@ export const PoolView = ({ market, constants }: {
 		lusdInStabilityPool,
 		numberOfTroves,
 		price,
+		trove,
 		validationContext
 	} = useLiquitySelector(selector);
-	const { address } = useAccount();
+	// const { address } = useAccount();
+	const { liquity, walletClient } = useLiquity();
 	const [showModal, setShowModal] = useState<ModalOpenning | null>(null);
 	const [showTxResult, setTxResult] = useState<ModalOpenning | null>(null);
 	const [amountInTx, setAmountInTx] = useState(0);
 	const [txHash, setTxHash] = useState("");
-	const { liquity } = useLiquity();
 	const wenTotalSupply = constants?.wenTotalSupply || Decimal.ZERO;
-	const [rewardsFromCollateral, setRewardsFromCollateral] = useState(Decimal.ZERO);
+	// const [rewardsFromCollateral, setRewardsFromCollateral] = useState(Decimal.ZERO);
+	const rewardsFromCollateral = stabilityDeposit.collateralGain;
+	const netDebt = trove.debt.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? trove.netDebt : Decimal.ZERO;
+	const [resetTx, setResetTx] = useState(false);
+	const [showTxDone, setShowTxDone] = useState(false);
+	const txId = useMemo(() => String(new Date().getTime()), [resetTx]);
+	const transactionState = useMyTransactionState(txId, true);
 
-	const [stabilityPoolDefault, stabilityPoolStatus] = useContract<StabilityPool>(
-		liquity.connection.addresses.stabilityPool,
-		StabilityPoolAbi
+	const [sendTransaction] = useTransactionFunction(
+		txId,
+		liquity.send.withdrawGainsFromStabilityPool.bind(liquity.send)
 	);
 
-	// const [hintHelpersDefault, hintHelpersDefaultStatus] = useContract<HintHelpers>(
-	// 	liquity.connection.addresses.hintHelpers,
-	// 	HintHelpersAbi
+	// const [stabilityPoolDefault, stabilityPoolStatus] = useContract<StabilityPool>(
+	// 	liquity.connection.addresses.stabilityPool,
+	// 	StabilityPoolAbi
 	// );
 
-	// const [troveManagerDefault, troveManagerDefaultStatus] = useContract<TroveManager>(
-	// 	liquity.connection.addresses.troveManager,
-	// 	TroveManagerAbi
-	// );
+	const handleRedeemCollateral = (evt: React.MouseEvent<HTMLButtonElement>) => {
+		setShowModal({
+			action: evt.currentTarget.id as ModalAction,
+			isShow: true
+		} as ModalOpenning);
+	};
 
-	// const [sortedTrovesDefault, sortedTrovesDefaultStatus] = useContract<SortedTroves>(
-	// 	liquity.connection.addresses.sortedTroves,
-	// 	SortedTrovesAbi
-	// );
+	// useEffect(() => {
+	// 	const read = async () => {
+	// 		if (stabilityPoolStatus === "LOADED" && address) {
+	// 			const res = await stabilityPoolDefault?.getDepositorETHGain(address);
+	// 			if (res) {
+	// 				setRewardsFromCollateral(Decimal.from(res.toString()).div(globalContants.IOTX_DECIMALS));
+	// 			}
+	// 		}
+	// 	};
 
-	// const handleRedeemCollateral = async () => {
-	// 	if (!hintHelpersDefault || !troveManagerDefault || !sortedTrovesDefault || !address) return;
-
-	// 	// const wenAmount = stabilityDeposit.currentLUSD.toString();
-	// 	// const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault.getRedemptionHints(wenAmount, price.toString(), 0);
-	// 	// const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault.findInsertPosition(
-	// 	// 	partialRedemptionHintNICR,
-	// 	// 	address,
-	// 	// 	address
-	// 	// )
-	// 	// const redemptionTx = await troveManagerDefault.redeemCollateral(
-	// 	// 	wenAmount,
-	// 	// 	firstRedemptionHint,
-	// 	// 	upperPartialRedemptionHint,
-	// 	// 	lowerPartialRedemptionHint,
-	// 	// 	partialRedemptionHintNICR,
-	// 	// 	0,
-	// 	// 	"1000000000000000000"
-	// 	// )
-	// 	// liquity.populate.redeemLUSD()
-	// };
+	// 	read();
+	// }, [address, stabilityPoolDefault, stabilityPoolStatus]);
 
 	useEffect(() => {
-		const read = async () => {
-			if (stabilityPoolStatus === "LOADED" && address) {
-				const res = await stabilityPoolDefault?.getDepositorETHGain(address);
-				if (res) {
-					setRewardsFromCollateral(Decimal.from(res.toString()).div(globalContants.IOTX_DECIMALS));
-				}
-			}
-		};
+		if (transactionState.id === txId && transactionState.tx) {
+			setTxHash(transactionState.tx.rawSentTransaction as unknown as string);
+		}
 
-		read();
-	}, [address, stabilityPoolDefault, stabilityPoolStatus]);
+		if (transactionState.id === txId && (transactionState.type === "failed" || transactionState.type === "cancelled")) {
+			setResetTx(!resetTx);
+		}
+
+		if (transactionState.id === txId && (transactionState.type === "confirmed")) {
+			setTxResult({
+				action: ModalAction.ClaimRewards,
+				isShow: true
+			} as ModalOpenning);
+
+			setResetTx(!resetTx);
+		}
+	}, [transactionState.type, transactionState.id, txId]);
 
 	const handleShowModal = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		setShowModal({
@@ -133,6 +138,19 @@ export const PoolView = ({ market, constants }: {
 
 	const handleCloseTxResult = () => {
 		setTxResult(null);
+		setTxHash("");
+		setAmountInTx(0);
+	};
+
+	const handleWatchAsset = async () => {
+		await walletClient?.watchAsset({
+			type: "ERC20",
+			options: {
+				address: liquity.connection.addresses.lqtyToken,
+				decimals: MAGMA.decimals || 18,
+				symbol: MAGMA.symbol
+			}
+		});
 	};
 
 	const handleModalDone = (tx: string, arg: number) => {
@@ -160,6 +178,14 @@ export const PoolView = ({ market, constants }: {
 		} as ModalOpenning)
 	};
 
+	const handleClaim = () => {
+		if (sendTransaction) {
+			setAmountInTx(Number(stabilityDeposit.lqtyReward.toString(2)));
+
+			return sendTransaction();
+		}
+	};
+
 	return <>
 		<div className="marketView">
 			<div
@@ -182,15 +208,9 @@ export const PoolView = ({ market, constants }: {
 						</button>
 
 						<button
-							disabled
-							// {
-							// 	!hintHelpersDefault
-							// 	|| hintHelpersDefaultStatus !== "LOADED"
-							// 	|| !troveManagerDefault
-							// 	|| troveManagerDefaultStatus !== "LOADED"
-							// }
-							// onClick={handleRedeemCollateral}
-							className="secondaryButton">
+							id={ModalAction.SwapWEN2IOTX}
+							onClick={handleRedeemCollateral}
+							className="secondaryButton fullWidth">
 							<img src="images/swap-orange.png" />
 
 							{t("swapWen2Iotx")}
@@ -236,6 +256,35 @@ export const PoolView = ({ market, constants }: {
 					</div>
 
 					<div className="flex-column">
+						<h4 className="fat">{t("magmaRewards")}</h4>
+
+						<div
+							className="flex-row-space-between"
+							style={{ alignItems: "center" }}>
+							<div className="flex-row-align-left">
+								<img
+									src={MAGMA.logo}
+									width="40px" />
+
+								<div className="flex-column-align-left">
+									{/* <div>{stabilityDeposit.lqtyReward.toString(2)}&nbsp;{globalContants.USD}</div> */}
+
+									<div className="label labelSmall">{stabilityDeposit.lqtyReward.toString(2)}&nbsp;{MAGMA.symbol}</div>
+								</div>
+							</div>
+
+							<button
+								className="secondaryButton"
+								onClick={handleClaim}
+								disabled={stabilityDeposit.lqtyReward.isZero || transactionState.type !== "idle"}>
+								<img src="images/rewards.png" />
+
+								{t("claimRewards")}
+							</button>
+						</div>
+					</div>
+
+					<div className="flex-column">
 						<h4 className="fat">{t("rewardsFromCollateral")}</h4>
 
 						<div className="label">{t("rewardsDescription")}</div>
@@ -276,7 +325,7 @@ export const PoolView = ({ market, constants }: {
 					</div>
 
 					<div className="flex-row-space-between">
-						<div className="label">{t("totalUtilizationRate")}</div>
+						<div className="label">{t("wenStakingRate")}</div>
 
 						<div style={{ color: "#F25454" }}>{(wenTotalSupply.gt(0) ? lusdInStabilityPool.div(wenTotalSupply).mul(100).toString(2) : 0) + "%"}</div>
 					</div>
@@ -311,6 +360,26 @@ export const PoolView = ({ market, constants }: {
 				amount={amountInTx + " " + WEN.symbol} />
 		</TxDone>}
 
+		{showModal?.action === ModalAction.SwapWEN2IOTX && showModal.isShow && <SwapWEN2IOTXModal
+			isOpen={showModal.isShow}
+			onClose={handleCloseModal}
+			onDone={handleModalDone}
+			max={Decimal.min(netDebt, lusdBalance)}
+			price={price}
+			trove={trove} />}
+
+		{showTxResult?.action === ModalAction.SwapWEN2IOTX && showTxResult.isShow && <TxDone
+			title={t("wenSwappedSuccessfully")}
+			onClose={handleCloseTxResult}
+			illustration="images/swap-success.png"
+			whereGoBack={t("back2StabilityPool")}>
+			<TxLabel
+				txHash={txHash}
+				title={t("youReceived")}
+				logo={WEN.logo}
+				amount={amountInTx + " " + IOTX.symbol} />
+		</TxDone>}
+
 		{showModal?.action === ModalAction.Unstake && showModal.isShow && <UnstakeModal
 			isOpen={showModal.isShow}
 			onClose={handleCloseModal}
@@ -330,6 +399,27 @@ export const PoolView = ({ market, constants }: {
 				title={t("unstakedAmount")}
 				logo={WEN.logo}
 				amount={amountInTx + " " + WEN.symbol} />
+		</TxDone>}
+
+		{showTxResult?.action === ModalAction.ClaimRewards && showTxResult.isShow && <TxDone
+			title={t("rewardsClaimedSuccessfully")}
+			onClose={handleCloseTxResult}
+			illustration="images/rewards-collected.png"
+			whereGoBack={t("close")}>
+			<div className="flex-column-align-center">
+				<TxLabel
+					txHash={txHash}
+					title={t("claimed")}
+					logo={MAGMA.logo}
+					amount={amountInTx + " " + MAGMA.symbol} />
+
+				<button
+					className="textButton smallTextButton"
+					style={{ textTransform: "none" }}
+					onClick={handleWatchAsset}>
+					{t("watchMagmaToWallet")}
+				</button>
+			</div>
 		</TxDone>}
 	</>
 };
