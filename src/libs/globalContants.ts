@@ -4,7 +4,8 @@ import { BigNumber } from "@ethersproject/bignumber";
 export enum ModalAction {
 	Stake = "stake",
 	Unstake = "unstake",
-	SwapWEN2IOTX = "swapWen2Iotx"
+	SwapWEN2IOTX = "swapWen2Iotx",
+	ClaimRewards = "claimRewards"
 }
 
 export enum Langs {
@@ -26,6 +27,12 @@ export enum BadgeType {
 	CloseTrove = "closeTrove",
 	Id = "ID",
 	Lock = "lockInDays"
+}
+
+export const MAGMA: Coin = {
+	symbol: "MGM",
+	logo: "images/magma.png",
+	decimals: 18
 }
 
 export const WEN: Coin = {

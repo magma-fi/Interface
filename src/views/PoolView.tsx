@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLang } from "../hooks/useLang";
-import { IOTX, ModalAction, WEN, globalContants } from "../libs/globalContants";
+import { IOTX, MAGMA, ModalAction, WEN, globalContants } from "../libs/globalContants";
 import { Coin } from "../libs/types";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
 import { useLiquitySelector } from "@liquity/lib-react";
@@ -16,6 +16,7 @@ import StabilityPoolAbi from "lib-ethers/abi/StabilityPool.json";
 import { Decimal, LUSD_LIQUIDATION_RESERVE } from "lib-base"
 import { Address, useAccount } from "wagmi";
 import { SwapWEN2IOTXModal } from "./SwapWEN2IOTXModal";
+import { useMyTransactionState, useTransactionFunction } from "../components/Transaction";
 
 type ModalOpenning = {
 	action: ModalAction;
@@ -60,21 +61,30 @@ export const PoolView = ({ market, constants }: {
 		trove,
 		validationContext
 	} = useLiquitySelector(selector);
-	const { address } = useAccount();
+	// const { address } = useAccount();
+	const { liquity, walletClient } = useLiquity();
 	const [showModal, setShowModal] = useState<ModalOpenning | null>(null);
 	const [showTxResult, setTxResult] = useState<ModalOpenning | null>(null);
 	const [amountInTx, setAmountInTx] = useState(0);
 	const [txHash, setTxHash] = useState("");
-	const { liquity } = useLiquity();
 	const wenTotalSupply = constants?.wenTotalSupply || Decimal.ZERO;
-	const [rewardsFromCollateral, setRewardsFromCollateral] = useState(Decimal.ZERO);
-	const netDebt = trove.debt.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? trove.netDebt : Decimal.ZERO
+	// const [rewardsFromCollateral, setRewardsFromCollateral] = useState(Decimal.ZERO);
+	const rewardsFromCollateral = stabilityDeposit.collateralGain;
+	const netDebt = trove.debt.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? trove.netDebt : Decimal.ZERO;
+	const [resetTx, setResetTx] = useState(false);
+	const [showTxDone, setShowTxDone] = useState(false);
+	const txId = useMemo(() => String(new Date().getTime()), [resetTx]);
+	const transactionState = useMyTransactionState(txId, true);
 
-	const [stabilityPoolDefault, stabilityPoolStatus] = useContract<StabilityPool>(
-		liquity.connection.addresses.stabilityPool,
-		StabilityPoolAbi
+	const [sendTransaction] = useTransactionFunction(
+		txId,
+		liquity.send.withdrawGainsFromStabilityPool.bind(liquity.send)
 	);
 
+	// const [stabilityPoolDefault, stabilityPoolStatus] = useContract<StabilityPool>(
+	// 	liquity.connection.addresses.stabilityPool,
+	// 	StabilityPoolAbi
+	// );
 
 	const handleRedeemCollateral = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		setShowModal({
@@ -83,18 +93,37 @@ export const PoolView = ({ market, constants }: {
 		} as ModalOpenning);
 	};
 
-	useEffect(() => {
-		const read = async () => {
-			if (stabilityPoolStatus === "LOADED" && address) {
-				const res = await stabilityPoolDefault?.getDepositorETHGain(address);
-				if (res) {
-					setRewardsFromCollateral(Decimal.from(res.toString()).div(globalContants.IOTX_DECIMALS));
-				}
-			}
-		};
+	// useEffect(() => {
+	// 	const read = async () => {
+	// 		if (stabilityPoolStatus === "LOADED" && address) {
+	// 			const res = await stabilityPoolDefault?.getDepositorETHGain(address);
+	// 			if (res) {
+	// 				setRewardsFromCollateral(Decimal.from(res.toString()).div(globalContants.IOTX_DECIMALS));
+	// 			}
+	// 		}
+	// 	};
 
-		read();
-	}, [address, stabilityPoolDefault, stabilityPoolStatus]);
+	// 	read();
+	// }, [address, stabilityPoolDefault, stabilityPoolStatus]);
+
+	useEffect(() => {
+		if (transactionState.id === txId && transactionState.tx) {
+			setTxHash(transactionState.tx.rawSentTransaction as unknown as string);
+		}
+
+		if (transactionState.id === txId && (transactionState.type === "failed" || transactionState.type === "cancelled")) {
+			setResetTx(!resetTx);
+		}
+
+		if (transactionState.id === txId && (transactionState.type === "confirmed")) {
+			setTxResult({
+				action: ModalAction.ClaimRewards,
+				isShow: true
+			} as ModalOpenning);
+
+			setResetTx(!resetTx);
+		}
+	}, [transactionState.type, transactionState.id, txId]);
 
 	const handleShowModal = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		setShowModal({
@@ -109,6 +138,19 @@ export const PoolView = ({ market, constants }: {
 
 	const handleCloseTxResult = () => {
 		setTxResult(null);
+		setTxHash("");
+		setAmountInTx(0);
+	};
+
+	const handleWatchAsset = async () => {
+		await walletClient?.watchAsset({
+			type: "ERC20",
+			options: {
+				address: liquity.connection.addresses.lqtyToken,
+				decimals: MAGMA.decimals || 18,
+				symbol: MAGMA.symbol
+			}
+		});
 	};
 
 	const handleModalDone = (tx: string, arg: number) => {
@@ -134,6 +176,14 @@ export const PoolView = ({ market, constants }: {
 			action: ModalAction.Unstake,
 			isShow: true
 		} as ModalOpenning)
+	};
+
+	const handleClaim = () => {
+		if (sendTransaction) {
+			setAmountInTx(Number(stabilityDeposit.lqtyReward.toString(2)));
+
+			return sendTransaction();
+		}
 	};
 
 	return <>
@@ -201,6 +251,35 @@ export const PoolView = ({ market, constants }: {
 								className="secondaryButton"
 								onClick={handleUnstake}>
 								{t("unstake")}
+							</button>
+						</div>
+					</div>
+
+					<div className="flex-column">
+						<h4 className="fat">{t("magmaRewards")}</h4>
+
+						<div
+							className="flex-row-space-between"
+							style={{ alignItems: "center" }}>
+							<div className="flex-row-align-left">
+								<img
+									src={MAGMA.logo}
+									width="40px" />
+
+								<div className="flex-column-align-left">
+									{/* <div>{stabilityDeposit.lqtyReward.toString(2)}&nbsp;{globalContants.USD}</div> */}
+
+									<div className="label labelSmall">{stabilityDeposit.lqtyReward.toString(2)}&nbsp;{MAGMA.symbol}</div>
+								</div>
+							</div>
+
+							<button
+								className="secondaryButton"
+								onClick={handleClaim}
+								disabled={stabilityDeposit.lqtyReward.isZero || transactionState.type !== "idle"}>
+								<img src="images/rewards.png" />
+
+								{t("claimRewards")}
 							</button>
 						</div>
 					</div>
@@ -320,6 +399,27 @@ export const PoolView = ({ market, constants }: {
 				title={t("unstakedAmount")}
 				logo={WEN.logo}
 				amount={amountInTx + " " + WEN.symbol} />
+		</TxDone>}
+
+		{showTxResult?.action === ModalAction.ClaimRewards && showTxResult.isShow && <TxDone
+			title={t("rewardsClaimedSuccessfully")}
+			onClose={handleCloseTxResult}
+			illustration="images/rewards-collected.png"
+			whereGoBack={t("close")}>
+			<div className="flex-column-align-center">
+				<TxLabel
+					txHash={txHash}
+					title={t("claimed")}
+					logo={MAGMA.logo}
+					amount={amountInTx + " " + MAGMA.symbol} />
+
+				<button
+					className="textButton smallTextButton"
+					style={{ textTransform: "none" }}
+					onClick={handleWatchAsset}>
+					{t("watchMagmaToWallet")}
+				</button>
+			</div>
 		</TxDone>}
 	</>
 };

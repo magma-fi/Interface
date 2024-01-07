@@ -132,5 +132,10 @@
 	"wenStakingRate": "WEN Staking Rate",
 	"liquidatedSuccessfully": "Liquidated Successfully",
 	"back2RiskyVault": "Back to Risky Vaults",
-	"liquidatedAmount": "Liquidated Amount"
+	"liquidatedAmount": "Liquidated Amount",
+	"magmaRewards": "Magma Rewards",
+	"claimRewards": "Claim Rewards",
+	"rewardsClaimedSuccessfully": "Rewards claimed successfully!",
+	"claimed": "Claimed",
+	"watchMagmaToWallet": "Add MAGMA to your wallet"
 }
