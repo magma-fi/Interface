@@ -129,5 +129,8 @@
 	"youReceive": "You Receive",
 	"wenSwappedSuccessfully": "WEN Swapped Successfully",
 	"youReceived": "You Received",
-	"wenStakingRate": "WEN Staking Rate"
+	"wenStakingRate": "WEN Staking Rate",
+	"liquidatedSuccessfully": "Liquidated Successfully",
+	"back2RiskyVault": "Back to Risky Vaults",
+	"liquidatedAmount": "Liquidated Amount"
 }

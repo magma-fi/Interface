@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import React, { useState, useEffect, useMemo } from "react";
 import { UserTrove, Decimal } from "lib-base";
 import { BlockPolledLiquityStoreState } from "lib-ethers";
@@ -12,6 +13,8 @@ import { useLang } from "../hooks/useLang";
 import { IOTX, WEN } from "../libs/globalContants";
 import appConfig from "../appConfig.json";
 import { JsonObject, LiquidatableTrove } from "../libs/types";
+import { TxDone } from "./TxDone";
+import { TxLabel } from "./TxLabel";
 
 type RiskyTrovesProps = {
   pageSize: number;
@@ -75,6 +78,9 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
   const [resetTx, setResetTx] = useState(false);
   const txId = useMemo(() => String(new Date().getTime()), [resetTx]);
   const [transactionState, setTransactionState] = useTransactionState();
+  const [showTxDone, setShowTxDone] = useState(false);
+  const [txAmount, setTxAmount] = useState("");
+  const [txHash, setTxHash] = useState("");
 
   // 交易结束或失败后重置transactionState。
   useEffect(() => {
@@ -85,6 +91,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
 
     if (transactionState.id === txId && (transactionState.type === "confirmed")) {
       setReload(!reload);
+      setShowTxDone(true);
     }
   }, [transactionState.id, transactionState.type, txId])
 
@@ -140,14 +147,16 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
 
     if (!id || !tx) return;
 
-    const txHash = tx?.rawSentTransaction as unknown as string;
+    const hash = tx?.rawSentTransaction as unknown as string;
+
+    setTxHash(hash);
 
     const callMyself = () => setTimeout(() => {
       waitForConfirmation();
     }, 5000);
 
     try {
-      const receipt = await provider.getTransactionReceipt(txHash);
+      const receipt = await provider.getTransactionReceipt(hash);
       if (!receipt) {
         return callMyself();
       }
@@ -167,7 +176,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
       } else {
         const reason = await tryToGetRevertReason(provider, receipt);
 
-        console.error(`Tx ${txHash} failed`);
+        console.error(`Tx ${hash} failed`);
         if (reason) {
           console.error(`Revert reason: ${reason}`);
         }
@@ -187,6 +196,8 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     const owner = evt.currentTarget.id;
     const send = liquity.send.liquidate.bind(liquity.send, owner)
     const id = txId;
+
+    setTxAmount(evt.currentTarget.dataset.amount!);
 
     const hasMessage = (error: unknown): error is { message: string } =>
       typeof error === "object" &&
@@ -224,6 +235,14 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
 
     return sendTransaction();
   };
+
+  const handleCloseTxDone = () => {
+    setShowTxDone(false);
+    setTxHash("");
+    setTxAmount("");
+  };
+
+  console.debug("xxx transactionState.type =", transactionState)
 
   return <>
     {loading && <LoadingOverlay />}
@@ -272,6 +291,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
 
               <div className="tableCell">
                 <button
+                  data-amount={trove.collateral.toString()}
                   id={trove.ownerAddress}
                   className="secondaryButton"
                   onClick={handleLiquidate}
@@ -314,5 +334,17 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
         </>}
       </div>
     </div>}
+
+    {showTxDone && <TxDone
+      title={t("liquidatedSuccessfully")}
+      onClose={handleCloseTxDone}
+      illustration="images/general-success.png"
+      whereGoBack={t("back2RiskyVault")}>
+      <TxLabel
+        txHash={txHash}
+        title={t("liquidatedAmount")}
+        logo={IOTX.logo}
+        amount={txAmount + " " + IOTX.symbol} />
+    </TxDone>}
   </>;
 };
