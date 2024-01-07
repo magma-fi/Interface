@@ -160,7 +160,7 @@ export const PoolView = ({ market, constants }: {
 						<button
 							id={ModalAction.SwapWEN2IOTX}
 							onClick={handleRedeemCollateral}
-							className="secondaryButton">
+							className="secondaryButton fullWidth">
 							<img src="images/swap-orange.png" />
 
 							{t("swapWen2Iotx")}
