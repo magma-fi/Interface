@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useLiquitySelector } from "@liquity/lib-react";
 import { useLang } from "../hooks/useLang";
-import { Coin, JsonObject, TroveChangeTx } from "../libs/types";
+import { Coin, JsonObject, TroveChangeData, TroveChangeTx } from "../libs/types";
 import { useEffect, useMemo, useState } from "react";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
 import { selectForTroveChangeValidation } from "../components/Trove/validation/validateTroveChange";
@@ -9,7 +9,7 @@ import { CRITICAL_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE, MINIMUM_COLLATERAL
 import { IOTX, TroveOptions, WEN, globalContants } from "../libs/globalContants";
 import { IconButton } from "../components/IconButton";
 import { DropdownMenu } from "../components/DropdownMenu";
-import { Cell, Pie, PieChart } from "recharts";
+import { Area, AreaChart, CartesianGrid, Cell, Label, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 import { DepositeModal } from "./DepositModal";
 import { Decimal } from "lib-base";
 import { calculateAvailableWithdrawal } from "../utils";
@@ -148,17 +148,64 @@ export const MarketView = ({
 	const availableWithdrawalFiat = availableWithdrawal.mul(price);
 	const { address } = useAccount();
 	const [txs, setTxs] = useState<TroveChangeTx[]>([]);
+	const [changes, setChanges] = useState<TroveChangeData[]>([]);
+	const [chartBoxWidth, setChartBoxWidth] = useState(700)
 
 	useEffect(() => {
 		if (!address) return;
 
-		const query = graphqlAsker.requestTroveChanges(address)
-		graphqlAsker.ask(chainId, query, (data: any) => {
-			if (data) {
-				setTxs(data.troveChanges);
-			}
-		});
+		setTimeout(() => {
+			const query = graphqlAsker.requestTroveChanges(address)
+			graphqlAsker.ask(chainId, query, (data: any) => {
+				if (data.troveChanges) {
+					setTxs(data.troveChanges);
+				}
+			});
+		}, 1000);
 	}, [address, chainId]);
+
+	useEffect(() => {
+		if (chainId <= 0 || changes.length > 0) return;
+
+		setTimeout(() => {
+			const startTime = Math.floor(Date.now() / 1000) - globalContants.MONTH_SECONDS;
+			const query = graphqlAsker.requestChangeHistory(startTime);
+			graphqlAsker.ask(chainId, query, (data: any) => {
+				const tempArr: TroveChangeData[] = [];
+				let yesterday = "";
+
+				for (let i = data?.troveChanges.length - 1; i >= 0; i--) {
+					const item = data.troveChanges[i];
+					const time = new Date(item.transaction.timestamp * 1000);
+					const month = time.getMonth() + 1;
+					const day = time.getDate();
+					const date = month + "-" + day;
+
+					if (yesterday !== date) {
+						yesterday = date;
+
+						tempArr.push({
+							collateralAfter: Math.floor(Number(item.collateralAfter) / 1000),
+							debtAfter: Math.floor(Number(item.debtAfter) / 1000),
+							timestamp: item.transaction.timestamp,
+							date: yesterday
+						} as TroveChangeData);
+					}
+				}
+
+				setChanges(tempArr.reverse());
+			});
+		}, 2000);
+	}, [chainId]);
+
+	useEffect(() => {
+		if (changes.length > 0) {
+			setTimeout(() => {
+				const dom = document.getElementById("marketView");
+				setChartBoxWidth(dom?.clientWidth || 400);
+			}, 1000);
+		}
+	}, [changes])
 
 	if (market?.symbol === "DAI" || market?.symbol === "USDC") {
 		return <div className="marketView">
@@ -271,7 +318,9 @@ export const MarketView = ({
 	};
 
 	return <>
-		<div className="marketView">
+		<div
+			id="marketView"
+			className="marketView">
 			<div>
 				{trove.status !== "open" && <div className="card">
 					<img className="illustration" src="images/1wen=1usd.png" />
@@ -626,6 +675,71 @@ export const MarketView = ({
 				</div>}
 			</div>
 		</div>
+
+		{changes?.length > 0 && <div
+			className="flex-column-align-left"
+			style={{ gap: "24px" }}>
+			<h3>{t("chart")}</h3>
+
+			<div>
+				<div className="flex-row-align-left">
+					<div style={{
+						color: "#FE8C00",
+						fontSize: "x-large"
+					}}>●</div>
+
+					<div className="label">{t("depositValue")}</div>
+				</div>
+
+				<div className="flex-row-align-left">
+					<div style={{
+						color: "#F25454",
+						fontSize: "x-large"
+					}}>●</div>
+
+					<div className="label">{t("debt")}</div>
+				</div>
+			</div>
+
+			<div>
+				<AreaChart
+					width={chartBoxWidth}
+					height={chartBoxWidth * 2 / 5}
+					data={changes}
+					margin={{
+						top: 0,
+						right: 0,
+						left: 0,
+						bottom: 0
+					}}>
+
+					<defs>
+						<linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="5%" stopColor="#FE8C00" stopOpacity={0.8} />
+							<stop offset="95%" stopColor="#FE8C00" stopOpacity={0.3} />
+						</linearGradient>
+						<linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="5%" stopColor="#F25454" stopOpacity={0.8} />
+							<stop offset="95%" stopColor="#F25454" stopOpacity={0.3} />
+						</linearGradient>
+					</defs>
+
+					<XAxis dataKey="date" />
+
+					<YAxis unit="K" />
+
+					<CartesianGrid
+						strokeDasharray="1"
+						stroke="#ffffff30" />
+
+					{/* <Tooltip /> */}
+
+					<Area type="monotone" dataKey="debtAfter" stroke="#F25454CC" fillOpacity={1} fill="url(#colorPv)" />
+
+					<Area type="monotone" dataKey="collateralAfter" stroke="#FE8C00cc" fillOpacity={1} fill="url(#colorUv)" />
+				</AreaChart>
+			</div>
+		</div>}
 
 		{showDepositModal && <DepositeModal
 			isOpen={showDepositModal}

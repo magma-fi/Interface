@@ -113,4 +113,6 @@ export const globalContants = {
 	TERMS_SHOWED: "termsShowed",
 	IOTX_DECIMALS: Math.pow(10, IOTX.decimals || 18),
 	WEN_DECIMALS: Math.pow(10, WEN.decimals || 18),
+	MONTH_SECONDS: 2592000,
+	WEEK_SECONDS: 604800
 };

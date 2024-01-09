@@ -137,5 +137,7 @@
 	"claimRewards": "Claim Rewards",
 	"rewardsClaimedSuccessfully": "Rewards claimed successfully!",
 	"claimed": "Claimed",
-	"watchMagmaToWallet": "Add MAGMA to your wallet"
+	"watchMagmaToWallet": "Add MAGMA to your wallet",
+	"chart": "chart",
+	"depositValue": "Deposit Value"
 }
