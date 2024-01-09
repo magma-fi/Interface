@@ -48,14 +48,14 @@ export const UnstakeModal = ({
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
 
 	const handleMax = () => {
-		const val = Number(stabilityDeposit.currentLUSD.toString(0));
+		const val = Number(stabilityDeposit.currentLUSD);
 		setValueForced(val);
 		setUnstakeAmount(val);
 		amountUnstaked = val;
 		setErrorMessages(undefined);
 	};
 
-	const handleInputDeposit = (val: number) => {
+	const handleInputUnstake = (val: number) => {
 		setValueForced(-1);
 		setUnstakeAmount(val);
 		amountUnstaked = val;
@@ -111,7 +111,7 @@ export const UnstakeModal = ({
 					price={Decimal.ONE}
 					allowSwap={false}
 					valueForced={valueForced}
-					onInput={handleInputDeposit}
+					onInput={handleInputUnstake}
 					max={Number(accountBalance.toString())}
 					warning={undefined}
 					error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
