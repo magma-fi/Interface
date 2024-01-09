@@ -17,7 +17,7 @@ import { loadABI } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { IOTX, WEN, globalContants } from "../libs/globalContants";
 import { erc20ABI, useAccount } from "wagmi";
-import { parseEther } from "viem";
+import { Address, parseEther } from "viem";
 
 export const CloseModal = ({
 	isOpen = false,
@@ -38,7 +38,7 @@ export const CloseModal = ({
 	balance: Decimal;
 	price: Decimal;
 }) => {
-	const { provider, walletClient, publicClient } = useLiquity();
+	const { provider, walletClient, publicClient, liquity } = useLiquity();
 	const { t } = useLang();
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
@@ -81,7 +81,11 @@ export const CloseModal = ({
 						functionName: 'getAmountsIn',
 						args: [
 							howMuchWEN.toString(),
-							[appConfig.tokens.wrappedNativeCurrency[indexOfConfig].address, appConfig.tokens.wen[indexOfConfig].address]
+							[
+								appConfig.tokens.wrappedNativeCurrency[indexOfConfig].address,
+								// appConfig.tokens.wen[indexOfConfig].address
+								liquity.connection.addresses.lusdToken
+							]
 						]
 					}) as bigint[];
 				} catch (error) {
@@ -151,7 +155,8 @@ export const CloseModal = ({
 
 		const txHash = await walletClient!.writeContract({
 			account: account.address,
-			address: appConfig.tokens.wen[indexOfConfig].address,
+			// address: appConfig.tokens.wen[indexOfConfig].address,
+			address: liquity.connection.addresses.lusdToken as Address,
 			abi: erc20ABI,
 			functionName: 'approve',
 			args: [
