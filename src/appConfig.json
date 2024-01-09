@@ -29,7 +29,7 @@
 				"abi": "/abis/MimoV2Router02NoReferral.json"
 			},
 			"swapAndCloseTool": {
-				"address": "0xd716d7bf2ddc68fecb3d6d6f825b351858439d87",
+				"address": "0xc43b689790011c73b2d851ee38e62b23d83479e9",
 				"abi": [
 					{
 						"inputs": [
