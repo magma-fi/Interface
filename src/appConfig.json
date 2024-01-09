@@ -4,7 +4,7 @@
 			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet"
 		},
 		"4689": {
-			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-v2"
+			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex"
 		}
 	},
 	"rpc": {
