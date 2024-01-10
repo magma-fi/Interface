@@ -139,5 +139,18 @@
 	"claimed": "Claimed",
 	"watchMagmaToWallet": "Add MAGMA to your wallet",
 	"chart": "chart",
-	"depositValue": "Deposit Value"
+	"depositValue": "Deposit Value",
+	"referral": "Referral",
+	"becomeAmbassador": "Become Magma's ambassador",
+	"referralHeaderDescription": "Invite your friends and get Magma Points when they stake WEN. The more points the more MGM you'll receive in the airdrop",
+	"registerYourAddress": "Register your address to generate the referral link",
+	"registerAddress": "Register Address",
+	"registering": "Registering",
+	"mustHaveNoDeposit": "User must have no deposit",
+	"totalRewardsReceived": "Total Rewards Received",
+	"magmaPoints": "Magma Points",
+	"referralURL": "Referral URL",
+	"copyURL": "Copy URL",
+	"copiedSuccessfully": "Copied Successfully",
+	"audit": "Audit"
 }

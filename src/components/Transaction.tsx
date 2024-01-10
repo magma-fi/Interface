@@ -23,7 +23,7 @@ type TransactionIdle = {
 type TransactionFailed = {
   type: "failed";
   id: string;
-  error: Error;
+  error: any;
 };
 
 type TransactionWaitingForApproval = {
@@ -34,7 +34,7 @@ type TransactionWaitingForApproval = {
 type TransactionCancelled = {
   type: "cancelled";
   id: string;
-  error: Error;
+  error: any;
 };
 
 type TransactionWaitingForConfirmations = {
@@ -269,12 +269,11 @@ export const useTransactionFunction = (
           error: new Error(cancelMessage)
         });
       } else {
-        console.error(error);
-
         setTransactionState({
           type: "failed",
           id,
-          error: new Error("Failed to send transaction (try again)")
+          error
+          //: new Error("Failed to send transaction (try again)")
         });
       }
     }
