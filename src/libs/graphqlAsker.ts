@@ -50,6 +50,25 @@ export const graphqlAsker = {
 		`;
 	},
 
+	requestChangeHistory: function (startTimestamp: number) {
+		return `
+		{
+			troveChanges(
+				first: 300
+				where: {transaction_: {timestamp_gt: ${startTimestamp}}}
+				orderBy: transaction__timestamp
+				orderDirection: asc
+			){
+				collateralAfter
+				debtAfter
+				transaction {
+					timestamp
+				}
+			}
+		}
+		`;
+	},
+
 	_getGraph: function (chainId: number) {
 		return appConfig.subgraph[String(chainId)]?.graphql;
 	}

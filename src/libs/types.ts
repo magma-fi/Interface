@@ -65,6 +65,13 @@ export type TroveChangeTx = {
 	transaction: TxForSubgraph;
 }
 
+export type TroveChangeData = {
+	collateralAfter: number;
+	debtAfter: number;
+	timestamp: number;
+	date: string;
+}
+
 export type LiquidatableTrove = UserTrove & { liquidatable: boolean; }
 
 export type JsonObject = { [key: string]: any };
