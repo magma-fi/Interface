@@ -44,6 +44,7 @@ export const SwapWEN2IOTXModal = ({
 	const receive = Decimal.ONE.div(redeemRate).mul(swapAmount);
 	const [sending, setSending] = useState(false);
 	const [iotxAsUnit, setIOTXAsUnit] = useState(true);
+	const [useMax, setUseMax] = useState(false);
 
 	const [hintHelpersDefault, hintHelpersDefaultStatus] = useContract<HintHelpers>(
 		liquity.connection.addresses.hintHelpers,
@@ -64,11 +65,13 @@ export const SwapWEN2IOTXModal = ({
 		const val = maxNumber;
 		setValueForced(val);
 		setSwapAmount(val);
+		setUseMax(true);
 	};
 
 	const handleInputSwap = (val: number) => {
 		setValueForced(-1);
 		setSwapAmount(val);
+		setUseMax(false);
 	};
 
 	const handleCloseModal = () => {
@@ -108,7 +111,7 @@ export const SwapWEN2IOTXModal = ({
 	const handleSwap = async () => {
 		setSending(true);
 
-		const wenAmount = Decimal.from(swapAmount).mul(globalContants.WEN_DECIMALS).toString();
+		const wenAmount = Decimal.from(useMax ? max : swapAmount).mul(globalContants.WEN_DECIMALS).toString();
 		const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault!.getRedemptionHints(wenAmount, price.mul(globalContants.IOTX_DECIMALS).toString(), 0);
 		const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault!.findInsertPosition(
 			partialRedemptionHintNICR,
@@ -172,7 +175,7 @@ export const SwapWEN2IOTXModal = ({
 					<button
 						className="textButton smallTextButton"
 						onClick={handleMax}>
-						{t("max")}:&nbsp;{max.toString(2)}&nbsp;{WEN.symbol}
+						{t("debtBalance")}:&nbsp;{max.toString(2)}&nbsp;{WEN.symbol}
 					</button>
 				</div>
 

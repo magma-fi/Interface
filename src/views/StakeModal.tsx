@@ -20,7 +20,7 @@ let amountStaked = 0;
 export const StakeModal = ({
 	isOpen = false,
 	onClose = () => { },
-	accountBalance = Decimal.ZERO,
+	wenBalance = Decimal.ZERO,
 	onDone = () => { },
 	stabilityDeposit,
 	validationContext,
@@ -28,7 +28,7 @@ export const StakeModal = ({
 }: {
 	isOpen: boolean;
 	onClose: () => void;
-	accountBalance: Decimal;
+	wenBalance: Decimal;
 	onDone: (tx: string, depositAmount: number) => void;
 	stabilityDeposit: StabilityDeposit;
 	validationContext: ValidationContextForStabilityPool;
@@ -39,20 +39,22 @@ export const StakeModal = ({
 	const [depositAmount, setDepositAmount] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
+	const [useMax, setUseMax] = useState(false);
 
 	const [validChange, description] = validateStabilityDepositChange(
 		stabilityDeposit,
-		stabilityDeposit.currentLUSD.add(depositAmount),
+		useMax ? wenBalance : stabilityDeposit.currentLUSD.add(depositAmount),
 		validationContext
 	);
 
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
 
 	const handleMax = () => {
-		const val = Number(accountBalance);
+		const val = Number(wenBalance);
 		setValueForced(val);
 		setDepositAmount(val);
 		setErrorMessages(undefined);
+		setUseMax(true);
 
 		amountStaked = val;
 	};
@@ -61,6 +63,7 @@ export const StakeModal = ({
 		setValueForced(-1);
 		setDepositAmount(val);
 		setErrorMessages(undefined);
+		setUseMax(false);
 
 		amountStaked = val;
 	};
@@ -106,7 +109,7 @@ export const StakeModal = ({
 					<button
 						className="textButton smallTextButton"
 						onClick={handleMax}>
-						{t("max")}:&nbsp;{accountBalance.toString(2)}&nbsp;{WEN.symbol}
+						{t("max")}:&nbsp;{wenBalance.toString(2)}&nbsp;{WEN.symbol}
 					</button>
 				</div>
 
@@ -116,7 +119,7 @@ export const StakeModal = ({
 					allowSwap={false}
 					valueForced={valueForced}
 					onInput={handleInputDeposit}
-					max={Number(accountBalance.toString())}
+					max={Number(wenBalance.toString())}
 					warning={undefined}
 					error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
 					allowReduce={true}
@@ -139,8 +142,8 @@ export const StakeModal = ({
 					<div className="label">{t("walletBalance")}</div>
 
 					<ChangedValueLabel
-						previousValue={accountBalance.toString(2)}
-						newValue={(accountBalance.gt(depositAmount) ? accountBalance.sub(depositAmount) : Decimal.ZERO).toString(2) + " " + WEN.symbol} />
+						previousValue={wenBalance.toString(2)}
+						newValue={(wenBalance.gt(depositAmount) ? wenBalance.sub(depositAmount) : Decimal.ZERO).toString(2) + " " + WEN.symbol} />
 				</div>
 
 				<div className="flex-row-space-between">

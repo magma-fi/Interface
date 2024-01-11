@@ -78,6 +78,7 @@ export const DepositeModal = ({
 	const isDirty = !previousTrove.current.collateral.eq(desireCollateral) || !previousNetDebt.eq(desireNetDebt);
 	const isDebtIncrease = desireNetDebt.gt(troveNetDebt);
 	const debtIncreaseAmount = isDebtIncrease ? desireNetDebt.sub(troveNetDebt) : Decimal.ZERO;
+	const [useMaxBalance, setUseMaxBalance] = useState(false);
 	const fee = !depositAndBorrow
 		? (
 			isDebtIncrease
@@ -117,15 +118,17 @@ export const DepositeModal = ({
 		setNewAvailableBorrow(availableBorrow);
 		setDefaultBorrowAmount(-1);
 		setErrorMessages(undefined);
+		setUseMaxBalance(false);
 	};
 
 	useEffect(init, []);
 
 	const handleMax = () => {
-		const val = Number(accountBalance.toString(0));
+		const val = Number(accountBalance);
 		setValueForced(val);
 		setDepositValue(val);
 		setErrorMessages(undefined);
+		setUseMaxBalance(true);
 	};
 
 	const handleExpandBorrow = () => {
@@ -174,7 +177,7 @@ export const DepositeModal = ({
 	}
 
 	const handleMaxBorrow = () => {
-		const val = Number(newAvailableBorrow?.sub(previousNetDebt).toString());
+		const val = Number(newAvailableBorrow?.sub(previousNetDebt));
 		setDefaultBorrowAmount(val);
 		setBorrowValue(val);
 	};
@@ -242,7 +245,7 @@ export const DepositeModal = ({
 		if (!trove) return;
 
 		if (depositValue >= 0) {
-			const newCollateral = previousTrove.current?.collateral.add(depositValue);
+			const newCollateral = previousTrove.current?.collateral.add(useMaxBalance ? accountBalance : depositValue);
 			const unsavedChanges = Difference.between(newCollateral, previousTrove.current?.collateral);
 			const nextCollateral = applyUnsavedCollateralChanges(unsavedChanges, trove);
 			setDesireCollateral(nextCollateral);
@@ -271,6 +274,7 @@ export const DepositeModal = ({
 		setValueForced(-1);
 		setDepositValue(val);
 		setErrorMessages(undefined);
+		setUseMaxBalance(false);
 	};
 
 	const handleCloseModal = () => {

@@ -116,7 +116,7 @@
 	"watchWenToWallet": "Add WEN to your wallet",
 	"knowSlippage": "I am aware that there might be losses and slippage during the exchange",
 	"rewardsFromCollateral": "Rewards from Collateral",
-	"rewardsDescription": "These are credited automatically in you deposits",
+	"rewardsDescription": "Credited to your wallet automatically",
 	"swapioUSD2IOTX": "Instantly swap ioUSD to IOTX.",
 	"note": "Note",
 	"differentWithRepaying": "This is different that repaying your debt.",
@@ -152,5 +152,6 @@
 	"referralURL": "Referral URL",
 	"copyURL": "Copy URL",
 	"copiedSuccessfully": "Copied Successfully",
-	"audit": "Audit"
+	"audit": "Audit",
+	"debtBalance": "Debt Balance"
 }
