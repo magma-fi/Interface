@@ -242,8 +242,6 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     setTxAmount("");
   };
 
-  console.debug("xxx transactionState.type =", transactionState)
-
   return <>
     {loading && <LoadingOverlay />}
 
