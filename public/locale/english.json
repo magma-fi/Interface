@@ -139,5 +139,6 @@
 	"claimed": "Claimed",
 	"watchMagmaToWallet": "Add MAGMA to your wallet",
 	"chart": "chart",
-	"depositValue": "Deposit Value"
+	"depositValue": "Deposit Value",
+	"debtBalance": "Debt Balance"
 }

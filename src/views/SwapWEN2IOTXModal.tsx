@@ -175,7 +175,7 @@ export const SwapWEN2IOTXModal = ({
 					<button
 						className="textButton smallTextButton"
 						onClick={handleMax}>
-						{t("max")}:&nbsp;{max.toString(2)}&nbsp;{WEN.symbol}
+						{t("debtBalance")}:&nbsp;{max.toString(2)}&nbsp;{WEN.symbol}
 					</button>
 				</div>
 

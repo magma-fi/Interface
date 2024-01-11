@@ -92,6 +92,7 @@ export const RepayModal = ({
 
 	const utilRate = Decimal.ONE.div(updatedTrove.collateralRatio(price));
 	const [sliderForcedValue, setSliderForcedValue] = useState(troveUtilizationRateNumber);
+	const [useMax, setUseMax] = useState(false);
 
 	useEffect(() => {
 		setSliderForcedValue(Number(utilRate));
@@ -102,6 +103,7 @@ export const RepayModal = ({
 		setRepayAmount(-1);
 		setDesireNetDebt(max);
 		setErrorMessages(undefined);
+		setUseMax(false);
 	};
 
 	const handleMax = () => {
@@ -110,6 +112,7 @@ export const RepayModal = ({
 		setRepayAmount(val);
 		repaidAmount = val;
 		setErrorMessages(undefined);
+		setUseMax(true);
 	};
 
 	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
@@ -131,7 +134,7 @@ export const RepayModal = ({
 		if (!trove) return;
 
 		if (repayAmount >= 0 && netDebt.gte(repayAmount)) {
-			const newNetDebt = netDebt.sub(repayAmount);
+			const newNetDebt = netDebt.sub(useMax ? max : repayAmount);
 			const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
 			const unsavedChanges = Difference.between(newNetDebt, previousNetDebt);
 			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
@@ -147,6 +150,7 @@ export const RepayModal = ({
 		repaidAmount = newDebt;
 		setValueForced(newDebt);
 		setErrorMessages(undefined);
+		setUseMax(false);
 	};
 
 	const handleInputRepay = (val: number) => {
@@ -154,6 +158,7 @@ export const RepayModal = ({
 		setRepayAmount(val);
 		repaidAmount = val;
 		setErrorMessages(undefined);
+		setUseMax(false);
 	};
 
 	const handleCloseModal = () => {

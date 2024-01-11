@@ -39,10 +39,11 @@ export const UnstakeModal = ({
 	const [unstakeAmount, setUnstakeAmount] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
+	const [useMax, setUseMax] = useState(false);
 
 	const [validChange, description] = validateStabilityDepositChange(
 		stabilityDeposit,
-		stabilityDeposit.currentLUSD.gt(unstakeAmount) ? stabilityDeposit.currentLUSD.sub(unstakeAmount) : Decimal.ZERO,
+		(stabilityDeposit.currentLUSD.lte(unstakeAmount) || useMax) ? Decimal.ZERO : stabilityDeposit.currentLUSD.sub(unstakeAmount),
 		validationContext
 	);
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
@@ -53,6 +54,7 @@ export const UnstakeModal = ({
 		setUnstakeAmount(val);
 		amountUnstaked = val;
 		setErrorMessages(undefined);
+		setUseMax(true);
 	};
 
 	const handleInputUnstake = (val: number) => {
@@ -60,6 +62,7 @@ export const UnstakeModal = ({
 		setUnstakeAmount(val);
 		amountUnstaked = val;
 		setErrorMessages(undefined);
+		setUseMax(false);
 	};
 
 	const handleCloseModal = () => {
