@@ -116,6 +116,6 @@ export const globalContants = {
 	WEN_DECIMALS: Math.pow(10, WEN.decimals || 18),
 	MONTH_SECONDS: 2592000,
 	WEEK_SECONDS: 604800,
-	HOST: "https://magma.finance/?ref=",
+	HOST: "app.magma.finance/?ref=",
 	REF_KEY: "ref@"
 };

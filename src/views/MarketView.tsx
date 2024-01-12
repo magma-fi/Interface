@@ -544,7 +544,7 @@ export const MarketView = ({
 							<button
 								className="secondaryButton"
 								onClick={handleRepay}
-								disabled={maxAvailableRepay.lt(0.01)}>
+								disabled={maxAvailableRepay.lt(0.01) || lusdBalance.lt(maxAvailableRepay)}>
 								<img src="images/repay.png" />
 
 								{t("repay") + " " + WEN.symbol}

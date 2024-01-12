@@ -168,7 +168,6 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 						</Route>
 
 						<Route path="/">
-							{/* <PageSwitcher /> */}
 							<BorrowView
 								isReferer={isReferer}
 								constants={constants} />
