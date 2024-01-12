@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ConnectWalletModal } from "./ConnectWalletModal";
 import { SideBar } from "../components/SideBar";
 import { UserAccount } from "../components/UserAccount";
-import { Route, BrowserRouter, Switch } from "react-router-dom";
+import { Route, BrowserRouter, Switch, useParams } from "react-router-dom";
 import { BorrowView } from "./BorrowView";
 import { StakeView } from "./StakeView";
 import { Chain, useAccount, useNetwork } from "wagmi";
@@ -16,6 +16,20 @@ import LUSDTokenAbi from "lib-ethers/abi/LUSDToken.json";
 import { Decimal } from "lib-base";
 import { WEN, globalContants } from "../libs/globalContants";
 import { TermsModal } from "./TermsModal";
+import { ReferralView } from "./ReferralView";
+import { Footer } from "./Footer";
+import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
+import { useLiquitySelector } from "@liquity/lib-react";
+import { zeroAddress } from "viem";
+import { graphqlAsker } from "../libs/graphqlAsker";
+
+const select = ({
+	trove,
+	// stabilityDeposit
+}: LiquityStoreState) => ({
+	trove,
+	// stabilityDeposit
+});
 
 export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const { isConnected } = useAccount();
@@ -23,9 +37,15 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const [showTerms, setShowTerms] = useState(false);
 	const { chain } = useNetwork();
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
-	const { liquity, chainId } = useLiquity();
+	const { account, liquity, chainId, config } = useLiquity();
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});
 	const dec = Math.pow(10, WEN.decimals || 18);
+
+	const { trove } = useLiquitySelector(select);
+
+	const [isReferer, setIsReferer] = useState(false);
+	const [referralCode, setReferralCode] = useState("");
+	const haveDeposited = trove?.collateral?.gt(0);
 
 	const [wenTokenDefault, wenTokenStatus] = useContract<LUSDToken>(
 		liquity.connection.addresses.lusdToken,
@@ -47,6 +67,22 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			setShowTerms(true);
 		}
 	}, []);
+
+	useEffect(() => {
+		if (!account || chainId === 0) return;
+
+		setTimeout(() => {
+			const query = graphqlAsker.requestReferer(account)
+			graphqlAsker.ask(chainId, query, (data: any) => {
+				if (data?.frontends?.length > 0) {
+					setIsReferer(true);
+
+					const ref = data?.frontends[0];
+					setReferralCode(ref.code);
+				}
+			});
+		}, 1000);
+	}, [account, chainId]);
 
 	useEffect(() => {
 		if (!isConnected) {
@@ -112,7 +148,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 					display: "flex",
 					flexGrow: 1,
 					flexDirection: "column",
-					alignItems: "center"
+					alignItems: "center",
+					position: "relative"
 				}}>
 					<Switch>
 						<Route path="/stake">
@@ -123,9 +160,17 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 							<LiquidationsView constants={constants} />
 						</Route>
 
+						<Route path="/referral">
+							<ReferralView
+								haveDeposited={haveDeposited}
+								isReferer={isReferer}
+								referralCode={referralCode} />
+						</Route>
+
 						<Route path="/">
-							{/* <PageSwitcher /> */}
-							<BorrowView constants={constants} />
+							<BorrowView
+								isReferer={isReferer}
+								constants={constants} />
 						</Route>
 
 						{/* <Route path="/bonds">
@@ -135,6 +180,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 							<RiskyTrovesPage />
 						</Route> */}
 					</Switch>
+
+					<Footer />
 				</div>
 
 				<SideBar>

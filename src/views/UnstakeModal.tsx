@@ -72,7 +72,7 @@ export const UnstakeModal = ({
 
 	useEffect(() => {
 		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
-			setErrorMessages({ string: transactionState.error.message || JSON.stringify(transactionState.error).substring(0, 100) } as ErrorMessage);
+			setErrorMessages({ string: transactionState.error.reason || JSON.stringify(transactionState.error.message || transactionState.error).substring(0, 100) } as ErrorMessage);
 		}
 
 		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {

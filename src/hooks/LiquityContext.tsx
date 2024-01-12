@@ -15,6 +15,8 @@ import { BatchedProvider } from "../providers/BatchingProvider";
 import { useEthersProvider } from "../libs/ethers";
 import { VoidSigner, ethers } from "ethers";
 import { globalContants } from "../libs/globalContants";
+import { graphqlAsker } from "../libs/graphqlAsker";
+import { zeroAddress } from "viem";
 
 type LiquityContextValue = {
   config: LiquityFrontendConfig;
@@ -24,6 +26,7 @@ type LiquityContextValue = {
   walletClient?: WalletClient;
   chainId: number;
   publicClient?: PublicClient;
+  urlSearch?: string
 };
 
 const LiquityContext = createContext<LiquityContextValue | undefined>(undefined);
@@ -59,22 +62,40 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
 
   const [config, setConfig] = useState<LiquityFrontendConfig>({} as LiquityFrontendConfig);
 
+  const [frontendTag, setFrontendTag] = useState(zeroAddress);
+  const url = new URL(window.location.href);
+  const urlSearch = url.search || "";
+  const refParam = url.searchParams.get("ref");
+  useEffect(() => {
+    if (!config || !refParam || chainId === 0) return;
+
+    const query = graphqlAsker.requestRefererWithCode(refParam)
+    graphqlAsker.ask(chainId, query, (data: any) => {
+      if (data?.frontends?.length > 0) {
+
+        const ref = data?.frontends[0].owner.id;
+        setFrontendTag(ref);
+        config.frontendTag = ref;
+      }
+    });
+  }, [refParam, chainId, config]);
+
   const connection = useMemo(() => {
-    if (config && provider && signerData && addr) {
+    if (config && provider && signerData && addr && frontendTag) {
       const batchedProvider = new BatchedProvider(provider, chainId);
       // batchedProvider._debugLog = true;
 
       try {
         return _connectByChainId(batchedProvider, signerData, chainId, {
           userAddress: addr,
-          frontendTag: config.frontendTag,
+          frontendTag: frontendTag,
           useStore: "blockPolled"
         });
       } catch (err) {
         console.error(err);
       }
     }
-  }, [config, provider, signerData, addr, chainId]);
+  }, [config, provider, signerData, addr, frontendTag, chainId]);
 
   useEffect(() => {
     getConfig().then(setConfig);
@@ -100,7 +121,8 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
         liquity,
         chainId,
         walletClient: connection.signer as unknown as WalletClient,
-        publicClient
+        publicClient,
+        urlSearch
       }}>
       {children}
     </LiquityContext.Provider>

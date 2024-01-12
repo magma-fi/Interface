@@ -157,6 +157,18 @@ h4 {
   // gap: var(--flex-gap-larger);
 }
 
+.footer {
+  position: absolute;
+  bottom: -5rem;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  gap: var(--flex-gap-middle);
+}
+
 .flex-column {
   display: flex;
   flex-direction: column;
@@ -217,6 +229,14 @@ h4 {
   margin: var(--flex-gap-middle) 0;
 }
 
+.verticalDivision {
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-left: 2px solid var(--surface-card-stroke);
+  height: 100%;
+}
+
 .navLink {
   display: flex;
   flex-direction: row;
@@ -230,6 +250,13 @@ h4 {
   opacity: 0.7;
   text-transform: capitalize;
   width: fit-content;
+
+  .icon {
+    width: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
   img {
     height: 16px;
@@ -565,25 +592,35 @@ h4 {
   grid-template-columns: auto auto;
   gap: var(--flex-gap-larger);
   width: 100%;
+}
 
-  .card {
-    flex: 1 1;
-    width: calc(100% - var(--flex-gap-middle) * 2);
-    display: flex;
-    padding: var(--flex-gap-big);
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--flex-gap-middle);
-    align-self: stretch;
-    border-radius: 12px;
-    border: 1px solid var(--surface-card-stroke);
-    background: var(--surface-card);
-    max-width: 400px;
+.card {
+  flex: 1 1;
+  width: calc(100% - var(--flex-gap-middle) * 2);
+  display: flex;
+  padding: var(--flex-gap-big);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--flex-gap-middle);
+  align-self: stretch;
+  border-radius: 12px;
+  border: 1px solid var(--surface-card-stroke);
+  background: var(--surface-card);
+  max-width: 400px;
 
-    .illustration {
-      width: 247px;
-    }
+  .illustration {
+    width: 247px;
   }
+}
+
+.bigBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  max-width: none;
+  gap: var(--flex-gap-big);
+  align-self: auto;
 }
 
 .badge {
@@ -1165,11 +1202,11 @@ input {
     display: flex;
     flex-direction: column-reverse;
     grid-template-columns: none;
+  }
 
-    .card {
-      width: calc(100% - var(--flex-gap-small) * 2);
-      padding: var(--flex-gap-small);
-    }
+  .card {
+    width: calc(100% - var(--flex-gap-small) * 2);
+    padding: var(--flex-gap-small);
   }
 
   .modalOverlay {
@@ -1230,5 +1267,11 @@ input {
     .txValues {
       font-size: smaller;
     }
+  }
+
+  .footer {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 }

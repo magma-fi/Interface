@@ -23,7 +23,9 @@ export function NavLink({
 		className={"navLink" + (active ? " active" : "") + (fullWidth ? " navLink-fullWidth" : "")}
 		to={url}
 		target={target}>
-		{icon && <img src={icon} />}
+		{icon && <div className="icon">
+			<img src={icon} />
+		</div>}
 
 		{label}
 

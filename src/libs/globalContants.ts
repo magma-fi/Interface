@@ -43,7 +43,8 @@ export const WEN: Coin = {
 
 export const IOTX: Coin = {
 	symbol: "IOTX",
-	logo: "images/iotx.png"
+	logo: "images/iotx.png",
+	decimals: 18
 }
 
 export const DAI: Coin = {
@@ -114,5 +115,7 @@ export const globalContants = {
 	IOTX_DECIMALS: Math.pow(10, IOTX.decimals || 18),
 	WEN_DECIMALS: Math.pow(10, WEN.decimals || 18),
 	MONTH_SECONDS: 2592000,
-	WEEK_SECONDS: 604800
+	WEEK_SECONDS: 604800,
+	HOST: "app.magma.finance/?ref=",
+	REF_KEY: "ref@"
 };
