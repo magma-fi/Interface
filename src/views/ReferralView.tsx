@@ -132,12 +132,7 @@ export const ReferralView = ({
 			</div>}
 
 			{isReferer && <div
-				className="card bigBox"
-				style={{
-					flexDirection: "row",
-					justifyContent: "flex-start",
-					padding: "1rem"
-				}}>
+				className="card bigBox referralBox">
 				<div className="flex-column-align-left">
 					<div className="label smallLabel">{t("totalRewardsReceived")}</div>
 
@@ -160,14 +155,7 @@ export const ReferralView = ({
 					}}>
 					<div className="label">{t("referralURL")}</div>
 
-					<div
-						className="card bigBox"
-						style={{
-							flexDirection: "row",
-							padding: "1rem",
-							width: "calc(100% - 3rem)",
-							justifyContent: "space-between"
-						}}>
+					<div className="card bigBox urlLabel">
 						<div className="flex-row-align-left">
 							<img
 								src="images/link.png"

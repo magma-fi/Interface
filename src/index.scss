@@ -623,6 +623,19 @@ h4 {
   align-self: auto;
 }
 
+.referralBox {
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 1rem;
+}
+
+.urlLabel {
+  flex-direction: row;
+  padding: 1rem;
+  width: calc(100% - 3rem);
+  justify-content: space-between;
+}
+
 .badge {
   padding: var(--flex-gap-tiny) var(--flex-gap-small);
   border-radius: 50px;
@@ -1273,5 +1286,21 @@ input {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+  }
+
+  .referralBox {
+    flex-direction: column;
+
+    .flex-column-align-left {
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
+  .urlLabel {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
   }
 }
