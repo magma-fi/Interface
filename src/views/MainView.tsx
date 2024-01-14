@@ -151,6 +151,20 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 					alignItems: "center",
 					position: "relative"
 				}}>
+					<div style={{
+						width: "100%",
+						display: "flex",
+						flexDirection: "row",
+						justifyContent: "flex-end",
+						alignItems: "center"
+					}}>
+						<UserAccount
+							onConnect={handleConnectWallet}
+							isSupportedNetwork={isSupportedNetwork}
+							chains={chains}
+							chainId={chainId} />
+					</div>
+
 					<Switch>
 						<Route path="/stake">
 							<StakeView constants={constants} />
@@ -184,14 +198,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 					<Footer />
 				</div>
 
-				<SideBar>
-					<UserAccount
-						onConnect={handleConnectWallet}
-						isSupportedNetwork={isSupportedNetwork}
-						chains={chains}
-						chainId={chainId} />
-					{/* <SystemStatsPopup /> */}
-				</SideBar>
+				<SideBar />
 			</BrowserRouter>
 		</div>
 

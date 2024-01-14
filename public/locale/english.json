@@ -153,5 +153,7 @@
 	"copyURL": "Copy URL",
 	"copiedSuccessfully": "Copied Successfully",
 	"audit": "Audit",
-	"debtBalance": "Debt Balance"
+	"debtBalance": "Debt Balance",
+	"network": "Network",
+	"wallet": "Wallet"
 }

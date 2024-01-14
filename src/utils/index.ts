@@ -2,7 +2,7 @@ import { JsonFragment } from "@ethersproject/abi";
 import { Trove, Decimal, CRITICAL_COLLATERAL_RATIO } from "lib-base";
 import { Abi, Narrow } from "viem";
 
-export const shortenAddress = (address: string) => address.substr(0, 6) + "..." + address.substr(-4);
+export const shortenAddress = (address: string, b = 6, e = 4) => address.substr(0, b) + "..." + address.substr(-e);
 
 export const calculateAvailableWithdrawal = (forTrove: Trove, price: Decimal, collateralRatio: Decimal = CRITICAL_COLLATERAL_RATIO) => {
 	const collateralValue = forTrove.collateral.mul(price);

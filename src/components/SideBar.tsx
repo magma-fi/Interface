@@ -3,26 +3,13 @@ import { NavLink } from "./NavLink";
 import { useLang } from "../hooks/useLang";
 import { WEN } from "../libs/globalContants";
 import { useLocation } from "react-router-dom";
-import { LangSelect } from "./LangSelect";
-import { StyleModeSelect } from "./StyleModeSelect";
 import { useLiquity } from "../hooks/LiquityContext";
-
-// const logoHeight = "32px";
-
-// const select = ({ frontend }: LiquityStoreState) => ({
-//   frontend
-// });
 
 export const SideBar: React.FC = ({ children }) => {
   const { urlSearch } = useLiquity();
   const { t } = useLang();
   const { pathname } = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(window.innerWidth > 575.98);
-  // const {
-  //   config: { frontendTag }
-  // } = useLiquity();
-  // const { frontend } = useLiquitySelector(select);
-  // const isFrontendRegistered = frontendTag === AddressZero || frontend.status === "registered";
 
   const handleShowMenuForMobile = () => {
     setShowMobileMenu(!showMobileMenu);
@@ -119,10 +106,6 @@ export const SideBar: React.FC = ({ children }) => {
 
           {/* <LangSelect /> */}
         </div>
-
-        <hr className="division" />
-
-        {children}
       </div>}
     </div>
   );

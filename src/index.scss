@@ -355,6 +355,39 @@ h4 {
   }
 }
 
+.topBar {
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  .logoOnTopBar {
+    display: none;
+  }
+}
+
+.selectionTrigger {
+  display: flex;
+  flex-direction: row;
+  width: fit-content;
+  justify-content: flex-start;
+  align-items: center;
+  gap: var(--flex-gap-small);
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--button-secondary-stroke);
+  background: var(--button-secondary-fill);
+  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.05), 0px 10px 10px -3px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+
+  img {
+    width: 20px;
+  }
+}
+
 .textButton {
   display: inline-flex;
   justify-content: center;
@@ -713,6 +746,13 @@ h4 {
 .fat {
   font-family: Metropolis700;
   color: var(--color);
+}
+
+.chainNameLabel {
+  text-overflow: ellipsis;
+  max-width: 6rem;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .chartContainer {
@@ -1302,5 +1342,18 @@ input {
     gap: 1rem;
     padding: 1rem;
     margin-bottom: 1rem;
+  }
+
+  .topBar {
+    padding-left: 1rem;
+    padding-right: 1rem;
+
+    .logoOnTopBar {
+      display: block;
+    }
+  }
+
+  .chainNameLabel{
+    max-width: 4rem;
   }
 }

@@ -1,16 +1,12 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { shortenAddress } from "../utils";
 import { useLang } from "../hooks/useLang";
-import { Chain, useAccount, useDisconnect, useSwitchNetwork } from "wagmi";
+import { Address, Chain, useAccount, useDisconnect, useSwitchNetwork } from "wagmi";
 import { DropdownMenu } from "./DropdownMenu";
 import { useMemo } from "react";
 import { OptionItem } from "../libs/types";
-
-// const select = ({ accountBalance, lusdBalance, lqtyBalance }: LiquityStoreState) => ({
-//   accountBalance,
-//   lusdBalance,
-//   lqtyBalance
-// });
+import { PopupView } from "./PopupView";
+import { useLiquity } from "../hooks/LiquityContext";
 
 export const UserAccount = ({
   onConnect = () => { },
@@ -23,16 +19,12 @@ export const UserAccount = ({
   chainId: number;
   chains: Chain[]
 }) => {
+  const { publicClient } = useLiquity();
   const { t } = useLang();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, connector } = useAccount();
   const { disconnect } = useDisconnect();
   const { switchNetwork } = useSwitchNetwork();
-  // const { connect, connectors } = useConnect();
-  // const { account } = useLiquity();
-  // const { accountBalance, lusdBalance: realLusdBalance, lqtyBalance } = useLiquitySelector(select);
-  // const { bLusdBalance, lusdBalance: customLusdBalance } = useBondView();
-  // const { LUSD_OVERRIDE_ADDRESS } = useBondAddresses();
-  // const lusdBalance = LUSD_OVERRIDE_ADDRESS === null ? realLusdBalance : customLusdBalance;
+  const chain = chains?.find(item => item.id === chainId);
 
   const chainOptions = useMemo(() => {
     return chains.map((item: Chain) => {
@@ -52,75 +44,105 @@ export const UserAccount = ({
     switchNetwork && switchNetwork((chains[idx] as Chain).id);
   };
 
-  return (
-    <div style={{ marginLeft: "16px" }}>
-      {/* <ConnectKitButton.Custom>
-        {connectKit => (
-          <Button
-            variant="outline"
-            sx={{ alignItems: "center", p: 2, mr: 3 }}
-            onClick={connectKit.show}
-          >
-            <Icon name="user-circle" size="lg" />
-            <Text as="span" sx={{ ml: 2, fontSize: 1 }}>
-              {shortenAddress(account)}
-            </Text>
-          </Button>
-        )}
-      </ConnectKitButton.Custom> */}
+  const entryView = isConnected ? <div className="flex-row-align-left">
+    <img
+      src={"images/" + connector?.name + ".png"}
+      width="21px"
+      height="18px" />
 
-      {!isConnected && <button
-        className="primaryButton"
-        onClick={handleConnectWallet}>
-        {t("connectWallet")}
-      </button>}
+    <div
+      className="flex-column-align-left"
+      style={{ gap: "4px" }}>
+      <div className="label">{t("wallet")}</div>
 
-      {address && <div style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
-        justifyContent: "flex-start",
-        alignItems: "flex-start"
+      <div className="label bigLabel fat">{shortenAddress(address as Address, 5, 2)}</div>
+    </div>
+  </div> : <></>
+
+  const popupView = <div
+    className="flex-column-align-center"
+    style={{ gap: "1rem" }}>
+    <a
+      className="textButton smallTextButton"
+      style={{ color: "#FF7F1E" }}
+      href={publicClient?.chain?.blockExplorers?.default.url + "/address/" + address}
+      target="_blank">
+      {t("viewInExplorer")}
+
+      <img src="images/external-orange.png" />
+    </a>
+
+    <button
+      className="primaryButton"
+      onClick={handleDisconnect}
+      style={{
+        paddingLeft: "3rem",
+        paddingRight: "3rem"
       }}>
-        <div>
-          <span>
-            <img
-              src="images/wallet.png"
-              width="21px"
-              height="18px" />
-            &nbsp;
-          </span>
+      {t("disconnect")}
+    </button>
+  </div>
 
-          <span className="propertyText">{shortenAddress(address)}</span>
+  return (
+    <div className="topBar">
+      <img
+        className="logoOnTopBar"
+        src="images/magma.png"
+        height="32px" />
+
+      <span>&nbsp;</span>
+
+      {!isConnected && <div className="flex-row-align-left">
+        <div className="selectionTrigger">
+          <img
+            src="images/iotx.png"
+            width="24px" />
+
+          <div
+            className="flex-column-align-left"
+            style={{ gap: "4px" }}>
+            <div className="label">{t("network")}</div>
+
+            <div className="label bigLabel fat">{chains[0].name}</div>
+          </div>
         </div>
 
         <button
-          className="textButton"
-          onClick={handleDisconnect}>
-          {t("disconnect")}
+          className="primaryButton"
+          onClick={handleConnectWallet}>
+          {t("connectWallet")}
         </button>
+      </div>}
 
+      {isConnected && address && <div className="flex-row-align-left">
         <DropdownMenu
           defaultValue={chains.findIndex(item => item.id === chainId)}
           options={chainOptions}
-          onChange={handleSwitchNetwork}>
-          <button className="textButton">{t("switchNetwork")}</button>
+          onChange={handleSwitchNetwork}
+          showArrows
+          alignTop
+          forcedClass="selectionTrigger">
+          <div className="flex-row-align-left">
+            <img
+              src="images/iotx.png"
+              width="24px" />
+
+            <div
+              className="flex-column-align-left"
+              style={{ gap: "4px" }}>
+              <div className="label">{t("network")}</div>
+
+              <div className="label bigLabel fat chainNameLabel">{chain?.name}</div>
+            </div>
+          </div>
         </DropdownMenu>
 
-        {/* {([
-          ["ETH", accountBalance],
-          // [COIN, Decimal.from(lusdBalance || 0)],
-          [COIN, Decimal.from(0)],
-          // [GT, Decimal.from(lqtyBalance)],
-          [GT, Decimal.from(0)],
-          // ["bLUSD", Decimal.from(bLusdBalance || 0)]
-          ["bLUSD", Decimal.from(0)]
-        ] as const).map(([currency, balance], i) => (
-          <div key={i} sx={{ ml: 3, flexDirection: "column" }}>
-            <Heading sx={{ fontSize: 1 }}>{currency}</Heading>
-            <Text sx={{ fontSize: 1 }}>{balance.prettify()}</Text>
-          </div>
-        ))} */}
+        <PopupView
+          entryView={entryView}
+          showArrows={true}
+          alignTop={true}
+          popupView={popupView}
+          forcedClass="selectionTrigger" />
       </div>}
     </div>
   );
