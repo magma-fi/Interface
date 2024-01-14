@@ -110,6 +110,8 @@ export const UserAccount = ({
         <button
           className="primaryButton"
           onClick={handleConnectWallet}>
+          <img src="images/wallet-dark.png" />
+
           {t("connectWallet")}
         </button>
       </div>}
