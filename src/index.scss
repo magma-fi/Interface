@@ -792,6 +792,7 @@ h4 {
   text-transform: capitalize;
   max-height: 47px;
   white-space: nowrap;
+  backdrop-filter: blur(4px);
 
   img {
     width: 20px;
@@ -1353,7 +1354,7 @@ input {
     }
   }
 
-  .chainNameLabel{
+  .chainNameLabel {
     max-width: 4rem;
   }
 }
