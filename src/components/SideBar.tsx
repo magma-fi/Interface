@@ -94,6 +94,15 @@ export const SideBar: React.FC = ({ children }) => {
           active={false}
           target="_blank" />
 
+        <NavLink
+          label={t("audit")}
+          icon="images/audit.png"
+          url="https://github.com/magma-fi/Audits/blob/main/MagmaStablecoin_final_Secure3_Audit_Report.pdf"
+          fullWidth={true}
+          showExternalLink={true}
+          active={false}
+          target="_blank" />
+
         <hr className="division" />
 
         <div style={{

@@ -11,11 +11,11 @@ export const Footer = () => {
 			height="24px" />
 
 		<div className="flex-row-align-left">
-			<a
+			{/* <a
 				href="https://github.com/magma-fi/Audits/blob/main/MagmaStablecoin_final_Secure3_Audit_Report.pdf"
 				target="_blank">
 				{t("audit")}
-			</a>
+			</a> */}
 
 			<div className="label">Designed and built with ❤️ by the FilDA team 🌏</div>
 		</div>

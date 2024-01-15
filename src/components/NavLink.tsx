@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 type NavLinkProps = {
-	icon: string;
+	icon?: string;
 	label: string;
 	url: string;
 	fullWidth: boolean;
