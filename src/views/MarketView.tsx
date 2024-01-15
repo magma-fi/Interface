@@ -187,7 +187,7 @@ export const MarketView = ({
 						yesterday = date;
 
 						tempArr.push({
-							collateralAfter: Math.floor(Number(item.collateralAfter) / 1000),
+							collateralAfter: Math.floor(Number(price.mul(item.collateralAfter)) / 1000),
 							debtAfter: Math.floor(Number(item.debtAfter) / 1000),
 							timestamp: item.transaction.timestamp,
 							date: yesterday
