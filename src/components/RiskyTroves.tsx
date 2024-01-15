@@ -82,19 +82,6 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
   const [txAmount, setTxAmount] = useState("");
   const [txHash, setTxHash] = useState("");
 
-  // 交易结束或失败后重置transactionState。
-  useEffect(() => {
-    if (transactionState.id === txId && (transactionState.type === "failed" || transactionState.type === "cancelled")) {
-      setTransactionState({ type: "idle" });
-      setResetTx(!resetTx);
-    }
-
-    if (transactionState.id === txId && (transactionState.type === "confirmed")) {
-      setReload(!reload);
-      setShowTxDone(true);
-    }
-  }, [transactionState.id, transactionState.type, txId])
-
   const nextPage = () => {
     if (clampedPage < numberOfPages - 1) {
       setPage(clampedPage + 1);
@@ -216,8 +203,6 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
           id,
           tx
         });
-
-        waitForConfirmation();
       } catch (error) {
         if (hasMessage(error) && error.message.includes("User denied transaction signature")) {
           setTransactionState({ type: "cancelled", id } as TransactionState);
@@ -241,6 +226,24 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
     setTxHash("");
     setTxAmount("");
   };
+
+  // 交易结束或失败后重置transactionState。
+  useEffect(() => {
+    if (transactionState.id === txId && transactionState.type === "waitingForConfirmation") {
+      waitForConfirmation();
+    }
+
+    if (transactionState.id === txId && (transactionState.type === "failed" || transactionState.type === "cancelled")) {
+      setTransactionState({ type: "idle" });
+      setResetTx(!resetTx);
+    }
+
+    if (transactionState.id === txId && (transactionState.type === "confirmed")) {
+      setReload(!reload);
+      setShowTxDone(true);
+    }
+  }, [transactionState.id, transactionState.type, txId])
+
 
   return <>
     {loading && <LoadingOverlay />}

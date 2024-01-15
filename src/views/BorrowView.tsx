@@ -7,7 +7,10 @@ import { Coin } from "../libs/types";
 import { MarketView } from "./MarketView";
 import { Decimal } from "lib-base";
 
-export const BorrowView = ({ constants }: { constants: Record<string, Decimal> }) => {
+export const BorrowView = ({ constants, isReferer }: {
+	constants: Record<string, Decimal>;
+	isReferer: boolean;
+}) => {
 	const { t } = useLang();
 	const [currentTrove, setCurrentTrove] = useState<Coin>(globalContants.COINS.IOTX);
 
@@ -32,6 +35,7 @@ export const BorrowView = ({ constants }: { constants: Record<string, Decimal> }
 			onSelect={handleSelectTrove} />
 
 		<MarketView
+			isReferer={isReferer}
 			market={currentTrove}
 			constants={constants} />
 	</div>

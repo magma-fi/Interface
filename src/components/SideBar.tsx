@@ -3,24 +3,13 @@ import { NavLink } from "./NavLink";
 import { useLang } from "../hooks/useLang";
 import { WEN } from "../libs/globalContants";
 import { useLocation } from "react-router-dom";
-import { LangSelect } from "./LangSelect";
-import { StyleModeSelect } from "./StyleModeSelect";
-
-// const logoHeight = "32px";
-
-// const select = ({ frontend }: LiquityStoreState) => ({
-//   frontend
-// });
+import { useLiquity } from "../hooks/LiquityContext";
 
 export const SideBar: React.FC = ({ children }) => {
+  const { urlSearch } = useLiquity();
   const { t } = useLang();
   const { pathname } = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(window.innerWidth > 575.98);
-  // const {
-  //   config: { frontendTag }
-  // } = useLiquity();
-  // const { frontend } = useLiquitySelector(select);
-  // const isFrontendRegistered = frontendTag === AddressZero || frontend.status === "registered";
 
   const handleShowMenuForMobile = () => {
     setShowMobileMenu(!showMobileMenu);
@@ -37,7 +26,7 @@ export const SideBar: React.FC = ({ children }) => {
       <NavLink
         label={t("borrow") + " " + WEN.symbol}
         icon="images/borrow.png"
-        url="/"
+        url={"/" + urlSearch}
         fullWidth={true}
         showExternalLink={false}
         active={pathname === "/"}
@@ -46,7 +35,7 @@ export const SideBar: React.FC = ({ children }) => {
       <NavLink
         label={t("stake") + " " + WEN.symbol}
         icon="images/stake.png"
-        url="/stake"
+        url={"/stake" + urlSearch}
         fullWidth={true}
         showExternalLink={false}
         active={pathname === "/stake"}
@@ -63,10 +52,19 @@ export const SideBar: React.FC = ({ children }) => {
       <NavLink
         label={t("liquidations")}
         icon="images/liquidations.png"
-        url="/liquidations"
+        url={"/liquidations" + urlSearch}
         fullWidth={true}
         showExternalLink={false}
         active={pathname === "/liquidations"}
+        target="_self" />
+
+      <NavLink
+        label={" " + t("referral")}
+        icon="images/referral.png"
+        url={"/referral" + urlSearch}
+        fullWidth={true}
+        showExternalLink={false}
+        active={pathname === "/referral"}
         target="_self" />
 
       <div
@@ -108,10 +106,6 @@ export const SideBar: React.FC = ({ children }) => {
 
           {/* <LangSelect /> */}
         </div>
-
-        <hr className="division" />
-
-        {children}
       </div>}
     </div>
   );

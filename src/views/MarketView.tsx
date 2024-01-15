@@ -28,10 +28,12 @@ import React from "react";
 
 export const MarketView = ({
 	market,
-	constants
+	constants,
+	isReferer
 }: {
 	market: Coin;
-	constants: Record<string, Decimal>
+	constants: Record<string, Decimal>;
+	isReferer: boolean;
 }) => {
 	const selector = useMemo(() => {
 		return (state: LiquityStoreState) => {
@@ -339,7 +341,7 @@ export const MarketView = ({
 						className="primaryButton bigButton"
 						style={{ width: "100%" }}
 						onClick={handleDeposit}
-						disabled={accountBalance.eq(0)}>
+						disabled={accountBalance.eq(0) || isReferer}>
 						<img src="images/deposit.png" />
 
 						{t("deposit") + " " + market?.symbol}
@@ -461,7 +463,8 @@ export const MarketView = ({
 							<button
 								id="1"
 								className="secondaryButton"
-								onClick={handleDeposit}>
+								onClick={handleDeposit}
+								disabled={isReferer}>
 								<img src="images/deposit-light.png" />
 
 								{t("deposit") + " " + IOTX.symbol}
@@ -541,11 +544,22 @@ export const MarketView = ({
 							<button
 								className="secondaryButton"
 								onClick={handleRepay}
-								disabled={maxAvailableRepay.lt(0.01)}>
+								disabled={maxAvailableRepay.lt(0.01) || lusdBalance.eq(0)}>
 								<img src="images/repay.png" />
 
 								{t("repay") + " " + WEN.symbol}
 							</button>
+
+							{(maxAvailableRepay.lt(0.01) || lusdBalance.eq(0)) && <div
+								className="label labelSmall"
+								style={{
+									textAlign: "center",
+									width: "100%"
+								}}>
+								{maxAvailableRepay.lt(0.01)
+									? t("available2Repay") + ": " + maxAvailableRepay.toString(2)
+									: (lusdBalance.eq(0) && " " + WEN.symbol + " " + t("balance") + ": 0")}
+							</div>}
 						</div>
 					</div>
 

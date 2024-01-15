@@ -1,5 +1,6 @@
 import { createApolloFetch } from "apollo-fetch";
 import appConfig from "../appConfig.json";
+import { JsonObject } from "./types";
 
 export const graphqlAsker = {
 	ask: function (chainId: number, query: string, doneCallback: (data: unknown) => void) {
@@ -69,7 +70,33 @@ export const graphqlAsker = {
 		`;
 	},
 
+	requestReferer: function (owner: string) {
+		return `
+		{
+			frontends(
+				where: {owner_contains_nocase: "${owner}"}
+			) {
+				sequenceNumber
+				code
+				kickbackRate
+			}
+		}
+		`;
+	},
+
+	requestRefererWithCode: function (code: string) {
+		return `
+		{
+			frontends(where: {code_contains_nocase: "${code}"}) {
+				owner {
+					id
+				}
+			}
+		}
+		`;
+	},
+
 	_getGraph: function (chainId: number) {
-		return appConfig.subgraph[String(chainId)]?.graphql;
+		return (appConfig.subgraph as JsonObject)[String(chainId)]?.graphql;
 	}
 };
