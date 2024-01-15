@@ -155,5 +155,6 @@
 	"audit": "Audit",
 	"debtBalance": "Debt Balance",
 	"network": "Network",
-	"wallet": "Wallet"
+	"wallet": "Wallet",
+	"available2Repay": "Available to Repay"
 }

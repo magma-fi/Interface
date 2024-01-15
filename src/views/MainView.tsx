@@ -189,9 +189,6 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 
 						{/* <Route path="/bonds">
 							<Bonds />
-						</Route>
-						<Route path="/risky-troves">
-							<RiskyTrovesPage />
 						</Route> */}
 					</Switch>
 

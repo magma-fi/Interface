@@ -544,11 +544,22 @@ export const MarketView = ({
 							<button
 								className="secondaryButton"
 								onClick={handleRepay}
-								disabled={maxAvailableRepay.lt(0.01) || lusdBalance.lt(maxAvailableRepay)}>
+								disabled={maxAvailableRepay.lt(0.01) || lusdBalance.eq(0)}>
 								<img src="images/repay.png" />
 
 								{t("repay") + " " + WEN.symbol}
 							</button>
+
+							{(maxAvailableRepay.lt(0.01) || lusdBalance.eq(0)) && <div
+								className="label labelSmall"
+								style={{
+									textAlign: "center",
+									width: "100%"
+								}}>
+								{maxAvailableRepay.lt(0.01)
+									? t("available2Repay") + ": " + maxAvailableRepay.toString(2)
+									: (lusdBalance.eq(0) && " " + WEN.symbol + " " + t("balance") + ": 0")}
+							</div>}
 						</div>
 					</div>
 
