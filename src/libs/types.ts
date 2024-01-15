@@ -75,3 +75,8 @@ export type TroveChangeData = {
 export type LiquidatableTrove = UserTrove & { liquidatable: boolean; }
 
 export type JsonObject = { [key: string]: any };
+
+export type MixedError = {
+	reason?: string;
+	message?: string;
+}

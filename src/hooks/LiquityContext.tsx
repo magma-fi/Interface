@@ -12,7 +12,7 @@ import {
 
 import { LiquityFrontendConfig, getConfig } from "../config";
 import { BatchedProvider } from "../providers/BatchingProvider";
-import { useEthersProvider } from "../libs/ethers";
+import { useEthersProvider, useEthersSigner } from "../libs/ethers";
 import { VoidSigner, ethers } from "ethers";
 import { globalContants } from "../libs/globalContants";
 import { graphqlAsker } from "../libs/graphqlAsker";
@@ -26,7 +26,8 @@ type LiquityContextValue = {
   walletClient?: WalletClient;
   chainId: number;
   publicClient?: PublicClient;
-  urlSearch?: string
+  urlSearch?: string;
+  signer: ethers.Signer;
 };
 
 const LiquityContext = createContext<LiquityContextValue | undefined>(undefined);
@@ -47,6 +48,7 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   const signer = useWalletClient();
   const chainId = useChainId();
   const wagmiProvider = useEthersProvider();
+  const wagmiSinger = useEthersSigner();
   const publicClient = usePublicClient({ chainId });
   const addr = isConnected ? address : globalContants.ADDRESS_PLACEHOLDER;
 
@@ -122,7 +124,8 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
         chainId,
         walletClient: connection.signer as unknown as WalletClient,
         publicClient,
-        urlSearch
+        urlSearch,
+        signer: wagmiSinger
       }}>
       {children}
     </LiquityContext.Provider>
