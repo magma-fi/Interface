@@ -29,6 +29,7 @@ export const TransactiionListItem = ({
 			case TroveOperation.AdjustTrove:
 			case TroveOperation.CloseTrove:
 			case TroveOperation.RedeemCollateral:
+			case TroveOperation.LiquidateInNormalMode:
 				if (col > 0) {
 					type.push(BadgeType.Deposit);
 				}
@@ -55,47 +56,98 @@ export const TransactiionListItem = ({
 		return type;
 	}, [col, data.troveOperation, deb]);
 
+	const twoBadgeTypes = useMemo(() => {
+		if (badgeTypes.length !== 2) return "";
+
+		let str = "";
+		badgeTypes.forEach((item, idx) => {
+			str += item.toString() + (idx === 0 ? " & " : "");
+		});
+		return str;
+	}, [badgeTypes]);
+
 	return <a
 		className="transactionListItem"
-		href={publicClient!.chain?.blockExplorers?.default.url + "/tx/" + data.transaction.id}
+		href={publicClient?.chain?.blockExplorers?.default.url + "/tx/" + data.transaction.id}
 		target="_blank">
-		<div
-			className="flex-column-align-left"
-			style={{ gap: "8px" }}>
+		{badgeTypes.length === 1 && <>
 			<div
-				className="flex-row-align-left"
-				style={{ alignItems: "flex-end" }}>
-				<div>{date}</div>
-				<div className="label smallLabel">{time}</div>
+				className="flex-column-align-left"
+				style={{ gap: "8px" }}>
+				<div
+					className="flex-row-align-left"
+					style={{ alignItems: "flex-end" }}>
+					<div>{date}</div>
+					<div className="label smallLabel">{time}</div>
+				</div>
+
+				{badgeTypes && <div className="flex-row-align-left">
+					{badgeTypes.map(badge => {
+						return <Badge type={badge} />
+					})}
+				</div>}
 			</div>
 
-			{badgeTypes && <div className="flex-row-align-left">
-				{badgeTypes.map(badge => {
-					return <Badge type={badge} />
-				})}
-			</div>}
-		</div>
+			<div className="txValues">
+				<div className="flex-row-align-left">
+					{col !== 0 && <div>
+						{Math.abs(col).toFixed(2)}&nbsp;{market.symbol}
+					</div>}
 
-		<div className="txValues">
-			<div className="flex-row-align-left">
-				{col !== 0 && <div style={{ color: col > 0 ? "#F25454" : "#8ED434" }}>
+					{deb !== 0 && <div>
+						{Math.abs(deb).toFixed(2)}&nbsp;{WEN.symbol}
+					</div>}
+				</div>
+
+				<div className="flex-row-align-left">
+					{col !== 0 && <div className="label smallLabel">
+						{(col < 0 ? "-" : "") + price.mul(Math.abs(col)).shorten()}&nbsp;{globalContants.USD}
+					</div>}
+
+					{deb !== 0 && <div className="label smallLabel">
+						{(deb < 0 ? "-" : "") + Decimal.from(Math.abs(deb)).shorten()}&nbsp;{globalContants.USD}
+					</div>}
+				</div>
+			</div>
+		</>}
+
+		{badgeTypes.length === 2 && <>
+			<div
+				className="flex-column-align-left"
+				style={{ gap: "8px" }}>
+				<div
+					className="flex-row-align-left"
+					style={{ alignItems: "flex-end" }}>
+					<div>{date}</div>
+					<div className="label smallLabel">{time}</div>
+				</div>
+
+				{col !== 0 && <div>
 					{Math.abs(col).toFixed(2)}&nbsp;{market.symbol}
 				</div>}
 
-				{deb !== 0 && <div style={{ color: deb > 0 ? "#F25454" : "#8ED434" }}>
-					{Math.abs(deb).toFixed(2)}&nbsp;{WEN.symbol}
+				{col !== 0 && <div className="label smallLabel">
+					{price.mul(Math.abs(col)).shorten()}&nbsp;{globalContants.USD}
 				</div>}
+
+				<Badge type={badgeTypes[0]} />
 			</div>
 
-			<div className="flex-row-align-left">
-				{col !== 0 && <div className="label smallLabel">
-					{(col < 0 ? "-" : "") + price.mul(Math.abs(col)).shorten()}&nbsp;{globalContants.USD}
+			<div className="txValues">
+				<Badge label={twoBadgeTypes} />
+
+
+				{deb !== 0 && <div>
+					{Math.abs(deb).toFixed(2)}&nbsp;{WEN.symbol}
 				</div>}
 
 				{deb !== 0 && <div className="label smallLabel">
-					{(deb < 0 ? "-" : "") + Decimal.from(Math.abs(deb)).shorten()}&nbsp;{globalContants.USD}
+					{Decimal.from(Math.abs(deb)).shorten()}&nbsp;{globalContants.USD}
 				</div>}
+
+				<Badge type={badgeTypes[1]} />
+
 			</div>
-		</div>
+		</>}
 	</a>
 };

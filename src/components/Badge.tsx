@@ -2,9 +2,14 @@ import { useMemo } from "react";
 import { BadgeType } from "../libs/globalContants";
 import { useLang } from "../hooks/useLang";
 
-export const Badge = ({ type, values }: {
-  type: BadgeType,
-  values?: Record<string, any>
+export const Badge = ({
+  type = BadgeType.Repay,
+  values,
+  label
+}: {
+  type?: BadgeType;
+  values?: Record<string, any>;
+  label?: string;
 }) => {
   const { t } = useLang();
   const colors: {
@@ -54,8 +59,8 @@ export const Badge = ({ type, values }: {
       backgroundColor: colors.bg,
       color: colors.fg
     }}>
-    {colors.icon && <img src={colors.icon} />}
+    {colors.icon && !label && <img src={colors.icon} />}
 
-    {t(type, values)}
+    {label ?? t(type, values)}
   </div>;
 };

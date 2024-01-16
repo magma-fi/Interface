@@ -47,7 +47,8 @@ export enum TroveOperation {
 	OpenTrove = "openTrove",
 	AdjustTrove = "adjustTrove",
 	CloseTrove = "closeTrove",
-	RedeemCollateral = "redeemCollateral"
+	RedeemCollateral = "redeemCollateral",
+	LiquidateInNormalMode = "liquidateInNormalMode"
 }
 
 export type TxForSubgraph = {
