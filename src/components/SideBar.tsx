@@ -76,32 +76,51 @@ export const SideBar: React.FC = ({ children }) => {
       </div>
 
       {showMobileMenu && <div className="mainMenu">
-        <NavLink
-          label={t("docs")}
-          icon="images/docs.png"
-          url="https://docs.magma.finance/"
-          fullWidth={true}
-          showExternalLink={true}
-          active={false}
-          target="_blank" />
+        <a
+          className="navLink"
+          href="https://docs.magma.finance/"
+          target="_blank">
+          <div className="icon">
+            <img src="images/docs.png" />
+          </div>
 
-        <NavLink
-          label={t("twitter")}
-          icon="images/x.png"
-          url="https://twitter.com/MagmaProtocol"
-          fullWidth={true}
-          showExternalLink={true}
-          active={false}
-          target="_blank" />
 
-        <NavLink
-          label={t("audit")}
-          icon="images/audit.png"
-          url="https://github.com/magma-fi/Audits/blob/main/MagmaStablecoin_final_Secure3_Audit_Report.pdf"
-          fullWidth={true}
-          showExternalLink={true}
-          active={false}
-          target="_blank" />
+          {t("docs")}
+
+          <img
+            id="externalLink"
+            src="images/external-link.png" />
+        </a>
+
+        <a
+          className="navLink"
+          href="https://twitter.com/MagmaProtocol"
+          target="_blank">
+          <div className="icon">
+            <img src="images/x.png" />
+          </div>
+
+          {t("twitter")}
+
+          <img
+            id="externalLink"
+            src="images/external-link.png" />
+        </a>
+
+        <a
+          className="navLink"
+          href="https://github.com/magma-fi/Audits/blob/main/MagmaStablecoin_final_Secure3_Audit_Report.pdf"
+          target="_blank">
+          <div className="icon">
+            <img src="images/audit.png" />
+          </div>
+
+          {t("audit")}
+
+          <img
+            id="externalLink"
+            src="images/external-link.png" />
+        </a>
 
         <hr className="division" />
 
