@@ -29,97 +29,7 @@
 				"abi": "/abis/MimoV2Router02NoReferral.json"
 			},
 			"swapAndCloseTool": {
-				"address": "0xd716d7bf2ddc68fecb3d6d6f825b351858439d87",
-				"abi": [
-					{
-						"inputs": [
-							{
-								"internalType": "address",
-								"name": "_borrowerOperations",
-								"type": "address"
-							},
-							{
-								"internalType": "address",
-								"name": "_mimoRouter",
-								"type": "address"
-							}
-						],
-						"stateMutability": "nonpayable",
-						"type": "constructor"
-					},
-					{
-						"inputs": [],
-						"name": "WEN",
-						"outputs": [
-							{
-								"internalType": "contract IERC20",
-								"name": "",
-								"type": "address"
-							}
-						],
-						"stateMutability": "view",
-						"type": "function"
-					},
-					{
-						"inputs": [],
-						"name": "WETH",
-						"outputs": [
-							{
-								"internalType": "address",
-								"name": "",
-								"type": "address"
-							}
-						],
-						"stateMutability": "view",
-						"type": "function"
-					},
-					{
-						"inputs": [],
-						"name": "borrowerOperations",
-						"outputs": [
-							{
-								"internalType": "contract IBorrowerOperations",
-								"name": "",
-								"type": "address"
-							}
-						],
-						"stateMutability": "view",
-						"type": "function"
-					},
-					{
-						"inputs": [],
-						"name": "mimoRouter",
-						"outputs": [
-							{
-								"internalType": "contract IMimoV2Router02NoReferral",
-								"name": "",
-								"type": "address"
-							}
-						],
-						"stateMutability": "view",
-						"type": "function"
-					},
-					{
-						"inputs": [],
-						"name": "swapAndCloseTrove",
-						"outputs": [],
-						"stateMutability": "payable",
-						"type": "function"
-					},
-					{
-						"inputs": [],
-						"name": "troveManager",
-						"outputs": [
-							{
-								"internalType": "contract ITroveManager",
-								"name": "",
-								"type": "address"
-							}
-						],
-						"stateMutability": "view",
-						"type": "function"
-					}
-				]
+				"address": "0xd716d7bf2ddc68fecb3d6d6f825b351858439d87"
 			}
 		}
 	},
@@ -139,6 +49,10 @@
 		"kickbackRate": {
 			"4690": 0.9,
 			"4689": 0.9
+		},
+		"refererFactory": {
+			"4690": "0xfdB37F188B4C8dF6aDA2E08eD187C5Fb48Eb5F69",
+			"4689": ""
 		}
 	}
 }

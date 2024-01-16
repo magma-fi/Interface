@@ -20,8 +20,11 @@ import { ReferralView } from "./ReferralView";
 import { Footer } from "./Footer";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
 import { useLiquitySelector } from "@liquity/lib-react";
-import { zeroAddress } from "viem";
 import { graphqlAsker } from "../libs/graphqlAsker";
+import { DappContract } from "../libs/DappContract.";
+import appConfig from "../appConfig.json";
+import { JsonObject } from "../libs/types";
+import refererFactory from "../abis/refererFactory.json";
 
 const select = ({
 	trove,
@@ -37,7 +40,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const [showTerms, setShowTerms] = useState(false);
 	const { chain } = useNetwork();
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
-	const { account, liquity, chainId, config } = useLiquity();
+	const { account, liquity, chainId, signer } = useLiquity();
+	const [referer, setReferer] = useState("");
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});
 	const dec = Math.pow(10, WEN.decimals || 18);
 
@@ -66,13 +70,30 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 		if (!window.localStorage.getItem(globalContants.TERMS_SHOWED)) {
 			setShowTerms(true);
 		}
-	}, []);
+
+		const getReferer = async () => {
+			const refererFactoryContract = new DappContract(
+				(appConfig.refer.refererFactory as JsonObject)[String(chainId)],
+				refererFactory,
+				signer
+			);
+
+			const res = await refererFactoryContract.dappFunctions.referralAccounts.call(account);
+			if (res) {
+				setReferer(res[0])
+			}
+		};
+
+		if (chainId && account) {
+			getReferer();
+		}
+	}, [account, chainId]);
 
 	useEffect(() => {
-		if (!account || chainId === 0) return;
+		if (!referer || chainId === 0) return;
 
 		setTimeout(() => {
-			const query = graphqlAsker.requestReferer(account)
+			const query = graphqlAsker.requestReferer(referer)
 			graphqlAsker.ask(chainId, query, (data: any) => {
 				if (data?.frontends?.length > 0) {
 					setIsReferer(true);
@@ -82,7 +103,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 				}
 			});
 		}, 1000);
-	}, [account, chainId]);
+	}, [referer, chainId]);
 
 	useEffect(() => {
 		if (!isConnected) {
@@ -178,7 +199,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 							<ReferralView
 								haveDeposited={haveDeposited}
 								isReferer={isReferer}
-								referralCode={referralCode} />
+								referralCode={referralCode}
+								referer={referer} />
 						</Route>
 
 						<Route path="/">
