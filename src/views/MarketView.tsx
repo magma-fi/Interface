@@ -341,7 +341,7 @@ export const MarketView = ({
 						className="primaryButton bigButton"
 						style={{ width: "100%" }}
 						onClick={handleDeposit}
-						disabled={accountBalance.eq(0) || isReferer}>
+						disabled={accountBalance.eq(0)}>
 						<img src="images/deposit.png" />
 
 						{t("deposit") + " " + market?.symbol}
@@ -463,8 +463,7 @@ export const MarketView = ({
 							<button
 								id="1"
 								className="secondaryButton"
-								onClick={handleDeposit}
-								disabled={isReferer}>
+								onClick={handleDeposit}>
 								<img src="images/deposit-light.png" />
 
 								{t("deposit") + " " + IOTX.symbol}
