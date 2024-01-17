@@ -1,7 +1,8 @@
-import { Address, useAccount } from "wagmi";
+/* eslint-disable @typescript-eslint/no-empty-function */
+import { useAccount } from "wagmi";
 import { useLang } from "../hooks/useLang";
-import { useMyTransactionState, useTransactionFunction } from "../components/Transaction";
-import { useEffect, useMemo, useState } from "react";
+// import { useMyTransactionState, useTransactionFunction } from "../components/Transaction";
+import { useEffect, useState } from "react";
 import { useLiquity } from "../hooks/LiquityContext";
 import appConfig from "../appConfig.json";
 import { JsonObject } from "../libs/types";
@@ -11,31 +12,38 @@ import { useContract } from "../hooks/useContract";
 import StabilityPoolAbi from "lib-ethers/abi/StabilityPool.json";
 import { MAGMA, globalContants } from "../libs/globalContants";
 import copy from "copy-to-clipboard";
+import { DappContract } from "../libs/DappContract.";
+import refererFactory from "../abis/refererFactory.json";
+// import { ethers } from "ethers";
+// import { EthersSigner } from "lib-ethers";
 
 export const ReferralView = ({
 	isReferer = false,
 	haveDeposited = false,
-	referralCode = ""
+	referralCode = "",
+	referer = ""
 }: {
 	isReferer: boolean;
 	haveDeposited: boolean;
 	referralCode: string;
+	referer: string;
 }) => {
 	const { t } = useLang();
 	const { address } = useAccount();
-	const { liquity, chainId } = useLiquity();
-	const txId = useMemo(() => String(Date.now()), []);
-	const transactionState = useMyTransactionState(txId, true);
+	const { liquity, chainId, provider, signer } = useLiquity();
+	// const txId = useMemo(() => String(Date.now()), []);
+	// const transactionState = useMyTransactionState(txId, true);
 	const [loading, setLoading] = useState(false);
 	const kickbackRate = Decimal.from((appConfig.refer.kickbackRate as JsonObject)[String(chainId)]);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [frontendRewards, setFrontendRewards] = useState(Decimal.ZERO);
 	const [copied, setCopied] = useState(false);
+	const refererFactoryAddress = (appConfig.refer.refererFactory as JsonObject)[String(chainId)];
 
-	const [sendTransaction] = useTransactionFunction(
-		txId,
-		liquity.send.registerFrontend.bind(liquity.send, kickbackRate)
-	);
+	// const [sendTransaction] = useTransactionFunction(
+	// 	txId,
+	// 	liquity.send.registerFrontend.bind(liquity.send, kickbackRate)
+	// );
 
 	const [stabilityPoolDefault, stabilityPoolStatus] = useContract<StabilityPool>(
 		liquity.connection.addresses.stabilityPool,
@@ -45,7 +53,8 @@ export const ReferralView = ({
 	useEffect(() => {
 		const read = async () => {
 			if (stabilityPoolStatus === "LOADED" && address) {
-				const res = await stabilityPoolDefault?.getFrontEndLQTYGain(address);
+				// const res = await stabilityPoolDefault?.getFrontEndLQTYGain(address);
+				const res = await stabilityPoolDefault?.getFrontEndLQTYGain(referer);
 				if (res) {
 					setFrontendRewards(Decimal.from(res.toString()).div(MAGMA.decimals));
 				}
@@ -56,23 +65,45 @@ export const ReferralView = ({
 	}, [address, stabilityPoolDefault, stabilityPoolStatus]);
 
 	const handleRegisterFrontend = async () => {
-		if (sendTransaction) {
-			setLoading(true);
-			sendTransaction();
-		}
+		if (!chainId || !provider || kickbackRate?.eq(0) || !signer || !refererFactoryAddress) return;
+
+		setLoading(true);
+
+		const refererFactoryContract = new DappContract(
+			refererFactoryAddress,
+			refererFactory,
+			signer
+		);
+
+		refererFactoryContract.dappFunctions.registerReferralAccount.run(
+			undefined,
+			(error: Error | unknown) => {
+				setErrorMessage((error as Error).message);
+				setLoading(false);
+			},
+			() => {
+				setErrorMessage("");
+				setLoading(false);
+
+				setTimeout(() => {
+					window.location.reload();
+				}, 1000);
+			},
+			kickbackRate.mul(globalContants.IOTX_DECIMALS).toString()
+		);
 	};
 
-	useEffect(() => {
-		if (transactionState.id === txId && (transactionState.type === "failed" || transactionState.type === "cancelled")) {
-			setErrorMessage(transactionState.error.reason || transactionState.error.code || transactionState.error.message);
-			setLoading(false);
-		}
+	// useEffect(() => {
+	// 	if (transactionState.id === txId && (transactionState.type === "failed" || transactionState.type === "cancelled")) {
+	// 		setErrorMessage(transactionState.error.reason || transactionState.error.code || transactionState.error.message);
+	// 		setLoading(false);
+	// 	}
 
-		if (transactionState.id === txId && (transactionState.type === "confirmed")) {
-			setErrorMessage("");
-			setLoading(false);
-		}
-	}, [transactionState.type, transactionState.id, txId]);
+	// 	if (transactionState.id === txId && (transactionState.type === "confirmed")) {
+	// 		setErrorMessage("");
+	// 		setLoading(false);
+	// 	}
+	// }, [transactionState.type, transactionState.id, txId]);
 
 	const handleCopy = () => {
 		copy(globalContants.HOST + referralCode);
@@ -117,7 +148,7 @@ export const ReferralView = ({
 								paddingLeft: "5rem",
 								paddingRight: "5rem"
 							}}
-							disabled={!address || loading || isReferer || haveDeposited}
+							disabled={!address || loading || isReferer || haveDeposited || !refererFactoryAddress}
 							onClick={handleRegisterFrontend}>
 							<img src="images/wallet-dark.png" />
 

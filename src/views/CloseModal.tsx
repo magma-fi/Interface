@@ -18,6 +18,7 @@ import { useLiquity } from "../hooks/LiquityContext";
 import { IOTX, WEN, globalContants } from "../libs/globalContants";
 import { erc20ABI, useAccount } from "wagmi";
 import { Address, parseEther } from "viem";
+import swapAndCloseTool from "../abis/swapAndCloseTool.json";
 
 export const CloseModal = ({
 	isOpen = false,
@@ -116,7 +117,7 @@ export const CloseModal = ({
 		const txHash = await walletClient!.writeContract({
 			account: account.address,
 			address: appConfig.swap[indexOfConfig].swapAndCloseTool.address,
-			abi: appConfig.swap[indexOfConfig].swapAndCloseTool.abi,
+			abi: swapAndCloseTool,
 			functionName: 'swapAndCloseTrove',
 			args: [],
 			value: parseEther(howMuchIOTX.mul(1.02).div(iotxDec).toString())

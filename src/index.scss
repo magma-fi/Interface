@@ -1054,6 +1054,12 @@ input {
   width: 100%;
   // gap: var(--flex-gap-larger);
   cursor: pointer;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #06020B;
+
+  &:last-child {
+    border-bottom: none;
+  }
 
   .txValues {
     display: flex;
