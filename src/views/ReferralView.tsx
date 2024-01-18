@@ -18,12 +18,12 @@ import refererFactory from "../abis/refererFactory.json";
 // import { EthersSigner } from "lib-ethers";
 
 export const ReferralView = ({
-	isReferer = false,
+	isReferrer = false,
 	haveDeposited = false,
 	referralCode = "",
 	referer = ""
 }: {
-	isReferer: boolean;
+	isReferrer: boolean;
 	haveDeposited: boolean;
 	referralCode: string;
 	referer: string;
@@ -124,7 +124,7 @@ export const ReferralView = ({
 
 			<div className="description">{t("referralHeaderDescription")}</div>
 
-			{!isReferer && <div
+			{!isReferrer && <div
 				className="card bigBox">
 				<img src="images/register-address.png" />
 
@@ -148,21 +148,21 @@ export const ReferralView = ({
 								paddingLeft: "5rem",
 								paddingRight: "5rem"
 							}}
-							disabled={!address || loading || isReferer || haveDeposited || !refererFactoryAddress}
+							disabled={!address || loading || !refererFactoryAddress}
 							onClick={handleRegisterFrontend}>
 							<img src="images/wallet-dark.png" />
 
 							{loading ? t("registering") + "..." : t("registerAddress")}
 						</button>
 
-						{haveDeposited && <div className="label smallLabel">{t("mustHaveNoDeposit")}</div>}
+						{/* {haveDeposited && <div className="label smallLabel">{t("mustHaveNoDeposit")}</div>} */}
 
 						{errorMessage && <div className="label smallLabel">{errorMessage}</div>}
 					</div>
 				</div>
 			</div>}
 
-			{isReferer && <div
+			{isReferrer && <div
 				className="card bigBox referralBox">
 				<div className="flex-column-align-left">
 					<div className="label smallLabel">{t("totalRewardsReceived")}</div>

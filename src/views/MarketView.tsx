@@ -29,11 +29,11 @@ import React from "react";
 export const MarketView = ({
 	market,
 	constants,
-	isReferer
+	isReferrer
 }: {
 	market: Coin;
 	constants: Record<string, Decimal>;
-	isReferer: boolean;
+	isReferrer: boolean;
 }) => {
 	const selector = useMemo(() => {
 		return (state: LiquityStoreState) => {
