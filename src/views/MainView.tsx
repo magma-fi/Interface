@@ -25,6 +25,7 @@ import { DappContract } from "../libs/DappContract.";
 import appConfig from "../appConfig.json";
 import { JsonObject } from "../libs/types";
 import refererFactory from "../abis/refererFactory.json";
+import { appController } from "../libs/appController";
 
 const select = ({
 	trove,
@@ -43,6 +44,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const { account, liquity, chainId, signer } = useLiquity();
 	const [referer, setReferer] = useState("");
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});
+	const [externalDataDone, setExternalDataDone] = useState(false);
 	const dec = Math.pow(10, WEN.decimals || 18);
 
 	const { trove } = useLiquitySelector(select);
@@ -65,6 +67,14 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 		liquity.connection.addresses.troveManager,
 		TroveManagerAbi
 	);
+
+	useEffect(() => {
+		if (chainId === 0) return;
+
+		appController.employWorkers(chainId, () => {
+			setExternalDataDone(true);
+		});
+	}, [chainId]);
 
 	useEffect(() => {
 		if (!window.localStorage.getItem(globalContants.TERMS_SHOWED)) {
@@ -206,7 +216,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 						<Route path="/">
 							<BorrowView
 								isReferrer={isReferrer}
-								constants={constants} />
+								constants={constants}
+								externalDataDone={externalDataDone} />
 						</Route>
 
 						{/* <Route path="/bonds">
