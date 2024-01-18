@@ -47,7 +47,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 
 	const { trove } = useLiquitySelector(select);
 
-	const [isReferer, setIsReferer] = useState(false);
+	const [isReferrer, setIsReferrer] = useState(false);
 	const [referralCode, setReferralCode] = useState("");
 	const haveDeposited = trove?.collateral?.gt(0);
 
@@ -96,7 +96,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			const query = graphqlAsker.requestReferer(referer)
 			graphqlAsker.ask(chainId, query, (data: any) => {
 				if (data?.frontends?.length > 0) {
-					setIsReferer(true);
+					setIsReferrer(true);
 
 					const ref = data?.frontends[0];
 					setReferralCode(ref.code);
@@ -198,14 +198,14 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 						<Route path="/referral">
 							<ReferralView
 								haveDeposited={haveDeposited}
-								isReferer={isReferer}
+								isReferrer={isReferrer}
 								referralCode={referralCode}
 								referer={referer} />
 						</Route>
 
 						<Route path="/">
 							<BorrowView
-								isReferer={isReferer}
+								isReferrer={isReferrer}
 								constants={constants} />
 						</Route>
 
