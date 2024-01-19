@@ -12,17 +12,19 @@ const sequenceNumbers = [];
 const getSystemStateWithSequenceNumbers = async () => {
 	const idList = sequenceNumbers.map(item => item.id).flat();
 	const res = await graphQLFetch.requestSystemStateWithDay(...idList);
+
 	if (res?.systemStates?.length > 0) {
 		const dataObjs = [];
 
 		for (let idx = 0; idx < res.systemStates.length; idx++) {
 			const item = res.systemStates[idx];
+			const snItem = sequenceNumbers.find(item => item.id === Number(item.id));
 
 			const dataObj = {
-				date: sequenceNumbers[idx].date,
+				date: snItem.date,
 				collateral: Number(item.totalCollateral),
 				debt: Number(item.totalDebt),
-				updateTime: sequenceNumbers[idx].updateTime
+				updateTime: snItem.updateTime
 			};
 
 			dataObjs.push(dataObj);
@@ -36,7 +38,7 @@ const getSystemStateWithSequenceNumbers = async () => {
 	}
 };
 
-const getHistoryByDate = async (day) => {
+const getHistoryByDate = async (day, isToday = false) => {
 	if (currentCalling >= historyCap) {
 		return await getSystemStateWithSequenceNumbers();
 	}
@@ -44,20 +46,22 @@ const getHistoryByDate = async (day) => {
 	const dayStr = day.toLocaleDateString();
 	const beginOfDay = Math.floor(new Date(dayStr).getTime() / 1000);
 	const endOfDay = beginOfDay + 86399;
-	const hasVal = await dbManager.read(db, table, "date", dayStr);
+	// const hasVal = await dbManager.read(db, table, "date", dayStr);
 
-	if (!hasVal || !hasVal.updateTime || hasVal.updateTime < (endOfDay - 21600000)) {
-		// 没有已存数据，或已存数据存储于当天18:00前，则更新当天数据。
-		const sns = await graphQLFetch.requestSequenceNumbersWithDay(beginOfDay, endOfDay);
-		if (sns?.troveChanges?.length > 0) {
-			sequenceNumbers.push({
-				date: dayStr,
-				id: sns.troveChanges[0].id,
-				forceUpdate: true,
-				updateTime: Date.now()
-			});
-		}
+	// if (isToday || !hasVal || !hasVal.updateTime || hasVal.updateTime < (endOfDay - 21600000)) {
+	// 没有已存数据，或已存数据存储于当天18:00前，则更新当天数据。
+	// 测试无论如何都更新数据。
+	const sns = await graphQLFetch.requestSequenceNumbersWithDay(beginOfDay, endOfDay);
+
+	if (sns?.troveChanges?.length > 0) {
+		sequenceNumbers.push({
+			date: dayStr,
+			id: sns.troveChanges[0].id,
+			forceUpdate: true,
+			updateTime: Date.now()
+		});
 	}
+	// }
 
 	currentCalling += 1;
 
