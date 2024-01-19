@@ -15,24 +15,21 @@ const getSystemStateWithSequenceNumbers = async () => {
 	if (res?.systemStates?.length > 0) {
 		const dataObjs = [];
 
-		res.systemStates.forEach((item, idx) => {
+		for (let idx = 0; idx < res.systemStates.length; idx++) {
+			const item = res.systemStates[idx];
+
 			const dataObj = {
 				date: sequenceNumbers[idx].date,
 				collateral: Number(item.totalCollateral),
-				debt: Number(item.totalDebt)
+				debt: Number(item.totalDebt),
+				updateTime: sequenceNumbers[idx].updateTime
 			};
 
-			if (sequenceNumbers[idx].forceUpdate) {
-				setTimeout(() => {
-					dbManager.update(db, table, dataObj)
-				}, 1000);
-			} else {
-				dataObjs.push(dataObj);
-			}
-		});
+			dataObjs.push(dataObj);
+		}
 
 		if (dataObjs.length > 0) {
-			await dbManager.add(db, table, dataObjs);
+			return await dbManager.add(db, table, dataObjs);
 		}
 
 		return;
@@ -42,21 +39,22 @@ const getSystemStateWithSequenceNumbers = async () => {
 const getHistoryByDate = async (day) => {
 	if (currentCalling >= historyCap) {
 		return await getSystemStateWithSequenceNumbers();
-	};
+	}
 
-	const dayStr = day.toLocaleDateString()
+	const dayStr = day.toLocaleDateString();
+	const beginOfDay = Math.floor(new Date(dayStr).getTime() / 1000);
+	const endOfDay = beginOfDay + 86399;
 	const hasVal = await dbManager.read(db, table, "date", dayStr);
 
-	if (!hasVal) {
-		const beginOfDay = Math.floor(new Date(dayStr).getTime() / 1000);
-		const endOfDay = beginOfDay + 86399;
+	if (!hasVal || !hasVal.updateTime || hasVal.updateTime < (endOfDay - 21600000)) {
+		// 没有已存数据，或已存数据存储于当天18:00前，则更新当天数据。
 		const sns = await graphQLFetch.requestSequenceNumbersWithDay(beginOfDay, endOfDay);
-
 		if (sns?.troveChanges?.length > 0) {
 			sequenceNumbers.push({
 				date: dayStr,
 				id: sns.troveChanges[0].id,
-				forceUpdate: !!hasVal
+				forceUpdate: true,
+				updateTime: Date.now()
 			});
 		}
 	}
@@ -73,6 +71,7 @@ const main = async (chainId) => {
 
 	if (db) {
 		await getHistoryByDate(new Date(), true);
+		db.close();
 	}
 
 };
@@ -80,7 +79,8 @@ const main = async (chainId) => {
 this.addEventListener('message', async e => {
 	if (e.data.cmd === "fetch") {
 		await main(e.data.params);
-		this.postMessage("fetched"); // 向主线程发送消息
+
+		this.postMessage("fetched");
 		this.close();
 	}
 });

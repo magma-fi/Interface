@@ -1,47 +1,68 @@
 const dbManager = {
-	_dbConnector: null,
 	_db: null,
 
 	open: function (dbName, version) {
 		return new Promise((resolve, reject) => {
-			this._dbConnector = indexedDB.open(dbName, version);
+			const dbConnector = indexedDB.open(dbName, version);
 
-			this._dbConnector.onerror = event => {
-				console.error('数据库打开报错', event);
+			dbConnector.onerror = event => {
+				console.error('数据库打开报错', event.target.errorCode);
 				reject(event);
 			};
 
-			this._dbConnector.onsuccess = () => {
-				this._db = this._dbConnector.result;
+			dbConnector.onsuccess = () => {
+				this._db = dbConnector.result;
+				console.warn('数据库打开成功 version =', this._db.version);
 				resolve(this._db);
 			};
 
-			this._dbConnector.onupgradeneeded = event => {
-				console.warn("数据库升级成功！");
-
+			dbConnector.onupgradeneeded = event => {
 				this._db = event.target.result;
+				const transaction = event.target.transaction;
 
-				const objectStore = this._db.createObjectStore("history", { keyPath: "date" });
+				this._db.onerror = evt => {
+					console.error('数据库打开报错', JSON.stringify(evt));
+				};
 
+				// 0: history数据表
+				const tableName = "history";
+				const objectStore = this._db.createObjectStore(tableName, { keyPath: "date" });
 				objectStore.createIndex("date", "date", { unique: true });
 				objectStore.createIndex("collateral", "collateral", { unique: false });
 				objectStore.createIndex("debt", "debt", { unique: false });
+				objectStore.createIndex("updateTime", "updateTime", { unique: false });
 
-				resolve(this._db);
+				// if (event.oldVersion < 8) {
+				// 	let objectStore = event.currentTarget.transaction.objectStore(tableName);
+				// 	if (!objectStore) {
+				// 		objectStore = this._db.createObjectStore(tableName, { keyPath: "date" });
+				// 		objectStore.createIndex("date", "date", { unique: true });
+				// 		objectStore.createIndex("collateral", "collateral", { unique: false });
+				// 		objectStore.createIndex("debt", "debt", { unique: false });
+				// 	}
+
+				// 	objectStore.createIndex("updateTime", "updateTime", { unique: false });
+				// }
+
+				transaction.oncomplete = () => {
+					console.warn("数据库升级成功", event.newVersion);
+					resolve(this._db);
+				};
+
 			}
 		});
 	},
 
 	read: function (db, table, field, condition) {
 		return new Promise((resolve, reject) => {
-			const transaction = db.transaction([table], "readonly");
+			const transaction = db.transaction(table, "readonly");
 			const objectStore = transaction.objectStore(table);
 			const index = objectStore.index(field);
 			const request = index.get(condition);
 
 			request.onerror = event => {
 				console.error('事务失败', event);
-				resolve(event);
+				reject(event);
 			};
 
 			request.onsuccess = event => {
@@ -57,11 +78,11 @@ const dbManager = {
 
 	update: function (db, table, dataObj) {
 		return new Promise((resolve, reject) => {
-			const request = db.transaction([table], 'readwrite')
+			const request = db.transaction(table, 'readwrite')
 				.objectStore(table)
 				.put(dataObj);
 
-			request.onsuccess = event => {
+			request.onsuccess = () => {
 				return resolve(true);
 			};
 
@@ -73,7 +94,7 @@ const dbManager = {
 
 	add: function (db, table, dataObjs) {
 		return new Promise((resolve, reject) => {
-			const transaction = db.transaction([table], "readwrite");
+			const transaction = db.transaction(table, "readwrite");
 			const objectStore = transaction.objectStore(table);
 
 			let howMany = 0;
@@ -86,7 +107,7 @@ const dbManager = {
 			}
 
 			dataObjs.forEach(element => {
-				const request = objectStore.add(element);
+				const request = objectStore.put(element);
 
 				request.onsuccess = event => {
 					countWriten();

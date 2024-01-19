@@ -34,6 +34,7 @@ const graphQLFetch = {
 				systemStates(where: {sequenceNumber_in: [${idList}]}) {
 					totalCollateral
 					totalDebt
+					id
 				}
 			}
 		`});

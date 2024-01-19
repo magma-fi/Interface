@@ -66,7 +66,7 @@ export const appController: {
 		this._dbConnector = window.indexedDB.open("magma-db-" + chainId, 1);
 
 		this._dbConnector.onerror = event => {
-			console.error('数据库打开报错', event);
+			console.error('数据库打开出错', event);
 		};
 
 		this._dbConnector.onsuccess = () => {
@@ -76,7 +76,9 @@ export const appController: {
 	},
 
 	readAll: function (onDone) {
-		const objectStore = this._db.transaction(["history"]).objectStore("history");
+		const objectStore = this._db
+			.transaction("history", "readonly")
+			.objectStore("history");
 
 		objectStore.openCursor().onsuccess = (event) => {
 			const cursor: IDBCursor = event.target.result;

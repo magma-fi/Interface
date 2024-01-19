@@ -232,7 +232,7 @@ export const MarketView = ({
 			const dom = document.getElementById("marketView");
 			setChartBoxWidth(dom?.clientWidth || 400);
 		}, 2000);
-	}, [externalDataDone]);
+	}, [chainId, changes.length, externalDataDone, price]);
 
 
 	if (market?.symbol === "DAI" || market?.symbol === "USDC") {
