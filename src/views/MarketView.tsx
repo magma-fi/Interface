@@ -234,6 +234,7 @@ export const MarketView = ({
 		}, 2000);
 	}, [chainId, changes.length, externalDataDone, price]);
 
+	// console.debug("xxx changes =", changes)
 
 	if (market?.symbol === "DAI" || market?.symbol === "USDC") {
 		return <div className="marketView">
@@ -771,7 +772,7 @@ export const MarketView = ({
 						strokeDasharray="1"
 						stroke="#ffffff30" />
 
-					{/* <Tooltip /> */}
+					<Tooltip />
 
 					<Area type="monotone" dataKey="debtAfter" stroke="#F25454CC" fillOpacity={1} fill="url(#colorPv)" />
 
