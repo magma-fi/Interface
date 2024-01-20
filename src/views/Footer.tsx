@@ -1,4 +1,5 @@
 import { useLang } from "../hooks/useLang";
+import { version } from "../../package.json";
 
 export const Footer = () => {
 	const { t } = useLang();
@@ -6,9 +7,14 @@ export const Footer = () => {
 	return <div
 		className="footer"
 		style={{ marginTop: "1.5rem" }}>
-		<img
-			src="images/logo+text.png"
-			height="24px" />
+		<div className="flex-row-align-left">
+			<img
+				src="images/logo+text.png"
+				height="24px" />
+
+			<div className="label smallLabel">v{version}</div>
+		</div>
+
 
 		<div className="flex-row-align-left">
 			{/* <a
@@ -17,7 +23,7 @@ export const Footer = () => {
 				{t("audit")}
 			</a> */}
 
-			<div className="label">Designed and built with ❤️ by the FilDA team 🌏</div>
+			<div className="label">{t("footerInfo")}</div>
 		</div>
 	</div>
 };
