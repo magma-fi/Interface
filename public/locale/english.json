@@ -158,5 +158,6 @@
 	"wallet": "Wallet",
 	"available2Repay": "Available to Repay",
 	"footerInfo": "Designed and built with ❤️ by the Magma team 🌏",
-	"inProcess": "In process"
+	"inProcess": "In process",
+	"deposits": "deposits"
 }

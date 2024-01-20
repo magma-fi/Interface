@@ -23,9 +23,10 @@ import { useLiquitySelector } from "@liquity/lib-react";
 import { graphqlAsker } from "../libs/graphqlAsker";
 import { DappContract } from "../libs/DappContract.";
 import appConfig from "../appConfig.json";
-import { JsonObject } from "../libs/types";
+import { DepositByReferrer, JsonObject } from "../libs/types";
 import refererFactory from "../abis/refererFactory.json";
 import { appController } from "../libs/appController";
+import { zeroAddress } from "viem";
 
 const select = ({
 	trove,
@@ -42,7 +43,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const { chain } = useNetwork();
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
 	const { account, liquity, chainId, signer } = useLiquity();
-	const [referer, setReferer] = useState("");
+	const [referrer, setReferrer] = useState("");
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});
 	const [externalDataDone, setExternalDataDone] = useState(false);
 	const dec = Math.pow(10, WEN.decimals || 18);
@@ -51,6 +52,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 
 	const [isReferrer, setIsReferrer] = useState(false);
 	const [referralCode, setReferralCode] = useState("");
+	const [depositsByReferrer, setDepositsByReferrer] = useState<DepositByReferrer[]>()
 	const haveDeposited = trove?.collateral?.gt(0);
 
 	const [wenTokenDefault, wenTokenStatus] = useContract<LUSDToken>(
@@ -89,9 +91,12 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			);
 
 			const res = await refererFactoryContract.dappFunctions.referralAccounts.call(account);
-			if (res) {
-				setReferer(res[0])
+			if (res && (res[0] !== zeroAddress)) {
+				setReferrer(res[0]);
 				setIsReferrer(true);
+			} else {
+				setReferrer("");
+				setIsReferrer(false);
 			}
 		};
 
@@ -101,18 +106,26 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	}, [account, chainId]);
 
 	useEffect(() => {
-		if (!referer || chainId === 0) return;
+		if (!referrer || chainId === 0) return;
 
 		setTimeout(() => {
-			const query = graphqlAsker.requestReferer(referer)
+			const query = graphqlAsker.requestReferer(referrer)
 			graphqlAsker.ask(chainId, query, (data: any) => {
 				if (data?.frontends?.length > 0) {
 					const ref = data?.frontends[0];
 					setReferralCode(ref.code);
+
+					setDepositsByReferrer(ref.deposits.map((item: any) => {
+						return {
+							address: item.id,
+							depositedAmount: Number(item.depositedAmount),
+							// transaction: item.changes[0].transaction.id
+						} as DepositByReferrer;
+					}));
 				}
 			});
 		}, 1000);
-	}, [referer, chainId]);
+	}, [referrer, chainId]);
 
 	useEffect(() => {
 		if (!isConnected) {
@@ -209,7 +222,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 								haveDeposited={haveDeposited}
 								isReferrer={isReferrer}
 								referralCode={referralCode}
-								referer={referer} />
+								referrer={referrer}
+								deposits={depositsByReferrer} />
 						</Route>
 
 						<Route path="/">

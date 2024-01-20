@@ -79,6 +79,10 @@ export const graphqlAsker = {
 				sequenceNumber
 				code
 				kickbackRate
+				deposits(first: 20, orderBy: depositedAmount, orderDirection: desc) {
+					id
+					depositedAmount
+				}
 			}
 		}
 		`;
