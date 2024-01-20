@@ -24,7 +24,7 @@ const getSystemStateWithSequenceNumbers = async () => {
 				date: snItem.date,
 				collateral: Number(item.totalCollateral),
 				debt: Number(item.totalDebt),
-				updateTime: snItem.updateTime
+				updateTime: snItem.id //updateTime字段改用来存储id
 			};
 
 			dataObjs.push(dataObj);
@@ -46,22 +46,20 @@ const getHistoryByDate = async (day, isToday = false) => {
 	const dayStr = day.toLocaleDateString();
 	const beginOfDay = Math.floor(new Date(dayStr).getTime() / 1000);
 	const endOfDay = beginOfDay + 86399;
-	// const hasVal = await dbManager.read(db, table, "date", dayStr);
+	const hasVal = await dbManager.read(db, table, "date", dayStr);
 
 	// if (isToday || !hasVal || !hasVal.updateTime || hasVal.updateTime < (endOfDay - 21600000)) {
-	// 没有已存数据，或已存数据存储于当天18:00前，则更新当天数据。
-	// 测试无论如何都更新数据。
-	const sns = await graphQLFetch.requestSequenceNumbersWithDay(beginOfDay, endOfDay);
-
-	if (sns?.troveChanges?.length > 0) {
-		sequenceNumbers.push({
-			date: dayStr,
-			id: sns.troveChanges[0].id,
-			forceUpdate: true,
-			updateTime: Date.now()
-		});
+	if (isToday || !hasVal || !hasVal.updateTime) {
+		const sns = await graphQLFetch.requestSequenceNumbersWithDay(beginOfDay, endOfDay);
+		if (sns?.troveChanges?.length > 0 && sns?.troveChanges[0]?.id !== hasVal?.updateTime) {
+			sequenceNumbers.push({
+				date: dayStr,
+				id: sns.troveChanges[0].id,
+				forceUpdate: true,
+				updateTime: Date.now()
+			});
+		}
 	}
-	// }
 
 	currentCalling += 1;
 
