@@ -628,6 +628,10 @@ h4 {
   width: 100%;
 }
 
+.marketViewLayout {
+  // 
+}
+
 .card {
   flex: 1 1;
   width: calc(100% - var(--flex-gap-middle) * 2);
@@ -1263,6 +1267,10 @@ input {
     display: flex;
     flex-direction: column-reverse;
     grid-template-columns: none;
+  }
+
+  .marketViewLayout {
+    flex-direction: column;
   }
 
   .card {

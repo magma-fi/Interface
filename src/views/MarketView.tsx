@@ -234,8 +234,6 @@ export const MarketView = ({
 		}, 2000);
 	}, [chainId, changes.length, externalDataDone, price]);
 
-	// console.debug("xxx changes =", changes)
-
 	if (market?.symbol === "DAI" || market?.symbol === "USDC") {
 		return <div className="marketView">
 			<h2>Coming soon...</h2>
@@ -349,7 +347,7 @@ export const MarketView = ({
 	return <>
 		<div
 			id="marketView"
-			className="marketView">
+			className="marketView marketViewLayout">
 			<div>
 				{trove.status !== "open" && <div className="card">
 					<img className="illustration" src="images/1wen=1usd.png" />
