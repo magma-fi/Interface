@@ -192,7 +192,7 @@ export const ReferralView = ({
 								src="images/link.png"
 								width="20px" />
 
-							<div>{copied ? t("copiedSuccessfully") : globalContants.HOST + referralCode}</div>
+							<div className={!referralCode ? "label smallLabel" : ""}>{referralCode ? (copied ? t("copiedSuccessfully") : globalContants.HOST + referralCode) : t("inProcess") + "..."}</div>
 						</div>
 
 						<button
@@ -201,7 +201,8 @@ export const ReferralView = ({
 								paddingLeft: "2rem",
 								paddingRight: "2rem"
 							}}
-							onClick={handleCopy}>
+							onClick={handleCopy}
+							disabled={!referralCode}>
 							<img src="images/copy.png" />
 
 							{t("copyURL")}

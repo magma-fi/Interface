@@ -157,5 +157,6 @@
 	"network": "Network",
 	"wallet": "Wallet",
 	"available2Repay": "Available to Repay",
-	"footerInfo": "Designed and built with ❤️ by the Magma team 🌏"
+	"footerInfo": "Designed and built with ❤️ by the Magma team 🌏",
+	"inProcess": "In process"
 }

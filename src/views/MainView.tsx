@@ -91,6 +91,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			const res = await refererFactoryContract.dappFunctions.referralAccounts.call(account);
 			if (res) {
 				setReferer(res[0])
+				setIsReferrer(true);
 			}
 		};
 
@@ -106,8 +107,6 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			const query = graphqlAsker.requestReferer(referer)
 			graphqlAsker.ask(chainId, query, (data: any) => {
 				if (data?.frontends?.length > 0) {
-					setIsReferrer(true);
-
 					const ref = data?.frontends[0];
 					setReferralCode(ref.code);
 				}
