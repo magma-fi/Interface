@@ -5,15 +5,17 @@ import { useLang } from "../hooks/useLang";
 import { useEffect, useState } from "react";
 import { useLiquity } from "../hooks/LiquityContext";
 import appConfig from "../appConfig.json";
-import { JsonObject } from "../libs/types";
+import { DepositByReferrer, JsonObject } from "../libs/types";
 import { Decimal } from "lib-base";
 import { StabilityPool } from "lib-ethers/dist/types";
 import { useContract } from "../hooks/useContract";
 import StabilityPoolAbi from "lib-ethers/abi/StabilityPool.json";
-import { MAGMA, globalContants } from "../libs/globalContants";
+import { MAGMA, WEN, globalContants } from "../libs/globalContants";
 import copy from "copy-to-clipboard";
 import { DappContract } from "../libs/DappContract.";
 import refererFactory from "../abis/refererFactory.json";
+import referrerABI from "../abis/referer.json";
+import { shortenAddress } from "../utils";
 // import { ethers } from "ethers";
 // import { EthersSigner } from "lib-ethers";
 
@@ -21,16 +23,18 @@ export const ReferralView = ({
 	isReferrer = false,
 	haveDeposited = false,
 	referralCode = "",
-	referer = ""
+	referrer = "",
+	deposits
 }: {
 	isReferrer: boolean;
 	haveDeposited: boolean;
 	referralCode: string;
-	referer: string;
+	referrer: string;
+	deposits?: DepositByReferrer[];
 }) => {
 	const { t } = useLang();
 	const { address } = useAccount();
-	const { liquity, chainId, provider, signer } = useLiquity();
+	const { liquity, chainId, provider, signer, publicClient } = useLiquity();
 	// const txId = useMemo(() => String(Date.now()), []);
 	// const transactionState = useMyTransactionState(txId, true);
 	const [loading, setLoading] = useState(false);
@@ -54,7 +58,7 @@ export const ReferralView = ({
 		const read = async () => {
 			if (stabilityPoolStatus === "LOADED" && address) {
 				// const res = await stabilityPoolDefault?.getFrontEndLQTYGain(address);
-				const res = await stabilityPoolDefault?.getFrontEndLQTYGain(referer);
+				const res = await stabilityPoolDefault?.getFrontEndLQTYGain(referrer);
 				if (res) {
 					setFrontendRewards(Decimal.from(res.toString()).div(MAGMA.decimals));
 				}
@@ -114,6 +118,21 @@ export const ReferralView = ({
 		}, 3000);
 	};
 
+	// useEffect(() => {
+	// 	if (!referrer) return;
+
+	// 	const getRes = async () => {
+	// 		const referrerContract = new DappContract(
+	// 			referrer,
+	// 			referrerABI,
+	// 			signer
+	// 		);
+	// 		const res = await referrerContract.dappFunctions.creater.call();
+	// 	};
+
+	// 	getRes();
+	// }, [referrer, signer]);
+
 	return <div className="mainContainer">
 		<div className="titleBox">
 			<img
@@ -123,93 +142,117 @@ export const ReferralView = ({
 			<h2>{t("becomeAmbassador")}</h2>
 
 			<div className="description">{t("referralHeaderDescription")}</div>
+		</div>
 
-			{!isReferrer && <div
-				className="card bigBox">
-				<img src="images/register-address.png" />
+		{!isReferrer && <div
+			className="card bigBox">
+			<img src="images/register-address.png" />
 
-				<h3>{t("registerYourAddress")}</h3>
+			<h3>{t("registerYourAddress")}</h3>
 
-				<div
-					className="card bigBox"
-					style={{ width: "fit-content" }}>
+			<div
+				className="card bigBox"
+				style={{ width: "fit-content" }}>
+				<div className="flex-row-align-left">
+					<img
+						src="images/link.png"
+						width="20px" />
+
+					<div>{globalContants.HOST}******</div>
+				</div>
+
+				<div className="flex-column-align-center">
+					<button
+						className="primaryButton bigButton"
+						style={{
+							paddingLeft: "5rem",
+							paddingRight: "5rem"
+						}}
+						disabled={!address || loading || !refererFactoryAddress}
+						onClick={handleRegisterFrontend}>
+						<img src="images/wallet-dark.png" />
+
+						{loading ? t("registering") + "..." : t("registerAddress")}
+					</button>
+
+					{/* {haveDeposited && <div className="label smallLabel">{t("mustHaveNoDeposit")}</div>} */}
+
+					{errorMessage && <div className="label smallLabel">{errorMessage}</div>}
+				</div>
+			</div>
+		</div>}
+
+		{isReferrer && <div
+			className="card bigBox referralBox">
+			<div className="flex-column-align-left">
+				<div className="label smallLabel">{t("totalRewardsReceived")}</div>
+
+				<div className="flex-row-align-left">
+					<img
+						src="images/magma.png"
+						width="24px" />
+
+					<h4>{frontendRewards.toString(2)}&nbsp;{t("magmaPoints")}</h4>
+				</div>
+			</div>
+
+			<div className="verticalDivision">&nbsp;</div>
+
+			<div
+				className="flex-column-align-left"
+				style={{
+					gap: "1rem",
+					flex: "1 1"
+				}}>
+				<div className="label">{t("referralURL")}</div>
+
+				<div className="card bigBox urlLabel">
 					<div className="flex-row-align-left">
 						<img
 							src="images/link.png"
 							width="20px" />
 
-						<div>{globalContants.HOST}******</div>
+						<div className={!referralCode ? "label smallLabel" : ""}>{referralCode ? (copied ? t("copiedSuccessfully") : globalContants.HOST + referralCode) : t("inProcess") + "..."}</div>
 					</div>
 
-					<div className="flex-column-align-center">
-						<button
-							className="primaryButton bigButton"
-							style={{
-								paddingLeft: "5rem",
-								paddingRight: "5rem"
-							}}
-							disabled={!address || loading || !refererFactoryAddress}
-							onClick={handleRegisterFrontend}>
-							<img src="images/wallet-dark.png" />
+					<button
+						className="primaryButton"
+						style={{
+							paddingLeft: "2rem",
+							paddingRight: "2rem"
+						}}
+						onClick={handleCopy}
+						disabled={!referralCode}>
+						<img src="images/copy.png" />
 
-							{loading ? t("registering") + "..." : t("registerAddress")}
-						</button>
-
-						{/* {haveDeposited && <div className="label smallLabel">{t("mustHaveNoDeposit")}</div>} */}
-
-						{errorMessage && <div className="label smallLabel">{errorMessage}</div>}
-					</div>
+						{t("copyURL")}
+					</button>
 				</div>
-			</div>}
+			</div>
+		</div>}
 
-			{isReferrer && <div
-				className="card bigBox referralBox">
-				<div className="flex-column-align-left">
-					<div className="label smallLabel">{t("totalRewardsReceived")}</div>
+		{deposits && <div className="depositsBox">
+			<h3>{t("deposits")}</h3>
 
-					<div className="flex-row-align-left">
-						<img
-							src="images/magma.png"
-							width="24px" />
+			<div className="depositsList">
+				{deposits.map(depositItem => {
+					return <div className="card depositItem">
+						<a
+							className="textButton"
+							style={{ color: "#FF7F1E" }}
+							href={publicClient?.chain?.blockExplorers?.default.url + "/address/" + depositItem.address}
+							target="_blank">
+							{shortenAddress(depositItem.address)}
 
-						<h4>{frontendRewards.toString(2)}&nbsp;{t("magmaPoints")}</h4>
-					</div>
-				</div>
-
-				<div className="verticalDivision">&nbsp;</div>
-
-				<div
-					className="flex-column-align-left"
-					style={{
-						gap: "1rem",
-						flex: "1 1"
-					}}>
-					<div className="label">{t("referralURL")}</div>
-
-					<div className="card bigBox urlLabel">
-						<div className="flex-row-align-left">
 							<img
-								src="images/link.png"
-								width="20px" />
+								id="externalLink"
+								src="images/external-orange.png" />
+						</a>
 
-							<div className={!referralCode ? "label smallLabel" : ""}>{referralCode ? (copied ? t("copiedSuccessfully") : globalContants.HOST + referralCode) : t("inProcess") + "..."}</div>
-						</div>
-
-						<button
-							className="primaryButton"
-							style={{
-								paddingLeft: "2rem",
-								paddingRight: "2rem"
-							}}
-							onClick={handleCopy}
-							disabled={!referralCode}>
-							<img src="images/copy.png" />
-
-							{t("copyURL")}
-						</button>
+						<div className="label smallLabel">{t("deposited")}:&nbsp;{depositItem.depositedAmount}&nbsp;{WEN.symbol}</div>
 					</div>
-				</div>
-			</div>}
-		</div>
+				})}
+			</div>
+		</div>}
 	</div>
 };
