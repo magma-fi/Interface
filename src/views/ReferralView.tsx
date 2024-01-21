@@ -231,7 +231,7 @@ export const ReferralView = ({
 			</div>
 		</div>}
 
-		{deposits && <div className="depositsBox">
+		{deposits && deposits.length > 0 && <div className="depositsBox">
 			<h3>{t("deposits")}</h3>
 
 			<div className="depositsList">
