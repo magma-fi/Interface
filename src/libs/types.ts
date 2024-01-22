@@ -85,5 +85,6 @@ export type MixedError = {
 export type DepositByReferrer = {
 	address: string,
 	depositedAmount: number,
-	transaction?: string
+	latestTransaction?: string,
+	lastUpdate?: number;
 }

@@ -998,7 +998,11 @@ h4 {
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
-        gap: var(--flex-gap-small)
+        gap: var(--flex-gap-small);
+      }
+
+      .withinButton {
+        // 
       }
     }
   }
@@ -1342,9 +1346,13 @@ input {
           align-items: center;
         }
 
-        .tableCell:last-child::before {
-          content: " ";
+        .withinButton {
+          align-items: flex-start;
         }
+
+        // .tableCell:last-child::before {
+        //   content: " ";
+        // }
       }
     }
   }

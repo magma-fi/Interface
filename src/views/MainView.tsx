@@ -119,7 +119,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 						return {
 							address: item.id,
 							depositedAmount: Number(item.depositedAmount),
-							// transaction: item.changes[0].transaction.id
+							latestTransaction: item.changes[0].transaction.id,
+							lastUpdate: item.changes[0].transaction.timestamp
 						} as DepositByReferrer;
 					}));
 				}

@@ -234,24 +234,55 @@ export const ReferralView = ({
 		{deposits && deposits.length > 0 && <div className="depositsBox">
 			<h3>{t("deposits")}</h3>
 
-			<div className="depositsList">
-				{deposits.map(depositItem => {
-					return <div className="card depositItem">
-						<a
-							className="textButton"
-							style={{ color: "#FF7F1E" }}
-							href={publicClient?.chain?.blockExplorers?.default.url + "/address/" + depositItem.address}
-							target="_blank">
-							{shortenAddress(depositItem.address)}
+			<div className="table">
+				<div className="tableBody">
+					{deposits.map(depositItem => {
+						return <div
+							className="tableRow"
+							style={{ alignItems: "center" }}
+							key={depositItem.address}>
+							<div className="tableCell label">
+								<div className="label">{t("owner")}</div>
 
-							<img
-								id="externalLink"
-								src="images/external-orange.png" />
-						</a>
+								<div className="flex-row-align-left">
+									<img
+										src="images/wallet.png"
+										height="16px" />
 
-						<div className="label smallLabel">{t("deposited")}:&nbsp;{depositItem.depositedAmount}&nbsp;{WEN.symbol}</div>
-					</div>
-				})}
+									{shortenAddress(depositItem.address)}
+								</div>
+							</div>
+
+							<div className="tableCell label smallLabel">
+								<div className="label">{t("staked")}</div>
+
+								{depositItem.depositedAmount}&nbsp;{WEN.symbol}
+							</div>
+
+							{depositItem.lastUpdate && <div className="tableCell">
+								<div className="label">{t("lastUpdate")}</div>
+
+								{new Date(depositItem.lastUpdate).toLocaleString()}
+							</div>}
+
+							{depositItem.latestTransaction && <div className="tableCell withinButton">
+								<div className="label">{t("latestTransactions")}</div>
+
+								<a
+									className="textButton"
+									style={{ color: "#FF7F1E" }}
+									href={publicClient?.chain?.blockExplorers?.default.url + "/tx/" + depositItem.latestTransaction}
+									target="_blank">
+									{shortenAddress(depositItem.latestTransaction)}
+
+									<img
+										id="externalLink"
+										src="images/external-orange.png" />
+								</a>
+							</div>}
+						</div>
+					})}
+				</div>
 			</div>
 		</div>}
 	</div>

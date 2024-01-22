@@ -76,12 +76,27 @@ export const graphqlAsker = {
 			frontends(
 				where: {owner_contains_nocase: "${owner}"}
 			) {
+				owner {
+					id
+				}
 				sequenceNumber
 				code
 				kickbackRate
-				deposits(first: 20, orderBy: depositedAmount, orderDirection: desc) {
+				deposits(first: 50, orderBy: depositedAmount, orderDirection: desc) {
 					id
 					depositedAmount
+					changes(
+						first: 1
+						where: {stabilityDepositOperation: "depositTokens"}
+						orderBy: sequenceNumber
+						orderDirection: desc
+					) {
+						stabilityDepositOperation
+						transaction {
+							id
+							timestamp
+						}
+					}
 				}
 			}
 		}
