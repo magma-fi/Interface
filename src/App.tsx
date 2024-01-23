@@ -11,6 +11,7 @@ import { AppLoader } from "./components/AppLoader";
 import { useAsyncValue } from "./hooks/AsyncValue";
 import { appController } from "./libs/appController";
 import { TransactionProvider } from "./components/Transaction";
+import { createModal } from "@rabby-wallet/rabbykit";
 
 // Start pre-fetching the config
 getConfig().then(config => {
@@ -44,6 +45,14 @@ const wagmiCfg = createConfig({
   webSocketPublicClient
 });
 
+const rabbyKit = createModal({
+  chains,
+  wagmi: wagmiCfg,
+  projectId: "a1362d88b5470c1006e169ce345815ae",
+  appName: "Magma Finance",
+  showWalletConnect: true
+});
+
 const App = () => {
   const config = useAsyncValue(getConfig);
   const loader = <AppLoader />;
@@ -58,7 +67,8 @@ const App = () => {
       <TransactionProvider>
         <LiquityFrontend
           chains={chains}
-          loader={loader} />
+          loader={loader}
+          rabbyKit={rabbyKit} />
       </TransactionProvider>
     </LiquityProvider>
   </WagmiConfig> : <></>

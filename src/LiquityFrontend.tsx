@@ -15,8 +15,9 @@ import { Chain } from "viem";
 type LiquityFrontendProps = {
   chains?: Chain[];
   loader?: React.ReactNode;
+  rabbyKit?: unknown;
 };
-export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader,chains }) => {
+export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader, chains, rabbyKit }) => {
   const { account, provider, liquity } = useLiquity();
 
   // For console tinkering ;-)
@@ -37,7 +38,9 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader,chains 
         <StabilityViewProvider>
           <StakingViewProvider>
             <BondsProvider>
-              <MainView chains={chains!} />
+              <MainView
+                chains={chains!}
+                rabbyKit={rabbyKit} />
             </BondsProvider>
           </StakingViewProvider>
         </StabilityViewProvider>

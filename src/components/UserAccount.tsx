@@ -17,7 +17,7 @@ export const UserAccount = ({
   onConnect: () => void;
   isSupportedNetwork: boolean;
   chainId: number;
-  chains: Chain[]
+  chains: Chain[];
 }) => {
   const { publicClient } = useLiquity();
   const { t } = useLang();
