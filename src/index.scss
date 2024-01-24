@@ -612,6 +612,7 @@ h4 {
 .description {
   color: var(--text-secondary);
   font-family: Metropolis400;
+  line-height: 1.5;
 }
 
 .comments {
@@ -625,6 +626,10 @@ h4 {
   grid-template-columns: auto auto;
   gap: var(--flex-gap-larger);
   width: 100%;
+}
+
+.marketViewLayout {
+  // 
 }
 
 .card {
@@ -993,7 +998,11 @@ h4 {
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
-        gap: var(--flex-gap-small)
+        gap: var(--flex-gap-small);
+      }
+
+      .withinButton {
+        // 
       }
     }
   }
@@ -1113,6 +1122,27 @@ input {
   border: 1px solid var(--surface-alert-error-stroke);
   background: var(--surface-alert-error);
   color: var(--text-error);
+}
+
+.depositsBox {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--flex-gap-big);
+
+  .depositsList {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    gap: var(--flex-gap-big);
+    width: 100%;
+
+    .depositItem {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-direction: row;
+    }
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1264,6 +1294,10 @@ input {
     grid-template-columns: none;
   }
 
+  .marketViewLayout {
+    flex-direction: column;
+  }
+
   .card {
     width: calc(100% - var(--flex-gap-small) * 2);
     padding: var(--flex-gap-small);
@@ -1312,9 +1346,13 @@ input {
           align-items: center;
         }
 
-        .tableCell:last-child::before {
-          content: " ";
+        .withinButton {
+          align-items: flex-start;
         }
+
+        // .tableCell:last-child::before {
+        //   content: " ";
+        // }
       }
     }
   }
@@ -1362,5 +1400,15 @@ input {
 
   .chainNameLabel {
     max-width: 4rem;
+  }
+
+  .depositsBox {
+    .depositsList {
+      display: flex;
+      flex-direction: column;
+      grid-template-columns: none;
+      gap: var(--flex-gap-big);
+      width: 100%;
+    }
   }
 }

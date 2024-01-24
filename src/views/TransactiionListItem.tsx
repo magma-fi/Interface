@@ -82,8 +82,10 @@ export const TransactiionListItem = ({
 				</div>
 
 				{badgeTypes && <div className="flex-row-align-left">
-					{badgeTypes.map(badge => {
-						return <Badge type={badge} />
+					{badgeTypes.map((badge, idx) => {
+						return <Badge
+							key={badge + idx}
+							type={badge} />
 					})}
 				</div>}
 			</div>

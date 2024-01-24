@@ -25,15 +25,18 @@ import { TransactiionListItem } from "./TransactiionListItem";
 import appConfig from "../appConfig.json";
 import { useLiquity } from "../hooks/LiquityContext";
 import React from "react";
+import { appController } from "../libs/appController";
 
 export const MarketView = ({
 	market,
 	constants,
-	isReferrer
+	isReferrer,
+	externalDataDone
 }: {
 	market: Coin;
 	constants: Record<string, Decimal>;
 	isReferrer: boolean;
+	externalDataDone?: boolean;
 }) => {
 	const selector = useMemo(() => {
 		return (state: LiquityStoreState) => {
@@ -61,7 +64,6 @@ export const MarketView = ({
 			};
 		};
 	}, []);
-
 	const { t } = useLang();
 	const {
 		price,
@@ -166,48 +168,71 @@ export const MarketView = ({
 		}, 1000);
 	}, [address, chainId]);
 
+	// useEffect(() => {
+	// 	if (chainId <= 0 || changes.length > 0) return;
+
+	// 	setTimeout(() => {
+	// 		const startTime = Math.floor(Date.now() / 1000) - globalContants.MONTH_SECONDS;
+	// 		const query = graphqlAsker.requestChangeHistory(startTime);
+	// 		graphqlAsker.ask(chainId, query, (data: any) => {
+	// 			const tempArr: TroveChangeData[] = [];
+	// 			let yesterday = "";
+
+	// 			for (let i = data?.troveChanges.length - 1; i >= 0; i--) {
+	// 				const item = data.troveChanges[i];
+	// 				const time = new Date(item.transaction.timestamp * 1000);
+	// 				const month = time.getMonth() + 1;
+	// 				const day = time.getDate();
+	// 				const date = month + "-" + day;
+
+	// 				if (yesterday !== date) {
+	// 					yesterday = date;
+
+	// 					tempArr.push({
+	// 						collateralAfter: Math.floor(Number(price.mul(item.collateralAfter)) / 1000),
+	// 						debtAfter: Math.floor(Number(item.debtAfter) / 1000),
+	// 						timestamp: item.transaction.timestamp,
+	// 						date: yesterday
+	// 					} as TroveChangeData);
+	// 				}
+	// 			}
+
+	// 			setChanges(tempArr.reverse());
+	// 		});
+	// 	}, 2000);
+	// }, [chainId]);
+
 	useEffect(() => {
-		if (chainId <= 0 || changes.length > 0) return;
+		if (!externalDataDone || !price || changes.length > 0) return;
+
+		const tempArr: TroveChangeData[] = [];
+		let howMany = 0
+
+		appController.openDB(chainId, () => {
+			appController.readAll((cursor: IDBCursor) => {
+				howMany += 1;
+
+				const key: string = cursor.key.toString();
+
+				tempArr.push({
+					collateralAfter: Number(price.mul(cursor.value.collateral)) / 1000,
+					debtAfter: Number(cursor.value.debt) / 1000,
+					date: key.substring(0, key.lastIndexOf("/"))
+				} as TroveChangeData)
+
+				if (howMany < 15) {
+					cursor.continue();
+				}
+			});
+		});
+
+		setChanges(tempArr);
 
 		setTimeout(() => {
-			const startTime = Math.floor(Date.now() / 1000) - globalContants.MONTH_SECONDS;
-			const query = graphqlAsker.requestChangeHistory(startTime);
-			graphqlAsker.ask(chainId, query, (data: any) => {
-				const tempArr: TroveChangeData[] = [];
-				let yesterday = "";
-
-				for (let i = data?.troveChanges.length - 1; i >= 0; i--) {
-					const item = data.troveChanges[i];
-					const time = new Date(item.transaction.timestamp * 1000);
-					const month = time.getMonth() + 1;
-					const day = time.getDate();
-					const date = month + "-" + day;
-
-					if (yesterday !== date) {
-						yesterday = date;
-
-						tempArr.push({
-							collateralAfter: Math.floor(Number(price.mul(item.collateralAfter)) / 1000),
-							debtAfter: Math.floor(Number(item.debtAfter) / 1000),
-							timestamp: item.transaction.timestamp,
-							date: yesterday
-						} as TroveChangeData);
-					}
-				}
-
-				setChanges(tempArr.reverse());
-			});
+			const dom = document.getElementById("marketView");
+			setChartBoxWidth(dom?.clientWidth || 400);
 		}, 2000);
-	}, [chainId]);
-
-	useEffect(() => {
-		if (changes.length > 0) {
-			setTimeout(() => {
-				const dom = document.getElementById("marketView");
-				setChartBoxWidth(dom?.clientWidth || 400);
-			}, 1000);
-		}
-	}, [changes])
+	}, [chainId, changes.length, externalDataDone, price]);
 
 	if (market?.symbol === "DAI" || market?.symbol === "USDC") {
 		return <div className="marketView">
@@ -322,7 +347,7 @@ export const MarketView = ({
 	return <>
 		<div
 			id="marketView"
-			className="marketView">
+			className="marketView marketViewLayout">
 			<div>
 				{trove.status !== "open" && <div className="card">
 					<img className="illustration" src="images/1wen=1usd.png" />
@@ -745,7 +770,7 @@ export const MarketView = ({
 						strokeDasharray="1"
 						stroke="#ffffff30" />
 
-					{/* <Tooltip /> */}
+					<Tooltip />
 
 					<Area type="monotone" dataKey="debtAfter" stroke="#F25454CC" fillOpacity={1} fill="url(#colorPv)" />
 

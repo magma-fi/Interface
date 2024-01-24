@@ -116,10 +116,10 @@
 	"watchWenToWallet": "Add WEN to your wallet",
 	"knowSlippage": "I am aware that there might be losses and slippage during the exchange",
 	"rewardsFromCollateral": "Rewards from Collateral",
-	"rewardsDescription": "Credited to your wallet automatically",
-	"swapioUSD2IOTX": "Instantly swap ioUSD to IOTX.",
+	"rewardsDescription": "These are credited to your wallet after unstaking",
+	"swapioUSD2IOTX": "Instantly swap WEN to IOTX",
 	"note": "Note",
-	"differentWithRepaying": "This is different that repaying your debt.",
+	"differentWithRepaying": "This is different from repaying your debt",
 	"amount2Swap": "Amount to Swap",
 	"currentRate": "Current Rate",
 	"connectYourWallet": "Connect Your Wallet",
@@ -142,7 +142,7 @@
 	"depositValue": "Deposit Value",
 	"referral": "Referral",
 	"becomeAmbassador": "Become Magma's ambassador",
-	"referralHeaderDescription": "Invite your friends and get Magma Points when they stake WEN. The more points the more MGM you'll receive in the airdrop",
+	"referralHeaderDescription": "Earn Magma Points when you invite friends to stake WEN. Committing to help secure Magma Protocol’s WEN stablecoin demonstrates genuine commitment to ensuring WEN’s success. Magma Ambassadors are valued community members so will be rewarded for their participation.",
 	"registerYourAddress": "Register your address to generate the referral link",
 	"registerAddress": "Register Address",
 	"registering": "Registering",
@@ -156,5 +156,9 @@
 	"debtBalance": "Debt Balance",
 	"network": "Network",
 	"wallet": "Wallet",
-	"available2Repay": "Available to Repay"
+	"available2Repay": "Available to Repay",
+	"footerInfo": "Designed and built with ❤️ by the Magma team 🌏",
+	"inProcess": "In process",
+	"deposits": "deposits",
+	"lastUpdate": "Last Update"
 }
