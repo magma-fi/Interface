@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { configureChains, WagmiConfig, createConfig } from "wagmi";
 import { iotexTestnet, iotex } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { LiquityProvider } from "./hooks/LiquityContext";
@@ -22,9 +23,15 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
   [iotex, iotexTestnet],
   [
     publicProvider(),
-    // jsonRpcProvider({
-    //   rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
-    // })
+    jsonRpcProvider({
+      rpc: chain => {
+        if (chain.id === 4689) {
+          return { http: "https://rpc.ankr.com/iotex" }
+        } else {
+          return null;
+        }
+      }
+    })
   ],
   { batch: { multicall: true } }
 );
