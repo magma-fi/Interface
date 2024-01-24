@@ -23,15 +23,15 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
   [iotex, iotexTestnet],
   [
     publicProvider(),
-    jsonRpcProvider({
-      rpc: chain => {
-        if (chain.id === 4689) {
-          return { http: "https://rpc.ankr.com/iotex" }
-        } else {
-          return null;
-        }
-      }
-    })
+    // jsonRpcProvider({
+    //   rpc: chain => {
+    //     if (chain.id === 4689) {
+    //       return { http: "https://iotexnode.filda.io" }
+    //     } else {
+    //       return null;
+    //     }
+    //   }
+    // })
   ],
   { batch: { multicall: true } }
 );
