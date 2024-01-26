@@ -209,7 +209,9 @@ export const MarketView = ({
 		let howMany = 0
 
 		appController.openDB(chainId, () => {
-			appController.readAll((cursor: IDBCursor) => {
+			appController.readAll((cursor?: IDBCursor) => {
+				if (!cursor) return;
+
 				howMany += 1;
 
 				const key: string = cursor.key.toString();
