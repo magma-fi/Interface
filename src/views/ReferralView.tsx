@@ -262,7 +262,7 @@ export const ReferralView = ({
 							{depositItem.lastUpdate && <div className="tableCell">
 								<div className="label">{t("lastUpdate")}</div>
 
-								{new Date(depositItem.lastUpdate).toLocaleString()}
+								{new Date(depositItem.lastUpdate * 1000).toLocaleString()}
 							</div>}
 
 							{depositItem.latestTransaction && <div className="tableCell withinButton">
