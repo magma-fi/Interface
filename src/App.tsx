@@ -5,6 +5,7 @@ import { publicProvider } from "wagmi/providers/public";
 import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
+import { SafeConnector } from "wagmi/connectors/safe"
 import { LiquityProvider } from "./hooks/LiquityContext";
 import { getConfig } from "./config";
 import { LiquityFrontend } from "./LiquityFrontend";
@@ -44,6 +45,13 @@ const wagmiCfg = createConfig({
       options: {
         projectId: "a1362d88b5470c1006e169ce345815ae",
         showQrModal: true
+      }
+    }),
+    new SafeConnector({
+      chains: [iotex],
+      options: {
+        allowedDomains: [/safe.iotex.io$/],
+        debug: false
       }
     })
   ],
