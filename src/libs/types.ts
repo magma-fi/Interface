@@ -88,3 +88,17 @@ export type DepositByReferrer = {
 	latestTransaction?: string,
 	lastUpdate?: number;
 }
+
+export enum StabilityDepositOperation {
+	depositTokens = "Stake",
+	withdrawTokens = "Unstake",
+	withdrawCollateralGain = "Claim"
+}
+
+export type StabilityTransactionRecord = {
+	id: number;
+	operation: StabilityDepositOperation;
+	amount: number;
+	timestamp: number;
+	tx: string;
+}

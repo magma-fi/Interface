@@ -51,6 +51,26 @@ export const graphqlAsker = {
 		`;
 	},
 
+	requestStabilityDepositChanges: function (account: string, howMany: number) {
+		return `
+		{
+			stabilityDepositChanges(
+				first: ${howMany}
+				where: {stabilityDeposit_contains_nocase: "${account}"}
+				orderBy: sequenceNumber
+				orderDirection: desc
+			) {
+				sequenceNumber
+				stabilityDepositOperation
+				depositedAmountChange
+				transaction {
+					timestamp
+				}
+			}
+		}
+		`;
+	},
+
 	requestChangeHistory: function (startTimestamp: number) {
 		return `
 		{
