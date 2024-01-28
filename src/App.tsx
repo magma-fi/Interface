@@ -60,13 +60,14 @@ const wagmiCfg = createConfig({
   webSocketPublicClient
 });
 
-const rabbyKit = createModal({
-  chains,
-  wagmi: wagmiCfg,
-  projectId: "a1362d88b5470c1006e169ce345815ae",
-  appName: "Magma Finance",
-  showWalletConnect: true
-});
+const rabbyKit = undefined;
+// const rabbyKit = createModal({
+//   chains,
+//   wagmi: wagmiCfg,
+//   projectId: "a1362d88b5470c1006e169ce345815ae",
+//   appName: "Magma Finance",
+//   showWalletConnect: true
+// });
 
 const App = () => {
   const config = useAsyncValue(getConfig);

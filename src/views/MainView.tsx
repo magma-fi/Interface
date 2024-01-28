@@ -133,8 +133,8 @@ export const MainView = ({ chains, rabbyKit }: {
 
 	useEffect(() => {
 		if (!isConnected) {
-			// setShowConnectModal(true);
-			return rabbyKit && rabbyKit.open();
+			setShowConnectModal(true);
+			// return rabbyKit && rabbyKit.open();
 		}
 	}, [isConnected]);
 
@@ -177,8 +177,8 @@ export const MainView = ({ chains, rabbyKit }: {
 	}, [borrowerOperationsDefault, borrowerOperationsStatus, wenTokenStatus, wenTokenDefault, troveManagerStatus, troveManagerStatus]);
 
 	const handleConnectWallet = () => {
-		// setShowConnectModal(true);
-		return rabbyKit && rabbyKit.open();
+		setShowConnectModal(true);
+		// return rabbyKit && rabbyKit.open();
 	};
 
 	const handleCloseConnectModal = () => {
@@ -251,9 +251,9 @@ export const MainView = ({ chains, rabbyKit }: {
 			</BrowserRouter>
 		</div>
 
-		{/* <ConnectWalletModal
+		<ConnectWalletModal
 			isOpen={showConnectModal}
-			onClose={handleCloseConnectModal} /> */}
+			onClose={handleCloseConnectModal} />
 
 		{showTerms && <TermsModal
 			isOpen={showTerms}
