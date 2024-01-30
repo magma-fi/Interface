@@ -346,9 +346,9 @@ export const MarketView = ({
 
 	const formatTooltipValue = (value: number, name: string) => {
 		if (name === "debtAfter") {
-			return [value + "K " + WEN.symbol, t("wenTotalSupply")];
+			return [value.toFixed(2) + "K " + WEN.symbol, t("wenTotalSupply")];
 		} else {
-			return [value + "K " + globalContants.USD, t("totalDeposits")];
+			return [value.toFixed(2) + "K " + globalContants.USD, t("totalDeposits")];
 		}
 	};
 
