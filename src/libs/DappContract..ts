@@ -4,6 +4,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { Signer } from "ethers";
 import { ContractInterface, ContractFunction, Contract } from "@ethersproject/contracts"
 import { MixedError } from "./types";
+import { Interface } from "@ethersproject/abi";
 
 type TransactionState = "idle" | "estimatingGas" | "waitingForConfirmation" | "failed" | "confirmed";
 
@@ -49,23 +50,38 @@ class TrackableFunction {
 	private _estimateGasFunc: ContractFunction<BigNumber> | undefined;
 	private _method: ContractFunction<TransactionResponse> | undefined;
 	private _callStatic: boolean;
+	private _interface: Interface;
+	private _forcedStaticCallMethod?: ContractFunction<TransactionResponse> | undefined;
 
 	private _tracker = new TransactionTracker();
 	public get tracker() {
 		return this._tracker;
 	}
 
-	constructor(signature: string, estimateGas: ContractFunction, method: ContractFunction, callStatic: boolean) {
+	constructor(signature: string, estimateGas: ContractFunction, method: ContractFunction, callStatic: boolean, i: Interface, forcedStaticCallMethod?: ContractFunction) {
 		this._signature = signature;
 		this._estimateGasFunc = estimateGas;
 		this._method = method;
 		this._callStatic = callStatic;
+		this._interface = i;
+		this._forcedStaticCallMethod = forcedStaticCallMethod;
 		this._tracker = new TransactionTracker();
+	}
+
+	public encode(...args: unknown[]): string {
+		return this._interface.encodeFunctionData(this._signature, [...args]);
 	}
 
 	public async call(...args: unknown[]) {
 		if (this._method) {
 			return await this._method(...args);
+		}
+	}
+
+	public async staticCall(...args: unknown[]) {
+		const func = this._callStatic ? this._method : this._forcedStaticCallMethod
+		if (func) {
+			return await func(...args);
 		}
 	}
 
@@ -153,7 +169,9 @@ export class DappContract extends Contract {
 				fragment.name,
 				this.estimateGas[signature],
 				staticCall ? this.callStatic[signature] : this.functions[signature],
-				staticCall
+				staticCall,
+				this.interface,
+				!staticCall ? this.callStatic[signature] : undefined
 			);
 		});
 	}

@@ -1,4 +1,6 @@
 import { Decimal, Trove, FrontendStatus, UserTrove } from "lib-base";
+import { Vault } from "./Vault";
+import { BigNumber } from "bignumber.js"
 
 export type OptionItem = {
 	icon?: string;
@@ -73,7 +75,8 @@ export type TroveChangeData = {
 	date: string;
 }
 
-export type LiquidatableTrove = UserTrove & { liquidatable: boolean; }
+// export type LiquidatableTrove = UserTrove & { liquidatable: boolean; }
+export type LiquidatableTrove = Vault & { liquidatable: boolean; }
 
 export type JsonObject = { [key: string]: any };
 
@@ -87,4 +90,22 @@ export type DepositByReferrer = {
 	depositedAmount: number,
 	latestTransaction?: string,
 	lastUpdate?: number;
+}
+
+export type VaultStatus = "open" | "closedByOwner" | "closedByRedemption";
+
+export type Vaultish = {
+	id: string;
+	status?: VaultStatus;
+	collateral?: BigNumber;
+	debt?: BigNumber;
+	collateralRatioSortKey?: string
+}
+
+export type callRequest = {
+	resultBox?: Record<string, any>;
+	key?: string;
+	contractAddress: string;
+	call: string;
+	parseFunc: (args: string[]) => void;
 }

@@ -15,6 +15,8 @@ import appConfig from "../appConfig.json";
 import { JsonObject, LiquidatableTrove } from "../libs/types";
 import { TxDone } from "./TxDone";
 import { TxLabel } from "./TxLabel";
+import { Vault } from "../libs/Vault";
+import { magma } from "../libs/magma";
 
 type RiskyTrovesProps = {
   pageSize: number;
@@ -44,15 +46,17 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
   const { liquity, chainId, publicClient, provider } = useLiquity();
   const [loading, setLoading] = useState(true);
   const [troves, setTroves] = useState<UserTrove[]>();
+  const [vaults, setVaults] = useState<Vault[]>([]);
   const [reload, setReload] = useState(false);
   const [page, setPage] = useState(0);
   const mcr = constants?.MCR?.gt(0) ? constants.MCR : Decimal.from((appConfig.constants as JsonObject)[String(chainId)].MAGMA_MINIMUM_COLLATERAL_RATIO);
+  const priceNumber = Number(price);
 
   const liquidatableTroves: LiquidatableTrove[] = useMemo(() => {
     const tempArr: LiquidatableTrove[] = [];
-    troves?.forEach((trove) => {
+    vaults?.forEach(trove => {
       if (recoveryMode) {
-        const collateralRatio = trove.collateralRatio(price);
+        const collateralRatio = trove.collateralRatio(priceNumber);
 
         if (collateralRatio.gte(mcr) && collateralRatio.lt(totalCollateralRatio)) {
           (trove as LiquidatableTrove).liquidatable = true;
@@ -99,6 +103,12 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, constants })
       setPage(clampedPage);
     }
   }, [page, clampedPage]);
+
+  useEffect(() => {
+    magma.getVaults(false, vs => {
+      setVaults(vs);
+    });
+  }, []);
 
   useEffect(() => {
     let mounted = true;

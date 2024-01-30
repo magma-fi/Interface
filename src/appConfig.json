@@ -54,5 +54,49 @@
 			"4690": "0xfdB37F188B4C8dF6aDA2E08eD187C5Fb48Eb5F69",
 			"4689": "0x3418884c177b67306aC7352C3B0BfF2EBFC14ca4"
 		}
+	},
+	"magma": {
+		"4690": {
+			"activePool": "0xc635eB021C46931f8854C134EB7dfc0D0FB8F2ad",
+			"borrowerOperations": "0xb4Ff74085e4f9bC46384f15f7058B703695c1884",
+			"troveManager": "0x1668782e96D766ade93Cd9e0609D33f7d63499B0",
+			"collSurplusPool": "0x2f2CE37f128A0C9a32388265341906293b5a0480",
+			"communityIssuance": "0xA40b9B827b6616230ef8C7F8CCb1dc2E2D1B224E",
+			"defaultPool": "0xF8C78fF37fA80FA381031B2C4657041F20FA530E",
+			"hintHelpers": "0xeFa62d299D56BAc515E2D1F9aDC115b5A0984c25",
+			"lockupContractFactory": "",
+			"lqtyStaking": "",
+			"priceFeed": "0x745a12D9BcDBFfb092fc38C1A24531dbb0846ad8",
+			"sortedTroves": "0xFa72c71D97F9d2E15A57CbB5c32f6A9E73B8141F",
+			"stabilityPool": "0xBe1E20c246A6224c2E50Dd2263e309a7ab9Efd4d",
+			"gasPool": "0x421aA994d8C80dcBe3Aa33f6478E7D410a4C8A50",
+			"lusdToken": "0x659dd68Ad9CCDA1fC4Dda42BdCe56642356eaf44",
+			"unipool": "",
+			"lqtyToken": "0xf9b0057843adc1bfc7279b4a5249114b407083ef",
+			"multiTroveGetter": "0xf672ee5017b6af9A7a747d5010dE6D8cb8949eb0",
+			"uniToken": "",
+			"multicaller": "0x7B0338afA9b19973592e26E7ACcf077C556aaAC9"
+		},
+		"4689": {
+			"activePool": "0x0B926bAafE0EbCc7843ef4752d9d843b5D4E39cF",
+			"borrowerOperations": "0x4C579289b99a8b1741745BD557c754B30b0B81fa",
+			"troveManager": "0x21d81DABF6985587CE64C2E8EB12F69DF2178fe2",
+			"collSurplusPool": "0xF00Bc206644BAe3d73D55e36AC2A86B62B457deB",
+			"communityIssuance": "0x4529E0775ABba89E3d9E160856d565944e147c6F",
+			"defaultPool": "0x90180Ad5E286e7B640267cd38a030fAf1997613D",
+			"hintHelpers": "0x52f6e5060527Cd77E101790E804Dde190AD3AA5c",
+			"lockupContractFactory": "",
+			"lqtyStaking": "",
+			"priceFeed": "0x1Ec94b48F3756F0D6240Bc7820EA4B5D7855D00A",
+			"sortedTroves": "0xE34669c9f20102749783b89ca9D57b219d9fc29d",
+			"stabilityPool": "0x037a2e9a464fbA409D0E55600836864B410d6Dd8",
+			"gasPool": "0x39E027020adc59De764B4E2F93ACa4e1C7b08B98",
+			"lusdToken": "0x6C0bf4b53696b5434A0D21C7D13Aa3cbF754913E",
+			"unipool": "",
+			"lqtyToken": "",
+			"multiTroveGetter": "0x2d71d7e791798E2987c23629d6F05935Ed13ad14",
+			"uniToken": "",
+			"multicaller": "0x63ccc9bd0dc151a2537aaf93375edb700c883f6a"
+		}
 	}
 }

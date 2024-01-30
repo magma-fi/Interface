@@ -1,0 +1,54 @@
+[
+	{
+		"type": "function",
+		"name": "aggregate",
+		"stateMutability": "nonpayable",
+		"constant": false,
+		"payable": false,
+		"inputs": [
+			{
+				"components": [
+					{
+						"name": "target",
+						"type": "address"
+					},
+					{
+						"name": "callData",
+						"type": "bytes"
+					}
+				],
+				"name": "calls",
+				"type": "tuple[]"
+			}
+		],
+		"outputs": [
+			{
+				"name": "blockNumber",
+				"type": "uint256"
+			},
+			{
+				"name": "returnData",
+				"type": "bytes[]"
+			}
+		]
+	},
+	{
+		"type": "function",
+		"name": "getEthBalance",
+		"stateMutability": "view",
+		"constant": true,
+		"payable": false,
+		"inputs": [
+			{
+				"name": "addr",
+				"type": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "balance",
+				"type": "uint256"
+			}
+		]
+	}
+]

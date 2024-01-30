@@ -27,6 +27,8 @@ import { DepositByReferrer, JsonObject } from "../libs/types";
 import refererFactory from "../abis/refererFactory.json";
 import { appController } from "../libs/appController";
 import { zeroAddress } from "viem";
+import { magma } from "../libs/magma";
+import { JsonRpcSigner } from "@ethersproject/providers";
 
 const select = ({
 	trove,
@@ -47,6 +49,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});
 	const [externalDataDone, setExternalDataDone] = useState(false);
 	const dec = Math.pow(10, WEN.decimals || 18);
+	const [data, setData] = useState<Record<string, any>>();
 
 	const { trove } = useLiquitySelector(select);
 
@@ -171,6 +174,19 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 
 		getContants();
 	}, [borrowerOperationsDefault, borrowerOperationsStatus, wenTokenStatus, wenTokenDefault, troveManagerStatus, troveManagerStatus]);
+
+	useEffect(() => {
+		const getData = async () => {
+			const res = await magma.getMagmaData();
+			if (res) setData(res);
+		};
+
+		if (chainId > 0 && signer) {
+			magma.init(chainId, signer as JsonRpcSigner);
+
+			getData();
+		}
+	}, [chainId, signer]);
 
 	const handleConnectWallet = () => {
 		setShowConnectModal(true);

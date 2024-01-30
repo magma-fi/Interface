@@ -51,6 +51,26 @@ export const graphqlAsker = {
 		`;
 	},
 
+	requestVaults: function (fromIndex = 0, howMany = 100) {
+		return `
+		{
+			troves(
+				first: ${howMany}
+				skip: ${fromIndex}
+				where: {status: "open"}
+				orderBy: collateralRatioSortKey
+				orderDirection: desc
+			) {
+				id
+				status
+				rawCollateral
+				rawDebt
+				collateralRatioSortKey
+			}
+		}
+		`;
+	},
+
 	requestChangeHistory: function (startTimestamp: number) {
 		return `
 		{

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Provider } from "@ethersproject/abstract-provider";
-import { BaseProvider } from "@ethersproject/providers";
+import { BaseProvider, JsonRpcSigner } from "@ethersproject/providers";
 import { PublicClient, WalletClient, useAccount, useChainId, usePublicClient, useWalletClient } from "wagmi";
 
 import {
@@ -17,6 +17,7 @@ import { VoidSigner, ethers } from "ethers";
 import { globalContants } from "../libs/globalContants";
 import { graphqlAsker } from "../libs/graphqlAsker";
 import { zeroAddress } from "viem";
+import { magma } from "../libs/magma";
 
 type LiquityContextValue = {
   config: LiquityFrontendConfig;
@@ -27,7 +28,7 @@ type LiquityContextValue = {
   chainId: number;
   publicClient?: PublicClient;
   urlSearch?: string;
-  signer: ethers.Signer;
+  signer: ethers.Signer | undefined | JsonRpcSigner;
 };
 
 const LiquityContext = createContext<LiquityContextValue | undefined>(undefined);
@@ -68,6 +69,7 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   const url = new URL(window.location.href);
   const urlSearch = url.search || "";
   const refParam = url.searchParams.get("ref");
+
   useEffect(() => {
     if (!config || !refParam || chainId === 0) return;
 
