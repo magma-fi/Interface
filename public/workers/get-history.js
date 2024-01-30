@@ -54,7 +54,7 @@ const getHistoryByDate = async (day, isToday = false) => {
 		if (sns?.troveChanges?.length > 0 && sns?.troveChanges[0]?.id !== hasVal?.updateTime) {
 			sequenceNumbers.push({
 				date: dayStr,
-				id: sns.troveChanges[0].id,
+				id: sns.troveChanges[0].id + 1,
 				forceUpdate: true,
 				updateTime: Date.now()
 			});
