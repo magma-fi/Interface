@@ -134,24 +134,31 @@ export const StakeModal = ({
 					<div className="label">{t("staked")}</div>
 
 					<ChangedValueLabel
-						previousValue={stabilityDeposit.currentLUSD.toString(2)}
-						newValue={stabilityDeposit.currentLUSD.add(depositAmount).toString(2) + " " + WEN.symbol} />
+						previousValue={Number(stabilityDeposit.currentLUSD)}
+						newValue={Number(stabilityDeposit.currentLUSD.add(depositAmount))}
+						nextPostfix={WEN.symbol}
+						positive={depositAmount > 0} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("walletBalance")}</div>
 
 					<ChangedValueLabel
-						previousValue={wenBalance.toString(2)}
-						newValue={(wenBalance.gt(depositAmount) ? wenBalance.sub(depositAmount) : Decimal.ZERO).toString(2) + " " + WEN.symbol} />
+						previousValue={Number(wenBalance)}
+						newValue={Number(wenBalance.gt(depositAmount) ? wenBalance.sub(depositAmount) : Decimal.ZERO)}
+						nextPostfix={WEN.symbol}
+						positive={depositAmount > 0} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("shareOfStabilityPool")}</div>
 
 					<ChangedValueLabel
-						previousValue={stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool).toString(2) + "%"}
-						newValue={stabilityDeposit.currentLUSD.add(depositAmount).mulDiv(100, lusdInStabilityPool.add(depositAmount)).toString(2) + "%"} />
+						previousValue={Number(stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool))}
+						previousPostfix="%"
+						newValue={Number(stabilityDeposit.currentLUSD.add(depositAmount).mulDiv(100, lusdInStabilityPool.add(depositAmount)))}
+						nextPostfix="%"
+						positive={depositAmount > 0} />
 				</div>
 			</div>
 		</div>
