@@ -1,6 +1,6 @@
 {
   "name": "magma-ui",
-  "version": "1.0.129",
+  "version": "1.0.133",
   "private": true,
   "type": "module",
   "dependencies": {
