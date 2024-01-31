@@ -50,6 +50,7 @@ export const ConnectWalletModal = ({
 					id={String(index)}
 					disabled={!connector.ready || isLoading}
 					className="secondaryButton bigButton"
+					style={{ justifyContent: "flex-start" }}
 					onClick={handleConnect}>
 					<img src={"images/" + name + ".png"} />
 

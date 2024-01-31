@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useMemo, useState } from "react";
 import { useLang } from "../hooks/useLang";
 import { IOTX, MAGMA, ModalAction, WEN, globalContants } from "../libs/globalContants";
-import { Coin } from "../libs/types";
+import { Coin, StabilityDepositOperation, StabilityTransactionRecord } from "../libs/types";
 import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
 import { useLiquitySelector } from "@liquity/lib-react";
 import { StakeModal } from "./StakeModal";
@@ -9,14 +10,12 @@ import { selectForStabilityDepositChangeValidation } from "../components/Stabili
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { UnstakeModal } from "./UnstakeModal";
-import { useContract } from "../hooks/useContract";
-import { HintHelpers, SortedTroves, StabilityPool, TroveManager } from "lib-ethers/dist/types";
 import { useLiquity } from "../hooks/LiquityContext";
-import StabilityPoolAbi from "lib-ethers/abi/StabilityPool.json";
 import { Decimal, LUSD_LIQUIDATION_RESERVE } from "lib-base"
-import { Address, useAccount } from "wagmi";
 import { SwapWEN2IOTXModal } from "./SwapWEN2IOTXModal";
 import { useMyTransactionState, useTransactionFunction } from "../components/Transaction";
+import { graphqlAsker } from "../libs/graphqlAsker";
+import { StabilityTransactionListItem } from "./StabilityTransactionListItem";
 
 type ModalOpenning = {
 	action: ModalAction;
@@ -62,7 +61,7 @@ export const PoolView = ({ market, constants }: {
 		validationContext
 	} = useLiquitySelector(selector);
 	// const { address } = useAccount();
-	const { liquity, walletClient } = useLiquity();
+	const { liquity, walletClient, account, chainId } = useLiquity();
 	const [showModal, setShowModal] = useState<ModalOpenning | null>(null);
 	const [showTxResult, setTxResult] = useState<ModalOpenning | null>(null);
 	const [amountInTx, setAmountInTx] = useState(0);
@@ -72,19 +71,14 @@ export const PoolView = ({ market, constants }: {
 	const rewardsFromCollateral = stabilityDeposit.collateralGain;
 	const netDebt = trove.debt.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? trove.netDebt : Decimal.ZERO;
 	const [resetTx, setResetTx] = useState(false);
-	const [showTxDone, setShowTxDone] = useState(false);
 	const txId = useMemo(() => String(new Date().getTime()), [resetTx]);
 	const transactionState = useMyTransactionState(txId, true);
+	const [txs, setTxs] = useState<StabilityTransactionRecord[]>();
 
 	const [sendTransaction] = useTransactionFunction(
 		txId,
 		liquity.send.withdrawGainsFromStabilityPool.bind(liquity.send)
 	);
-
-	// const [stabilityPoolDefault, stabilityPoolStatus] = useContract<StabilityPool>(
-	// 	liquity.connection.addresses.stabilityPool,
-	// 	StabilityPoolAbi
-	// );
 
 	const handleRedeemCollateral = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		setShowModal({
@@ -93,18 +87,24 @@ export const PoolView = ({ market, constants }: {
 		} as ModalOpenning);
 	};
 
-	// useEffect(() => {
-	// 	const read = async () => {
-	// 		if (stabilityPoolStatus === "LOADED" && address) {
-	// 			const res = await stabilityPoolDefault?.getDepositorETHGain(address);
-	// 			if (res) {
-	// 				setRewardsFromCollateral(Decimal.from(res.toString()).div(globalContants.IOTX_DECIMALS));
-	// 			}
-	// 		}
-	// 	};
+	useEffect(() => {
+		if (!account || (txs && txs.length > 0)) return;
 
-	// 	read();
-	// }, [address, stabilityPoolDefault, stabilityPoolStatus]);
+		setTimeout(() => {
+			const query = graphqlAsker.requestStabilityDepositChanges(account, 5)
+			graphqlAsker.ask(chainId, query, (data: any) => {
+				if (data?.stabilityDepositChanges) {
+					setTxs(data.stabilityDepositChanges.map((item: any) => ({
+						id: item.sequenceNumber,
+						operation: StabilityDepositOperation[item.stabilityDepositOperation as keyof typeof StabilityDepositOperation],
+						amount: Number(item.depositedAmountChange),
+						timestamp: item.transaction.timestamp * 1000,
+						tx: item.transaction.id
+					} as StabilityTransactionRecord)));
+				}
+			});
+		}, 1000);
+	}, [account, chainId]);
 
 	useEffect(() => {
 		if (transactionState.id === txId && transactionState.tx) {
@@ -308,7 +308,9 @@ export const PoolView = ({ market, constants }: {
 				</div>
 			</div>
 
-			<div>
+			<div
+				className="flex-column"
+				style={{ gap: "40px" }}>
 				<div
 					className="panel"
 					style={{ gap: "12px" }}>
@@ -336,6 +338,24 @@ export const PoolView = ({ market, constants }: {
 						<div>{numberOfTroves}</div>
 					</div>
 				</div>
+
+				{txs && txs.length > 0 && <div
+					className="card"
+					style={{ gap: "24px" }}>
+					<div className="flex-row-space-between">
+						<h3>{t("latestTransactions")}</h3>
+
+						<div>&nbsp;</div>
+					</div>
+
+					{txs.map(txItem => {
+						return <StabilityTransactionListItem
+							key={txItem.id}
+							data={txItem}
+							market={market}
+							price={price} />
+					})}
+				</div>}
 			</div>
 		</div>
 

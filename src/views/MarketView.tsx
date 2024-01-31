@@ -209,7 +209,9 @@ export const MarketView = ({
 		let howMany = 0
 
 		appController.openDB(chainId, () => {
-			appController.readAll((cursor: IDBCursor) => {
+			appController.readAll((cursor?: IDBCursor) => {
+				if (!cursor) return;
+
 				howMany += 1;
 
 				const key: string = cursor.key.toString();
@@ -342,6 +344,14 @@ export const MarketView = ({
 				symbol: WEN.symbol
 			}
 		});
+	};
+
+	const formatTooltipValue = (value: number, name: string) => {
+		if (name === "debtAfter") {
+			return [value.toFixed(2) + "K " + WEN.symbol, t("wenTotalSupply")];
+		} else {
+			return [value.toFixed(2) + "K " + globalContants.USD, t("totalDeposits")];
+		}
 	};
 
 	return <>
@@ -649,7 +659,7 @@ export const MarketView = ({
 					</div>
 
 					<div className="flex-row-space-between">
-						<div className="description">{t("totalDeposits")}</div>
+						<div className="description">{t("totalDeposits")}&nbsp;(TVL)</div>
 
 						<div className="flex-column-align-right">
 							<div>{TVL.mul(price).shorten()}&nbsp;{globalContants.USD}</div>
@@ -770,7 +780,7 @@ export const MarketView = ({
 						strokeDasharray="1"
 						stroke="#ffffff30" />
 
-					<Tooltip />
+					<Tooltip formatter={formatTooltipValue} />
 
 					<Area type="monotone" dataKey="debtAfter" stroke="#F25454CC" fillOpacity={1} fill="url(#colorPv)" />
 

@@ -26,7 +26,10 @@ export enum BadgeType {
 	RecoveryMode = "recoveryMode",
 	CloseTrove = "closeTrove",
 	Id = "ID",
-	Lock = "lockInDays"
+	Lock = "lockInDays",
+	Stake = "stake",
+	Unstake = "unstake",
+	Claim = "claim"
 }
 
 export const MAGMA: Coin = {

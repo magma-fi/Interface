@@ -8,11 +8,13 @@ export const appController: {
 	changeLang: (lng: Langs) => void;
 	relaunch: () => void;
 	employWorkers: (chainId: number, onDone?: () => void) => void;
-	_dbConnector: IDBOpenDBRequest;
-	_db: IDBDatabase;
+	_dbConnector: IDBOpenDBRequest | undefined;
+	_db: IDBDatabase | undefined;
 	openDB: (chainId: number, onDone: () => void) => void;
-	readAll: (onDone: (arg: IDBCursor) => void) => void;
+	readAll: (onDone: (arg?: IDBCursor) => void) => void;
 } = {
+	_dbConnector: undefined,
+	_db: undefined,
 	lang: null,
 
 	init: function () {
@@ -25,7 +27,7 @@ export const appController: {
 		}
 
 		if (!this.lang) {
-			this.lang = Langs.English
+			this.lang = Langs.English;
 		}
 	},
 
@@ -44,16 +46,16 @@ export const appController: {
 		});
 
 		this.worker.addEventListener("message", e => {
-			if (e.data === "fetched") onDone && onDone();
-			this.worker?.terminate();
-		})
+			if (e.data === "openned") onDone && onDone();
+			if (e.data === "fetched") this.worker?.terminate();
+		});
 
 		this.worker.addEventListener('error', err => {
 			console.error(err);
 		});
 
 		this.worker.addEventListener('messageerror', err => {
-			console.error(err)
+			console.error(err);
 		});
 
 		this.worker.postMessage({
@@ -70,21 +72,29 @@ export const appController: {
 		};
 
 		this._dbConnector.onsuccess = () => {
-			this._db = this._dbConnector.result;
+			this._db = this._dbConnector?.result;
 			return onDone && onDone();
 		};
 	},
 
 	readAll: function (onDone) {
-		const objectStore = this._db
-			.transaction("history", "readonly")
-			.objectStore("history");
+		let objectStore = null;
 
-		objectStore.openCursor().onsuccess = (event) => {
-			const cursor: IDBCursor = event.target.result;
-			if (cursor) {
-				return onDone && onDone(cursor);
-			}
-		};
+		try {
+			objectStore = this._db?.transaction("history", "readonly").objectStore("history");
+		} catch (error) {
+			console.warn(error);
+		}
+
+		if (objectStore) {
+			objectStore.openCursor().onsuccess = (event) => {
+				const cursor: IDBCursor = event.target.result;
+				if (cursor) {
+					return onDone && onDone(cursor);
+				}
+			};
+		} else {
+			return onDone && onDone();
+		}
 	}
 };

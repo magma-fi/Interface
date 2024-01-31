@@ -18,7 +18,7 @@
 	"marketOverview": "market overview",
 	"totalUtilizationRate": "Total Utilization Rate",
 	"recoveryModeAt": "Recovery Mode at {recovery}%",
-	"totalDeposits": "Total Deposits (TVL)",
+	"totalDeposits": "Total Deposits",
 	"numberOfVaults": "Number of Vaults",
 	"borrowFee": "Borrow Deposit Fee",
 	"liquidationReserve": "Liquidation Reserve",
@@ -160,5 +160,6 @@
 	"footerInfo": "Designed and built with ❤️ by the Magma team 🌏",
 	"inProcess": "In process",
 	"deposits": "deposits",
-	"lastUpdate": "Last Update"
+	"lastUpdate": "Last Update",
+	"claim": "Claim"
 }
