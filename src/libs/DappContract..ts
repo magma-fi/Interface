@@ -92,7 +92,6 @@ class TrackableFunction {
 
 				gasLimit = await this._estimateGasFunc(...args);
 			} catch (error) {
-				console.debug(error);
 				this._trackerGetError(error);
 			}
 		}

@@ -12,13 +12,12 @@ const sequenceNumbers = [];
 const getSystemStateWithSequenceNumbers = async () => {
 	const idList = sequenceNumbers.map(item => item.id).flat();
 	const res = await graphQLFetch.requestSystemStateWithDay(...idList);
-
 	if (res?.systemStates?.length > 0) {
 		const dataObjs = [];
 
 		for (let idx = 0; idx < res.systemStates.length; idx++) {
 			const item = res.systemStates[idx];
-			const snItem = sequenceNumbers.find(item => item.id === Number(item.id));
+			const snItem = sequenceNumbers.find(sequenceItem => sequenceItem.id === Number(item.id));
 
 			const dataObj = {
 				date: snItem.date,
@@ -68,14 +67,14 @@ const getHistoryByDate = async (day, isToday = false) => {
 
 const main = async (chainId) => {
 	db = await dbManager.open("magma-db-" + chainId, 1);
-
-	graphQLFetch.init(chainId);
-
 	if (db) {
+		this.postMessage("openned");
+
+		graphQLFetch.init(chainId);
+
 		await getHistoryByDate(new Date(), true);
 		db.close();
 	}
-
 };
 
 this.addEventListener('message', async e => {
