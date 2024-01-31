@@ -22,12 +22,14 @@ export const Badge = ({
     let icon = ""
 
     switch (type) {
+      case BadgeType.Stake:
       case BadgeType.Deposit:
         bg = "#10120d";
         fg = "#8ED434";
         icon = "images/deposit-green.png";
         break;
 
+      case BadgeType.Unstake:
       case BadgeType.Borrow:
         bg = "#211816";
         fg = "#E4BC62";
@@ -40,9 +42,10 @@ export const Badge = ({
         icon = "images/repay-blue.png";
         break;
 
+      case BadgeType.Claim:
       case BadgeType.Withdraw:
         bg = "#170e0d";
-        fg = "##FF9407";
+        fg = "#FF9407";
         icon = "images/withdraw-orange.png";
         break;
 
