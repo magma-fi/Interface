@@ -109,6 +109,21 @@ export const SideBar: React.FC = ({ children }) => {
 
         <a
           className="navLink"
+          href="https://t.me/MagmaProtocol"
+          target="_blank">
+          <div className="icon">
+            <img src="images/tg.png" />
+          </div>
+
+          {t("telegram")}
+
+          <img
+            id="externalLink"
+            src="images/external-link.png" />
+        </a>
+
+        <a
+          className="navLink"
           href="https://github.com/magma-fi/Audits/blob/main/MagmaStablecoin_final_Secure3_Audit_Report.pdf"
           target="_blank">
           <div className="icon">
