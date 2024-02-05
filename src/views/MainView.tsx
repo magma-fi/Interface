@@ -30,10 +30,10 @@ import { zeroAddress } from "viem";
 
 const select = ({
 	trove,
-	// stabilityDeposit
+	stabilityDeposit
 }: LiquityStoreState) => ({
 	trove,
-	// stabilityDeposit
+	stabilityDeposit
 });
 
 export const MainView = ({ chains, rabbyKit }: {
@@ -52,8 +52,7 @@ export const MainView = ({ chains, rabbyKit }: {
 	const dec = Math.pow(10, WEN.decimals || 18);
 	const [points, setPoints] = useState(0);
 
-	const { trove } = useLiquitySelector(select);
-
+	const { trove, stabilityDeposit } = useLiquitySelector(select);
 	const [isReferrer, setIsReferrer] = useState(false);
 	const [referralCode, setReferralCode] = useState("");
 	const [depositsByReferrer, setDepositsByReferrer] = useState<DepositByReferrer[]>()
@@ -112,9 +111,15 @@ export const MainView = ({ chains, rabbyKit }: {
 	useEffect(() => {
 		if (!chainId || !account || !referrer) return;
 
-		appController.getUserPoints(chainId, account, referrer, res => {
-			setPoints(res);
-		});
+		appController.getUserPoints(
+			chainId,
+			account,
+			referrer,
+			Number(stabilityDeposit.currentLUSD),
+			Number(stabilityDeposit.collateralGain),
+			res => {
+				setPoints(res);
+			});
 	}, [chainId, account, referrer]);
 
 	useEffect(() => {
