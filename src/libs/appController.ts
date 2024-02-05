@@ -140,7 +140,7 @@ export const appController: {
 										});
 									}
 
-									return onDone && onDone(res.stabilityScore + res.lpScore + myUsersPoints);
+									return onDone && onDone(res.stabilityScore + res.lpScore + myUsersPoints * 0.1);
 								},
 								lpScoreGraph
 							);
