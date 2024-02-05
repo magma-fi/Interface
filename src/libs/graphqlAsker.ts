@@ -140,6 +140,9 @@ export const graphqlAsker = {
 		{
 			users(where: {frontend_contains_nocase: "${referrer}"}) {
 				id
+				stabilityDeposit {
+					depositedAmount
+				}
 			}
 		}
 		`;
