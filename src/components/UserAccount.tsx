@@ -12,12 +12,14 @@ export const UserAccount = ({
   onConnect = () => { },
   isSupportedNetwork = true,
   chainId = 0,
-  chains = []
+  chains = [],
+  points
 }: {
   onConnect: () => void;
   isSupportedNetwork: boolean;
   chainId: number;
-  chains: Chain[]
+  chains: Chain[];
+  points: number;
 }) => {
   const { publicClient } = useLiquity();
   const { t } = useLang();
@@ -117,6 +119,11 @@ export const UserAccount = ({
       </div>}
 
       {isConnected && address && <div className="flex-row-align-left">
+        {points >= 0 && <div className="flex-row-align-left">
+          <div className="label">{t("points")}:</div>
+          <div className="label fat">{points.toFixed(2)}</div>
+        </div>}
+
         <DropdownMenu
           defaultValue={chains.findIndex(item => item.id === chainId)}
           options={chainOptions}

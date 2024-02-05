@@ -47,6 +47,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});
 	const [externalDataDone, setExternalDataDone] = useState(false);
 	const dec = Math.pow(10, WEN.decimals || 18);
+	const [points, setPoints] = useState(0);
 
 	const { trove } = useLiquitySelector(select);
 
@@ -100,10 +101,18 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			}
 		};
 
-		if (chainId && account) {
+		if (chainId && account && signer) {
 			getReferer();
 		}
-	}, [account, chainId]);
+	}, [account, chainId, signer]);
+
+	useEffect(() => {
+		if (!chainId || !account || !referrer) return;
+
+		appController.getUserPoints(chainId, account, referrer, res => {
+			setPoints(res);
+		});
+	}, [chainId, account, referrer]);
 
 	useEffect(() => {
 		if (!referrer || chainId === 0) return;
@@ -206,7 +215,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 							onConnect={handleConnectWallet}
 							isSupportedNetwork={isSupportedNetwork}
 							chains={chains}
-							chainId={chainId} />
+							chainId={chainId}
+							points={points} />
 					</div>
 
 					<Switch>
@@ -224,7 +234,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 								isReferrer={isReferrer}
 								referralCode={referralCode}
 								referrer={referrer}
-								deposits={depositsByReferrer} />
+								deposits={depositsByReferrer}
+								points={points} />
 						</Route>
 
 						<Route path="/">
