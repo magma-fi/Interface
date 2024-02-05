@@ -104,8 +104,6 @@ export const appController: {
 	},
 
 	getUserPoints: function (chainId, user, referrer, staked, collateralGain, onDone): void {
-		// this._getUserStabilityAndLpScore(chainId, "0x91662cac85b19377cf73be58db6a72bbe3b16cd8", res => {
-		// this._getUserStabilityAndLpScore(chainId, "0xf495e080adcc153579423a3860801a4e282b26f2", staked, collateralGain, res => {
 		this._getUserStabilityAndLpScore(chainId, user, staked, collateralGain, res => {
 			let myUsersPoints = 0;
 
@@ -117,16 +115,19 @@ export const appController: {
 					const myUsers = result.users.map((item: { id: string; }) => '"' + item.id + '"');
 
 					const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
-
 					const question = graphqlAsker.requestScoreOfUsers(myUsers);
+
 					const stabilityScoreGraph = cfg?.stabilityScore;
 					graphqlAsker.ask(
 						chainId,
 						question,
 						(stabilityScoreRes: any) => {
 							if (stabilityScoreRes?.users) {
-								stabilityScoreRes?.users.forEach((element: any) => {
-									myUsersPoints += Number(element.point.point);
+								stabilityScoreRes?.users.forEach((element: any, idx: number) => {
+									myUsersPoints += (
+										Number(element.point.point)
+										+ Number(result.users[idx].stabilityDeposit.depositedAmount) * 10 * (Date.now() - element.point.timestamp * 1000) / 3600000
+									);
 								});
 							}
 
@@ -137,7 +138,10 @@ export const appController: {
 								(lpScoreRes: any) => {
 									if (lpScoreRes?.users) {
 										lpScoreRes.users.forEach((element: any) => {
-											myUsersPoints += Number(element.point.point);
+											myUsersPoints += (
+												Number(element.point.point)
+												+ (Number(element.user.balance.balance) / 10 ** 18) * 4 * (Date.now() - element.user.point.timestamp * 1000) / 3600000
+											);
 										});
 									}
 
@@ -169,7 +173,7 @@ export const appController: {
 					chainId,
 					query,
 					(data: any) => {
-						if (data.user) res.lpScore = Number(data.user.point.point) + collateralGain * 4 * (Date.now() - data.user.point.timestamp * 1000) / 3600;
+						if (data.user) res.lpScore = Number(data.user.point.point) + (Number(data.user.balance.balance) / 10 ** 18) * 4 * (Date.now() - data.user.point.timestamp * 1000) / 3600000;
 
 						return onDone && onDone(res);
 					},
@@ -186,8 +190,8 @@ export const appController: {
 				chainId,
 				query,
 				(data: any) => {
-					// 基础积分 = subgraph里的point字段 + AMOUNT * (当前时间 - timestamp ) * 10 / 3600
-					if (data.user) res.stabilityScore = Number(data.user.point.point) + staked * 10 * (Date.now() - data.user.point.timestamp * 1000) / 3600;
+					// 基础积分 = subgraph里的point字段 + AMOUNT * (当前时间 - timestamp ) * 10 / 3600000
+					if (data.user) res.stabilityScore = Number(data.user.point.point) + staked * 10 * (Date.now() - data.user.point.timestamp * 1000) / 3600000;
 					getLPScore();
 				},
 				stabilityScoreGraph
