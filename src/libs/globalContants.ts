@@ -120,5 +120,7 @@ export const globalContants = {
 	MONTH_SECONDS: 2592000,
 	WEEK_SECONDS: 604800,
 	HOST: "app.magma.finance/?ref=",
-	REF_KEY: "ref@"
+	REF_KEY: "ref@",
+	FRONTEND_TAG: "frontendTag",
+	REFERRER_CODE: "referrerCode"
 };
