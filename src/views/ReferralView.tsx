@@ -24,13 +24,15 @@ export const ReferralView = ({
 	haveDeposited = false,
 	referralCode = "",
 	referrer = "",
-	deposits
+	deposits,
+	points
 }: {
 	isReferrer: boolean;
 	haveDeposited: boolean;
 	referralCode: string;
 	referrer: string;
 	deposits?: DepositByReferrer[];
+	points: number;
 }) => {
 	const { t } = useLang();
 	const { address } = useAccount();
@@ -192,7 +194,8 @@ export const ReferralView = ({
 						src="images/magma.png"
 						width="24px" />
 
-					<h4>{frontendRewards.toString(2)}&nbsp;{t("magmaPoints")}</h4>
+					{/* <h4>{frontendRewards.toString(2)}&nbsp;{t("magmaPoints")}</h4> */}
+					<h4>{points.toFixed(2)}&nbsp;{t("magmaPoints")}</h4>
 				</div>
 			</div>
 

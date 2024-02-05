@@ -1,10 +1,14 @@
 {
 	"subgraph": {
 		"4690": {
-			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet"
+			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet",
+			"stabilityScore": "",
+			"lpScore": ""
 		},
 		"4689": {
-			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-v2"
+			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-v2",
+			"stabilityScore": "https://graphnode.filda.io/subgraphs/name/magma-WEN-point-iotex",
+			"lpScore": "https://graphnode.filda.io/subgraphs/name/magma-WEN-WIOTXLP-point-iotex"
 		}
 	},
 	"rpc": {
