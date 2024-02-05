@@ -15,8 +15,8 @@ export const appController: {
 	_db: IDBDatabase | undefined;
 	openDB: (chainId: number, onDone: () => void) => void;
 	readAll: (onDone: (arg?: IDBCursor) => void) => void;
-	getUserPoints: (chainId: number, user: string, referrer: string, onDone: (point: number) => void) => void;
-	_getUserStabilityAndLpScore: (chainId: number, user: string, onDone: (res: Record<string, number>) => void) => void;
+	getUserPoints: (chainId: number, user: string, referrer: string, staked: number, collateralGain: number, onDone: (point: number) => void) => void;
+	_getUserStabilityAndLpScore: (chainId: number, user: string, staked: number, collateralGain: number, onDone: (res: Record<string, number>) => void) => void;
 } = {
 	_dbConnector: undefined,
 	_db: undefined,
@@ -103,9 +103,10 @@ export const appController: {
 		}
 	},
 
-	getUserPoints: function (chainId, user, referrer, onDone): void {
+	getUserPoints: function (chainId, user, referrer, staked, collateralGain, onDone): void {
 		// this._getUserStabilityAndLpScore(chainId, "0x91662cac85b19377cf73be58db6a72bbe3b16cd8", res => {
-		this._getUserStabilityAndLpScore(chainId, user, res => {
+		// this._getUserStabilityAndLpScore(chainId, "0xf495e080adcc153579423a3860801a4e282b26f2", staked, collateralGain, res => {
+		this._getUserStabilityAndLpScore(chainId, user, staked, collateralGain, res => {
 			let myUsersPoints = 0;
 
 			// 根据referrer取得用户的下线。
@@ -152,7 +153,7 @@ export const appController: {
 		});
 	},
 
-	_getUserStabilityAndLpScore: function (chainId: number, user: string, onDone) {
+	_getUserStabilityAndLpScore: function (chainId, user, staked, collateralGain, onDone) {
 		const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
 		const query = graphqlAsker.requestUserScore(user);
 		const res = {
@@ -168,7 +169,7 @@ export const appController: {
 					chainId,
 					query,
 					(data: any) => {
-						if (data.user) res.lpScore = Number(data.user.point.point);
+						if (data.user) res.lpScore = Number(data.user.point.point) + collateralGain * 4 * (Date.now() - data.user.point.timestamp * 1000) / 3600;
 
 						return onDone && onDone(res);
 					},
@@ -185,7 +186,8 @@ export const appController: {
 				chainId,
 				query,
 				(data: any) => {
-					if (data.user) res.stabilityScore = Number(data.user.point.point);
+					// 基础积分 = subgraph里的point字段 + AMOUNT * (当前时间 - timestamp ) * 10 / 3600
+					if (data.user) res.stabilityScore = Number(data.user.point.point) + staked * 10 * (Date.now() - data.user.point.timestamp * 1000) / 3600;
 					getLPScore();
 				},
 				stabilityScoreGraph
