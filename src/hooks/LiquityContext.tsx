@@ -66,8 +66,9 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
 
   const [frontendTag, setFrontendTag] = useState(zeroAddress);
   const url = new URL(window.location.href);
-  const urlSearch = url.search || "";
+  const [urlSearch, setUrlSearch] = useState(url.search || "");
   const refParam = url.searchParams.get("ref");
+
   useEffect(() => {
     if (!config || !refParam || chainId === 0) return;
 
@@ -78,9 +79,27 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
         const ref = data?.frontends[0].owner.id;
         setFrontendTag(ref);
         config.frontendTag = ref;
+
+        window.localStorage.setItem(globalContants.FRONTEND_TAG, ref);
+        window.localStorage.setItem(globalContants.REFERRER_CODE, refParam);
       }
     });
   }, [refParam, chainId, config]);
+
+  useEffect(() => {
+    if (!config) return;
+
+    const addr = window.localStorage.getItem(globalContants.FRONTEND_TAG);
+    if (addr) {
+      setFrontendTag(addr as typeof zeroAddress);
+      config.frontendTag = addr;
+    }
+
+    const c = window.localStorage.getItem(globalContants.REFERRER_CODE);
+    if (c) {
+      setUrlSearch("?ref=" + c);
+    }
+  }, [config]);
 
   const connection = useMemo(() => {
     if (config && provider && signerData && addr && frontendTag) {
