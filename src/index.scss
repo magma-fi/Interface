@@ -366,6 +366,14 @@ h4 {
   .logoOnTopBar {
     display: none;
   }
+
+  .userAccountBox {
+    display: flex;
+    flex-direction: row;
+    gap: var(--flex-gap-middle);
+    justify-content: flex-end;
+    align-items: center;
+  }
 }
 
 .selectionTrigger {
@@ -1404,6 +1412,15 @@ input {
 
     .logoOnTopBar {
       display: block;
+    }
+
+    .userAccountBox {
+      flex-direction: column-reverse;
+      align-items: flex-end;
+  
+      .points{
+        margin-right: 1rem;
+      }
     }
   }
 

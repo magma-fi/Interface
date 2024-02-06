@@ -118,40 +118,42 @@ export const UserAccount = ({
         </button>
       </div>}
 
-      {isConnected && account && <div className="flex-row-align-left">
-        {points >= 0 && <div className="flex-row-align-left">
+      {isConnected && account && <div className="userAccountBox">
+        {points >= 0 && <div className="flex-row-align-left points">
           <div className="label">{t("points")}:</div>
           <div className="label fat">{points.toFixed(2)}</div>
         </div>}
 
-        <DropdownMenu
-          defaultValue={chains.findIndex(item => item.id === chainId)}
-          options={chainOptions}
-          onChange={handleSwitchNetwork}
-          showArrows
-          alignTop
-          forcedClass="selectionTrigger">
-          <div className="flex-row-align-left">
-            <img
-              src={"images/" + chain?.id + ".png"}
-              width="24px" />
+        <div className="flex-row-align-left">
+          <DropdownMenu
+            defaultValue={chains.findIndex(item => item.id === chainId)}
+            options={chainOptions}
+            onChange={handleSwitchNetwork}
+            showArrows
+            alignTop
+            forcedClass="selectionTrigger">
+            <div className="flex-row-align-left">
+              <img
+                src="images/iotx.png"
+                width="24px" />
 
-            <div
-              className="flex-column-align-left"
-              style={{ gap: "4px" }}>
-              <div className="label">{t("network")}</div>
+              <div
+                className="flex-column-align-left"
+                style={{ gap: "4px" }}>
+                <div className="label">{t("network")}</div>
 
-              <div className="label bigLabel fat chainNameLabel">{chain?.name}</div>
+                <div className="label bigLabel fat chainNameLabel">{chain?.name}</div>
+              </div>
             </div>
-          </div>
-        </DropdownMenu>
+          </DropdownMenu>
 
-        <PopupView
-          entryView={entryView}
-          showArrows={true}
-          alignTop={true}
-          popupView={popupView}
-          forcedClass="selectionTrigger" />
+          <PopupView
+            entryView={entryView}
+            showArrows={true}
+            alignTop={true}
+            popupView={popupView}
+            forcedClass="selectionTrigger" />
+        </div>
       </div>}
     </div>
   );
