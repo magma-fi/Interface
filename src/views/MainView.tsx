@@ -110,7 +110,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 
 		appController.getUserPoints(
 			chainId,
-			account,
+			account.toLowerCase(),
 			referrer,
 			Number(stabilityDeposit.currentLUSD),
 			Number(stabilityDeposit.collateralGain),
