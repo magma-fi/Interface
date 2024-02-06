@@ -15,7 +15,7 @@ import { HintHelpers, SortedTroves, TroveManager } from "lib-ethers/dist/types";
 import { SnackBar } from "../components/SnackBar";
 import { useContract } from "../hooks/useContract";
 import { useLiquity } from "../hooks/LiquityContext";
-import { Address, useAccount, useWaitForTransaction } from "wagmi";
+import { Address } from "wagmi";
 
 export const SwapWEN2IOTXModal = ({
 	isOpen = false,
@@ -33,8 +33,7 @@ export const SwapWEN2IOTXModal = ({
 	trove: UserTrove;
 }) => {
 	const { t } = useLang();
-	const { address } = useAccount();
-	const { provider, liquity, walletClient } = useLiquity();
+	const { provider, liquity, walletClient, account } = useLiquity();
 	const [valueForced, setValueForced] = useState(-1);
 	const [swapAmount, setSwapAmount] = useState(0);
 	const maxNumber = Number(max);
@@ -115,14 +114,14 @@ export const SwapWEN2IOTXModal = ({
 		const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault!.getRedemptionHints(wenAmount, price.mul(globalContants.IOTX_DECIMALS).toString(), 0);
 		const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault!.findInsertPosition(
 			partialRedemptionHintNICR,
-			address!,
-			address!
+			account!,
+			account!
 		)
 
 		let txHash = "";
 		try {
 			txHash = await walletClient!.writeContract({
-				account: address,
+				account: account as Address,
 				address: liquity.connection.addresses.troveManager as Address,
 				abi: TroveManagerAbi,
 				functionName: 'redeemCollateral',
@@ -261,7 +260,7 @@ export const SwapWEN2IOTXModal = ({
 				|| troveManagerDefaultStatus !== "LOADED"
 				|| !sortedTrovesDefault
 				|| sortedTrovesDefaultStatus !== "LOADED"
-				|| !address
+				|| !account
 				|| !walletClient
 				|| sending
 			}

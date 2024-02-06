@@ -76,7 +76,7 @@ export const MarketView = ({
 		fees,
 		lusdBalance
 	} = useLiquitySelector(selector);
-	const { walletClient, chainId, liquity } = useLiquity()
+	const { walletClient, chainId, liquity, account } = useLiquity()
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
 	const [depositAndBorrow, setDepositAndBorrow] = useState(true);
@@ -150,23 +150,22 @@ export const MarketView = ({
 
 	const availableWithdrawal = calculateAvailableWithdrawal(trove, price, appLiquidationPoint);
 	const availableWithdrawalFiat = availableWithdrawal.mul(price);
-	const { address } = useAccount();
 	const [txs, setTxs] = useState<TroveChangeTx[]>([]);
 	const [changes, setChanges] = useState<TroveChangeData[]>([]);
 	const [chartBoxWidth, setChartBoxWidth] = useState(700)
 
 	useEffect(() => {
-		if (!address) return;
+		if (!account) return;
 
 		setTimeout(() => {
-			const query = graphqlAsker.requestTroveChanges(address)
+			const query = graphqlAsker.requestTroveChanges(account)
 			graphqlAsker.ask(chainId, query, (data: any) => {
 				if (data.troveChanges) {
 					setTxs(data.troveChanges);
 				}
 			});
 		}, 1000);
-	}, [address, chainId]);
+	}, [account, chainId]);
 
 	// useEffect(() => {
 	// 	if (chainId <= 0 || changes.length > 0) return;
