@@ -46,7 +46,7 @@ export const MainView = ({ chains, rabbyKit }: {
 	const { chain } = useNetwork();
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
 	const { account, liquity, chainId, signer } = useLiquity();
-	const [referrer, setReferrer] = useState("");
+	const [referrer, setReferrer] = useState<string | undefined>(undefined);
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});
 	const [externalDataDone, setExternalDataDone] = useState(false);
 	const dec = Math.pow(10, WEN.decimals || 18);
@@ -109,7 +109,7 @@ export const MainView = ({ chains, rabbyKit }: {
 	}, [account, chainId, signer]);
 
 	useEffect(() => {
-		if (!chainId || !account || !referrer) return;
+		if (!chainId || !account || stabilityDeposit.currentLUSD.eq(0) || referrer === undefined) return;
 
 		appController.getUserPoints(
 			chainId,
@@ -120,7 +120,7 @@ export const MainView = ({ chains, rabbyKit }: {
 			res => {
 				setPoints(res);
 			});
-	}, [chainId, account, referrer]);
+	}, [chainId, account, referrer, stabilityDeposit.currentLUSD]);
 
 	useEffect(() => {
 		if (!referrer || chainId === 0) return;
