@@ -21,9 +21,9 @@ export const UserAccount = ({
   chains: Chain[];
   points: number;
 }) => {
-  const { publicClient } = useLiquity();
+  const { publicClient, account } = useLiquity();
   const { t } = useLang();
-  const { address, isConnected, connector } = useAccount();
+  const { isConnected, connector } = useAccount();
   const { disconnect } = useDisconnect();
   const { switchNetwork } = useSwitchNetwork();
   const chain = chains?.find(item => item.id === chainId);
@@ -57,7 +57,7 @@ export const UserAccount = ({
       style={{ gap: "4px" }}>
       <div className="label">{t("wallet")}</div>
 
-      <div className="label bigLabel fat">{shortenAddress(address as Address, 5, 2)}</div>
+      <div className="label bigLabel fat">{shortenAddress(account as Address, 5, 2)}</div>
     </div>
   </div> : <></>
 
@@ -67,7 +67,7 @@ export const UserAccount = ({
     <a
       className="textButton smallTextButton"
       style={{ color: "#FF7F1E" }}
-      href={publicClient?.chain?.blockExplorers?.default.url + "/address/" + address}
+      href={publicClient?.chain?.blockExplorers?.default.url + "/address/" + account}
       target="_blank">
       {t("viewInExplorer")}
 
@@ -118,7 +118,7 @@ export const UserAccount = ({
         </button>
       </div>}
 
-      {isConnected && address && <div className="flex-row-align-left">
+      {isConnected && account && <div className="flex-row-align-left">
         {points >= 0 && <div className="flex-row-align-left">
           <div className="label">{t("points")}:</div>
           <div className="label fat">{points.toFixed(2)}</div>
