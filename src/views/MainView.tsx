@@ -113,7 +113,7 @@ export const MainView = ({ chains, rabbyKit }: {
 
 		appController.getUserPoints(
 			chainId,
-			account,
+			account.toLowerCase(),
 			referrer,
 			Number(stabilityDeposit.currentLUSD),
 			Number(stabilityDeposit.collateralGain),
