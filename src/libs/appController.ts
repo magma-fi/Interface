@@ -107,6 +107,8 @@ export const appController: {
 		this._getUserStabilityAndLpScore(chainId, user, staked, collateralGain, res => {
 			let myUsersPoints = 0;
 
+			if (!referrer) return onDone && onDone(res.stabilityScore + res.lpScore);
+
 			// 根据referrer取得用户的下线。
 			// const query = graphqlAsker.requestUsersWithReferrer("0x");
 			const query = graphqlAsker.requestUsersWithReferrer(referrer);
@@ -192,6 +194,7 @@ export const appController: {
 				(data: any) => {
 					// 基础积分 = subgraph里的point字段 + AMOUNT * (当前时间 - timestamp ) * 10 / 3600000
 					if (data.user) res.stabilityScore = Number(data.user.point.point) + staked * 10 * (Date.now() - data.user.point.timestamp * 1000) / 3600000;
+
 					getLPScore();
 				},
 				stabilityScoreGraph
