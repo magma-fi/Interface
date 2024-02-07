@@ -126,7 +126,7 @@ export const UserAccount = ({
           forcedClass="selectionTrigger">
           <div className="flex-row-align-left">
             <img
-              src="images/iotx.png"
+              src={"images/" + chain?.id + ".png"}
               width="24px" />
 
             <div
