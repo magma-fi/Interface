@@ -186,7 +186,7 @@ export const PoolView = ({ market, constants }: {
 	};
 
 	return <>
-		<div className="marketView">
+		<div className="marketView poolView">
 			<div
 				className="flex-column"
 				style={{ gap: "24px" }}>

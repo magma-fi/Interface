@@ -39,8 +39,9 @@ export const SwapWEN2IOTXModal = ({
 	const maxNumber = Number(max);
 	const [fee, setFee] = useState(Decimal.ZERO);
 	const redeemRate = price;
-	const feeDecimals = fee.div(globalContants.IOTX_DECIMALS);
-	const receive = Decimal.ONE.div(redeemRate).mul(swapAmount);
+	const feeDecimals = fee.div(globalContants.WEN_DECIMALS);
+	const feePercent = Number(feeDecimals.div(swapAmount).mul(100));
+	const receive = Decimal.ONE.div(redeemRate).mul(Decimal.from(swapAmount).sub(feeDecimals));
 	const [sending, setSending] = useState(false);
 	const [iotxAsUnit, setIOTXAsUnit] = useState(true);
 	const [useMax, setUseMax] = useState(false);
@@ -79,8 +80,8 @@ export const SwapWEN2IOTXModal = ({
 
 	useEffect(() => {
 		const getData = async () => {
-			if (troveManagerDefaultStatus === "LOADED" && troveManagerDefault) {
-				const res = await troveManagerDefault.REDEMPTION_FEE_FLOOR();
+			if (troveManagerDefaultStatus === "LOADED" && troveManagerDefault && swapAmount > 0) {
+				const res = await troveManagerDefault.getRedemptionFeeWithDecay(Decimal.from(swapAmount).mul(globalContants.WEN_DECIMALS).toString());
 				if (res) {
 					setFee(Decimal.from(res.toString()));
 				}
@@ -88,7 +89,7 @@ export const SwapWEN2IOTXModal = ({
 		}
 
 		getData();
-	}, [troveManagerDefaultStatus, troveManagerDefault]);
+	}, [troveManagerDefaultStatus, troveManagerDefault, swapAmount]);
 
 	const listenHash = async (txHash: string) => {
 		if (!txHash) return;
@@ -224,11 +225,11 @@ export const SwapWEN2IOTXModal = ({
 				</div>
 
 				<div className="flex-row-space-between">
-					<div className="label">{t("conversionFee")}&nbsp;({feeDecimals.mul(100).toString(2)})%</div>
+					<div className="label">{t("conversionFee")}&nbsp;({swapAmount > 0 ? feePercent.toFixed(2) : 0})%</div>
 
 					<div
 						className="label"
-						style={{ color: "#F6F6F7" }}>{feeDecimals.mul(max).toString(2)}&nbsp;{WEN.symbol}</div>
+						style={{ color: "#F6F6F7" }}>{feeDecimals.toString(2)}&nbsp;{WEN.symbol}</div>
 				</div>
 
 				<div className="flex-row-space-between">

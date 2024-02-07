@@ -636,6 +636,10 @@ h4 {
   width: 100%;
 }
 
+.poolView {
+  // 
+}
+
 .marketViewLayout {
   // 
 }
@@ -1189,6 +1193,7 @@ input {
     flex-direction: column;
     width: 100vw;
     height: fit-content;
+    margin-bottom: 8rem;
   }
 
   .sider {
@@ -1303,6 +1308,10 @@ input {
   }
 
   .marketViewLayout {
+    flex-direction: column;
+  }
+
+  .poolView {
     flex-direction: column;
   }
 
