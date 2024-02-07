@@ -30,10 +30,10 @@ import { zeroAddress } from "viem";
 
 const select = ({
 	trove,
-	// stabilityDeposit
+	stabilityDeposit
 }: LiquityStoreState) => ({
 	trove,
-	// stabilityDeposit
+	stabilityDeposit
 });
 
 export const MainView = ({ chains }: { chains: Chain[] }) => {
@@ -43,13 +43,13 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const { chain } = useNetwork();
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
 	const { account, liquity, chainId, signer } = useLiquity();
-	const [referrer, setReferrer] = useState("");
+	const [referrer, setReferrer] = useState<string | undefined>(undefined);
 	const [constants, setConstants] = useState<Record<string, Decimal>>({});
 	const [externalDataDone, setExternalDataDone] = useState(false);
 	const dec = Math.pow(10, WEN.decimals || 18);
+	const [points, setPoints] = useState(0);
 
-	const { trove } = useLiquitySelector(select);
-
+	const { trove, stabilityDeposit } = useLiquitySelector(select);
 	const [isReferrer, setIsReferrer] = useState(false);
 	const [referralCode, setReferralCode] = useState("");
 	const [depositsByReferrer, setDepositsByReferrer] = useState<DepositByReferrer[]>()
@@ -100,10 +100,24 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			}
 		};
 
-		if (chainId && account) {
+		if (chainId && account && signer) {
 			getReferer();
 		}
-	}, [account, chainId]);
+	}, [account, chainId, signer]);
+
+	useEffect(() => {
+		if (!chainId || !account || stabilityDeposit.currentLUSD.eq(0) || referrer === undefined) return;
+
+		appController.getUserPoints(
+			chainId,
+			account.toLowerCase(),
+			referrer,
+			Number(stabilityDeposit.currentLUSD),
+			Number(stabilityDeposit.collateralGain),
+			res => {
+				setPoints(res);
+			});
+	}, [chainId, account, referrer, stabilityDeposit.currentLUSD]);
 
 	useEffect(() => {
 		if (!referrer || chainId === 0) return;
@@ -206,7 +220,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 							onConnect={handleConnectWallet}
 							isSupportedNetwork={isSupportedNetwork}
 							chains={chains}
-							chainId={chainId} />
+							chainId={chainId}
+							points={points} />
 					</div>
 
 					<Switch>
@@ -224,7 +239,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 								isReferrer={isReferrer}
 								referralCode={referralCode}
 								referrer={referrer}
-								deposits={depositsByReferrer} />
+								deposits={depositsByReferrer}
+								points={points} />
 						</Route>
 
 						<Route path="/">

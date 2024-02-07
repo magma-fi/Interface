@@ -60,7 +60,6 @@ export const PoolView = ({ market, constants }: {
 		trove,
 		validationContext
 	} = useLiquitySelector(selector);
-	// const { address } = useAccount();
 	const { liquity, walletClient, account, chainId } = useLiquity();
 	const [showModal, setShowModal] = useState<ModalOpenning | null>(null);
 	const [showTxResult, setTxResult] = useState<ModalOpenning | null>(null);

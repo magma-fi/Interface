@@ -3,8 +3,8 @@ import appConfig from "../appConfig.json";
 import { JsonObject } from "./types";
 
 export const graphqlAsker = {
-	ask: function (chainId: number, query: string, doneCallback: (data: unknown) => void) {
-		const uri = this._getGraph(chainId);
+	ask: function (chainId: number, query: string, doneCallback: (data: unknown) => void, graphURL = undefined) {
+		const uri = graphURL ?? this._getGraph(chainId);
 
 		if (!uri) {
 			return doneCallback(null);
@@ -129,6 +129,53 @@ export const graphqlAsker = {
 			frontends(where: {code_contains_nocase: "${code}"}) {
 				owner {
 					id
+				}
+			}
+		}
+		`;
+	},
+
+	requestUsersWithReferrer: function (referrer: string) {
+		return `
+		{
+			users(where: {frontend_contains_nocase: "${referrer}"}) {
+				id
+				stabilityDeposit {
+					depositedAmount
+				}
+			}
+		}
+		`;
+	},
+
+	requestUserScore: function (user: string) {
+		return `
+		{
+			user(id: "${user}") {
+				id
+				point {
+					point
+					timestamp
+				}
+				balance {
+					balance
+				}
+			}
+		}
+		`;
+	},
+
+	requestScoreOfUsers: function (users: string[]) {
+		return `
+		{
+			users(where: {id_in: [${users}]}) {
+				id
+				point {
+					point
+					timestamp
+				}
+				balance {
+					balance
 				}
 			}
 		}
