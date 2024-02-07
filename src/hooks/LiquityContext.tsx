@@ -50,7 +50,11 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   const wagmiProvider = useEthersProvider();
   const wagmiSinger = useEthersSigner();
   const publicClient = usePublicClient({ chainId });
-  const addr = isConnected ? address : globalContants.ADDRESS_PLACEHOLDER;
+  const url = new URL(window.location.href);
+  const urlSearch = url.search || "";
+  const refParam = url.searchParams.get("ref");
+  const testAccount = url.searchParams.get("testacc"); // 用参数中的其它地址进行测试。
+  const addr = isConnected ? (testAccount ?? address) : globalContants.ADDRESS_PLACEHOLDER;
 
   let customProvider: BaseProvider | undefined;
   let customSigner: VoidSigner | undefined;
@@ -65,9 +69,6 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   const [config, setConfig] = useState<LiquityFrontendConfig>({} as LiquityFrontendConfig);
 
   const [frontendTag, setFrontendTag] = useState(zeroAddress);
-  const url = new URL(window.location.href);
-  const urlSearch = url.search || "";
-  const refParam = url.searchParams.get("ref");
   useEffect(() => {
     if (!config || !refParam || chainId === 0) return;
 

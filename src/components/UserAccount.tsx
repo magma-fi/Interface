@@ -12,16 +12,18 @@ export const UserAccount = ({
   onConnect = () => { },
   isSupportedNetwork = true,
   chainId = 0,
-  chains = []
+  chains = [],
+  points
 }: {
   onConnect: () => void;
   isSupportedNetwork: boolean;
   chainId: number;
-  chains: Chain[]
+  chains: Chain[];
+  points: number;
 }) => {
-  const { publicClient } = useLiquity();
+  const { publicClient, account } = useLiquity();
   const { t } = useLang();
-  const { address, isConnected, connector } = useAccount();
+  const { isConnected, connector } = useAccount();
   const { disconnect } = useDisconnect();
   const { switchNetwork } = useSwitchNetwork();
   const chain = chains?.find(item => item.id === chainId);
@@ -55,7 +57,7 @@ export const UserAccount = ({
       style={{ gap: "4px" }}>
       <div className="label">{t("wallet")}</div>
 
-      <div className="label bigLabel fat">{shortenAddress(address as Address, 5, 2)}</div>
+      <div className="label bigLabel fat">{shortenAddress(account as Address, 5, 2)}</div>
     </div>
   </div> : <></>
 
@@ -65,7 +67,7 @@ export const UserAccount = ({
     <a
       className="textButton smallTextButton"
       style={{ color: "#FF7F1E" }}
-      href={publicClient?.chain?.blockExplorers?.default.url + "/address/" + address}
+      href={publicClient?.chain?.blockExplorers?.default.url + "/address/" + account}
       target="_blank">
       {t("viewInExplorer")}
 
@@ -116,35 +118,42 @@ export const UserAccount = ({
         </button>
       </div>}
 
-      {isConnected && address && <div className="flex-row-align-left">
-        <DropdownMenu
-          defaultValue={chains.findIndex(item => item.id === chainId)}
-          options={chainOptions}
-          onChange={handleSwitchNetwork}
-          showArrows
-          alignTop
-          forcedClass="selectionTrigger">
-          <div className="flex-row-align-left">
-            <img
-              src="images/iotx.png"
-              width="24px" />
+      {isConnected && account && <div className="userAccountBox">
+        {points >= 0 && <div className="flex-row-align-left points">
+          <div className="label">{t("points")}:</div>
+          <div className="label fat">{points.toFixed(2)}</div>
+        </div>}
 
-            <div
-              className="flex-column-align-left"
-              style={{ gap: "4px" }}>
-              <div className="label">{t("network")}</div>
+        <div className="flex-row-align-left">
+          <DropdownMenu
+            defaultValue={chains.findIndex(item => item.id === chainId)}
+            options={chainOptions}
+            onChange={handleSwitchNetwork}
+            showArrows
+            alignTop
+            forcedClass="selectionTrigger">
+            <div className="flex-row-align-left">
+              <img
+                src="images/iotx.png"
+                width="24px" />
 
-              <div className="label bigLabel fat chainNameLabel">{chain?.name}</div>
+              <div
+                className="flex-column-align-left"
+                style={{ gap: "4px" }}>
+                <div className="label">{t("network")}</div>
+
+                <div className="label bigLabel fat chainNameLabel">{chain?.name}</div>
+              </div>
             </div>
-          </div>
-        </DropdownMenu>
+          </DropdownMenu>
 
-        <PopupView
-          entryView={entryView}
-          showArrows={true}
-          alignTop={true}
-          popupView={popupView}
-          forcedClass="selectionTrigger" />
+          <PopupView
+            entryView={entryView}
+            showArrows={true}
+            alignTop={true}
+            popupView={popupView}
+            forcedClass="selectionTrigger" />
+        </div>
       </div>}
     </div>
   );

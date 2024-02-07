@@ -6,7 +6,7 @@ type WalletConnectorProps = {
 
 export const WalletConnector: React.FC<WalletConnectorProps> = ({ children }) => {
   const { connect, connectors, isLoading, pendingConnector } = useConnect();
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
 
   // return (
   //   <ConnectKitButton.Custom>

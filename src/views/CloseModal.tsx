@@ -16,7 +16,7 @@ import appConfig from "../appConfig.json";
 import { loadABI } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { IOTX, WEN, globalContants } from "../libs/globalContants";
-import { erc20ABI, useAccount } from "wagmi";
+import { erc20ABI } from "wagmi";
 import { Address, parseEther } from "viem";
 import swapAndCloseTool from "../abis/swapAndCloseTool.json";
 
@@ -39,12 +39,11 @@ export const CloseModal = ({
 	balance: Decimal;
 	price: Decimal;
 }) => {
-	const { provider, walletClient, publicClient, liquity } = useLiquity();
+	const { provider, walletClient, publicClient, liquity, account } = useLiquity();
 	const { t } = useLang();
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
 	const indexOfConfig: string = String(chainId);
-	const account = useAccount();
 	const [agree, setAgree] = useState(false);
 
 	const updatedTrove = new Trove(Decimal.ZERO, Decimal.ZERO);
@@ -115,7 +114,7 @@ export const CloseModal = ({
 
 	const swap = async () => {
 		const txHash = await walletClient!.writeContract({
-			account: account.address,
+			account: account as Address,
 			address: appConfig.swap[indexOfConfig].swapAndCloseTool.address,
 			abi: swapAndCloseTool,
 			functionName: 'swapAndCloseTrove',
@@ -155,7 +154,7 @@ export const CloseModal = ({
 		if (!publicClient) return;
 
 		const txHash = await walletClient!.writeContract({
-			account: account.address,
+			account: account as Address,
 			// address: appConfig.tokens.wen[indexOfConfig].address,
 			address: liquity.connection.addresses.lusdToken as Address,
 			abi: erc20ABI,
