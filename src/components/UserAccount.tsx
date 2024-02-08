@@ -121,7 +121,7 @@ export const UserAccount = ({
       {isConnected && account && <div className="userAccountBox">
         {points >= 0 && <div className="flex-row-align-left points">
           <div className="label">{t("points")}:</div>
-          <div className="label fat">{points.toFixed(2)}</div>
+          <div className="label fat">{points.toFixed(0)}</div>
         </div>}
 
         <div className="flex-row-align-left">
