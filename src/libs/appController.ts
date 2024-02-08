@@ -15,8 +15,10 @@ export const appController: {
 	_db: IDBDatabase | undefined;
 	openDB: (chainId: number, onDone: () => void) => void;
 	readAll: (onDone: (arg?: IDBCursor) => void) => void;
-	getUserPoints: (chainId: number, user: string, referrer: string, staked: number, collateralGain: number, onDone: (point: number) => void) => void;
-	_getUserStabilityAndLpScore: (chainId: number, user: string, staked: number, collateralGain: number, onDone: (res: Record<string, number>) => void) => void;
+	getUserPoints: (chainId: number, user: string, referrer: string, onDone: (point: number) => void) => void;
+	_getUserWENScore: (chainId: number, user: string) => Promise<number>;
+	_getLPScore: (chainId: number, user: string) => Promise<number>;
+	_getUserStabilityAndLpScore: (chainId: number, user: string, onDone: (res: Record<string, number>) => void) => void;
 } = {
 	_dbConnector: undefined,
 	_db: undefined,
@@ -103,104 +105,128 @@ export const appController: {
 		}
 	},
 
-	getUserPoints: function (chainId, user, referrer, staked, collateralGain, onDone): void {
-		this._getUserStabilityAndLpScore(chainId, user, staked, collateralGain, res => {
+	getUserPoints: function (chainId, user, referrer, onDone): void {
+		this._getUserStabilityAndLpScore(chainId, user, res => {
 			let myUsersPoints = 0;
 
 			if (!referrer) return onDone && onDone(res.stabilityScore + res.lpScore);
 
 			// 根据referrer取得用户的下线。
-			// const query = graphqlAsker.requestUsersWithReferrer("0x");
 			const query = graphqlAsker.requestUsersWithReferrer(referrer);
 			graphqlAsker.ask(chainId, query, (result: any) => {
 				if (result?.users) {
 					const myUsers = result.users.map((item: { id: string; }) => '"' + item.id + '"');
+					if (myUsers.length > 0) {
+						const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
 
-					const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
-					const question = graphqlAsker.requestScoreOfUsers(myUsers);
+						const stabilityScoreGraph = cfg?.stabilityScore;
+						const question4Wen = graphqlAsker.requestWENScoreOfUsers(myUsers);
+						graphqlAsker.ask(
+							chainId,
+							question4Wen,
+							(stabilityScoreRes: any) => {
+								if (stabilityScoreRes?.users) {
+									stabilityScoreRes?.users.forEach((element: any) => {
+										const p = Number(element.point.point);
+										if (!isNaN(p)) myUsersPoints += p;
 
-					const stabilityScoreGraph = cfg?.stabilityScore;
-					graphqlAsker.ask(
-						chainId,
-						question,
-						(stabilityScoreRes: any) => {
-							if (stabilityScoreRes?.users) {
-								stabilityScoreRes?.users.forEach((element: any, idx: number) => {
-									myUsersPoints += (
-										Number(element.point.point)
-										+ Number(result.users[idx].stabilityDeposit.depositedAmount) * 10 * (Date.now() - element.point.timestamp * 1000) / 3600000
-									);
-								});
-							}
+										const d = Number(element.stabilityDeposit.depositedAmount);
+										if (!isNaN(d)) myUsersPoints += d * 10 * (Date.now() - element.point.timestamp * 1000) / 3600000;
+									});
+								}
 
-							const lpScoreGraph = cfg?.lpScore;
-							graphqlAsker.ask(
-								chainId,
-								question,
-								(lpScoreRes: any) => {
-									if (lpScoreRes?.users) {
-										lpScoreRes.users.forEach((element: any) => {
-											myUsersPoints += (
-												Number(element.point.point)
-												+ (Number(element.user.balance.balance) / 10 ** 18) * 4 * (Date.now() - element.user.point.timestamp * 1000) / 3600000
-											);
-										});
-									}
+								const lpScoreGraph = cfg?.lpScore;
+								const question = graphqlAsker.requestLPScoreOfUsers(myUsers);
+								graphqlAsker.ask(
+									chainId,
+									question,
+									(lpScoreRes: any) => {
+										if (lpScoreRes?.users) {
+											lpScoreRes.users.forEach((element: any) => {
+												myUsersPoints += (
+													Number(element.point.point)
+													+ (Number(element.user.balance.balance) / 10 ** 18) * 4 * (Date.now() - element.user.point.timestamp * 1000) / 3600000
+												);
+											});
+										}
 
-									return onDone && onDone(res.stabilityScore + res.lpScore + myUsersPoints * 0.1);
-								},
-								lpScoreGraph
-							);
-						},
-						stabilityScoreGraph
-					);
+										return onDone && onDone(res.stabilityScore + res.lpScore + myUsersPoints * 0.1);
+									},
+									lpScoreGraph
+								);
+							},
+							stabilityScoreGraph
+						);
+					} else {
+						return onDone && onDone(res.stabilityScore + res.lpScore);
+					}
 				}
 			});
 		});
 	},
 
-	_getUserStabilityAndLpScore: function (chainId, user, staked, collateralGain, onDone) {
-		const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
-		const query = graphqlAsker.requestUserScore(user);
+	_getUserStabilityAndLpScore: async function (chainId, user, onDone) {
 		const res = {
 			stabilityScore: 0,
 			lpScore: 0
 		};
 
+		res.stabilityScore = await this._getUserWENScore(chainId, user);
+		res.lpScore = await this._getLPScore(chainId, user);
 
-		const getLPScore = () => {
-			const lpScoreGraph = cfg?.lpScore;
-			if (lpScoreGraph) {
+		return onDone && onDone(res);
+	},
+
+	_getUserWENScore: function (chainId, user) {
+		return new Promise((resolve) => {
+			const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
+			const stabilityScoreGraph = cfg?.stabilityScore;
+			let stabilityScore = 0;
+			if (stabilityScoreGraph) {
+				const query = graphqlAsker.requestUserWENScore(user);
 				graphqlAsker.ask(
 					chainId,
 					query,
 					(data: any) => {
-						if (data.user) res.lpScore = Number(data.user.point.point) + (Number(data.user.balance.balance) / 10 ** 18) * 4 * (Date.now() - data.user.point.timestamp * 1000) / 3600000;
+						// 基础积分 = subgraph里的point字段 + AMOUNT * (当前时间 - timestamp ) * 10 / 3600000
+						if (data.user) {
+							const p = Number(data.user.point.point);
+							if (!isNaN(p)) stabilityScore = p;
 
-						return onDone && onDone(res);
+							const d = Number(data.user.stabilityDeposit.depositedAmount);
+							if (!isNaN(d)) stabilityScore += d * 10 * (Date.now() - data.user.point.timestamp * 1000) / 3600000;
+						}
+
+						resolve(stabilityScore);
+					},
+					stabilityScoreGraph
+				);
+			} else {
+				resolve(0);
+			}
+		});
+	},
+
+	_getLPScore: function (chainId, user) {
+		return new Promise(resolve => {
+			const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
+			const lpScoreGraph = cfg?.lpScore;
+			let lpScore = 0;
+			if (lpScoreGraph) {
+				const query = graphqlAsker.requestUserLPScore(user);
+				graphqlAsker.ask(
+					chainId,
+					query,
+					(data: any) => {
+						if (data.user) lpScore = Number(data.user.point.point) + (Number(data.user.balance.balance) / 10 ** 18) * 4 * (Date.now() - data.user.point.timestamp * 1000) / 3600000;
+
+						resolve(lpScore);
 					},
 					lpScoreGraph
 				);
 			} else {
-				return onDone && onDone(res);
+				resolve(0);
 			}
-		};
-
-		const stabilityScoreGraph = cfg?.stabilityScore;
-		if (stabilityScoreGraph) {
-			graphqlAsker.ask(
-				chainId,
-				query,
-				(data: any) => {
-					// 基础积分 = subgraph里的point字段 + AMOUNT * (当前时间 - timestamp ) * 10 / 3600000
-					if (data.user) res.stabilityScore = Number(data.user.point.point) + staked * 10 * (Date.now() - data.user.point.timestamp * 1000) / 3600000;
-
-					getLPScore();
-				},
-				stabilityScoreGraph
-			);
-		} else {
-			getLPScore();
-		}
+		});
 	}
 };
