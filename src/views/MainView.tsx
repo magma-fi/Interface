@@ -106,7 +106,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	}, [account, chainId, signer]);
 
 	useEffect(() => {
-		if (!chainId || !account || stabilityDeposit.currentLUSD.eq(0) || referrer === undefined) return;
+		if (!chainId || !account || !stabilityDeposit || referrer === undefined) return;
 
 		appController.getUserPoints(
 			chainId,
@@ -117,7 +117,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			res => {
 				setPoints(res);
 			});
-	}, [chainId, account, referrer, stabilityDeposit.currentLUSD]);
+	}, [chainId, account, referrer, stabilityDeposit]);
 
 	useEffect(() => {
 		if (!referrer || chainId === 0) return;
