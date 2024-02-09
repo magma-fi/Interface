@@ -28,13 +28,7 @@ import refererFactory from "../abis/refererFactory.json";
 import { appController } from "../libs/appController";
 import { zeroAddress } from "viem";
 
-const select = ({
-	trove,
-	stabilityDeposit
-}: LiquityStoreState) => ({
-	trove,
-	stabilityDeposit
-});
+const select = ({ trove }: LiquityStoreState) => ({ trove });
 
 export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const { isConnected } = useAccount();
@@ -49,7 +43,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const dec = Math.pow(10, WEN.decimals || 18);
 	const [points, setPoints] = useState(0);
 
-	const { trove, stabilityDeposit } = useLiquitySelector(select);
+	const { trove } = useLiquitySelector(select);
 	const [isReferrer, setIsReferrer] = useState(false);
 	const [referralCode, setReferralCode] = useState("");
 	const [depositsByReferrer, setDepositsByReferrer] = useState<DepositByReferrer[]>()
@@ -106,18 +100,16 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	}, [account, chainId, signer]);
 
 	useEffect(() => {
-		if (!chainId || !account || !stabilityDeposit || referrer === undefined) return;
+		if (!chainId || !account || referrer === undefined) return;
 
 		appController.getUserPoints(
 			chainId,
 			account.toLowerCase(),
 			referrer,
-			Number(stabilityDeposit.currentLUSD),
-			Number(stabilityDeposit.collateralGain),
 			res => {
 				setPoints(res);
 			});
-	}, [chainId, account, referrer, stabilityDeposit]);
+	}, [chainId, account, referrer]);
 
 	useEffect(() => {
 		if (!referrer || chainId === 0) return;

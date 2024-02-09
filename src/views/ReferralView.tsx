@@ -192,7 +192,7 @@ export const ReferralView = ({
 						width="24px" />
 
 					{/* <h4>{frontendRewards.toString(2)}&nbsp;{t("magmaPoints")}</h4> */}
-					<h4>{points.toFixed(2)}&nbsp;{t("magmaPoints")}</h4>
+					<h4>{points.toFixed(0)}&nbsp;{t("magmaPoints")}</h4>
 				</div>
 			</div>
 

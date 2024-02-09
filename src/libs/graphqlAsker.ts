@@ -148,7 +148,23 @@ export const graphqlAsker = {
 		`;
 	},
 
-	requestUserScore: function (user: string) {
+	requestUserWENScore: function (user: string) {
+		return `
+		{
+			user(id: "${user}") {
+				point {
+					point
+					timestamp
+				}
+				stabilityDeposit {
+					depositedAmount
+				}
+			}
+		}
+		`;
+	},
+
+	requestUserLPScore: function (user: string) {
 		return `
 		{
 			user(id: "${user}") {
@@ -165,7 +181,24 @@ export const graphqlAsker = {
 		`;
 	},
 
-	requestScoreOfUsers: function (users: string[]) {
+	requestWENScoreOfUsers: function (users: string[]) {
+		return `
+		{
+			users(where: {id_in: [${users}]}) {
+				id
+				point {
+					point
+					timestamp
+				}
+				stabilityDeposit {
+					depositedAmount
+				}
+			}
+		}
+		`;
+	},
+
+	requestLPScoreOfUsers: function (users: string[]) {
 		return `
 		{
 			users(where: {id_in: [${users}]}) {
