@@ -106,14 +106,15 @@ export const MarketView = ({
 	const liquidationPoint = recoveryMode ? CCR : MCR;
 	const appLiquidationPoint = recoveryMode ? CCR : appConfigConstants.appMCR;
 	const borrowingFeePct = new Percent(borrowingRate);
-
-	const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateralRatio(price);
 	const troveCollateralValue = trove.collateral.mul(price);
-	const line = Decimal.min(liquidationPoint, troveCollateralRatio);
-	const debtToLiquidate = Decimal.max(
-		trove.debt,
-		Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(troveCollateralValue)
-	);
+
+	// const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateralRatio(price);
+	// const line = Decimal.min(liquidationPoint, troveCollateralRatio);
+	// const debtToLiquidate = Decimal.max(
+	// 	trove.debt,
+	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(troveCollateralValue)
+	// );
+	const debtToLiquidate = trove.debt;
 	const liquidationPrice = trove.collateral.gt(0) ? debtToLiquidate.div(trove.collateral) : Decimal.ZERO;
 
 	const maxAvailableBorrow = troveCollateralValue.div(liquidationPoint).mul(appMMROffset);
