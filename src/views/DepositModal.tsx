@@ -101,7 +101,7 @@ export const DepositeModal = ({
 	const errorInfo = txErrorMessages || errorMessages;
 
 	const newCollateralRatio = updatedTrove.collateralRatio(price);
-	
+
 	// const newTroveCollateralRatio = updatedTrove.debt.eq(0) ? Decimal.ZERO : newCollateralRatio;
 	// const newTroveCollateralValue = updatedTrove.collateral.mul(price);
 	// const line = Decimal.min(liquidationPoint, newTroveCollateralRatio);
@@ -412,7 +412,8 @@ export const DepositeModal = ({
 						<div
 							className="label"
 							style={{ color: "#F6F6F7" }}>
-							{updatedTrove.debt.mul(borrowingRate).toString(2)}&nbsp;{WEN.symbol}
+							{/* {updatedTrove.debt.mul(borrowingRate).toString(2)}&nbsp;{WEN.symbol} */}
+							{fee.toString(2)}&nbsp;{WEN.symbol}
 						</div>
 					</div>
 

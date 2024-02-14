@@ -295,7 +295,8 @@ export const BorrowModal = ({
 					<div
 						className="label"
 						style={{ color: "#F6F6F7" }}>
-						{updatedTrove.debt.mul(borrowingRate).toString(2)}&nbsp;{WEN.symbol}
+						{/* {updatedTrove.debt.mul(borrowingRate).toString(2)}&nbsp;{WEN.symbol} */}
+						{fee.toString(2)}&nbsp;{WEN.symbol}
 					</div>
 				</div>
 
