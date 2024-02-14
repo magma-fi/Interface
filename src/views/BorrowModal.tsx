@@ -95,13 +95,14 @@ export const BorrowModal = ({
 	const newURisPositive = newCollateralRatio.gt(troveCollateralRatio);
 	const newUR = ((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(newCollateralRatio) : Decimal.ZERO);
 
-	const newTroveCollateralRatio = updatedTrove.debt.eq(0) ? Decimal.ZERO : newCollateralRatio;
-	const newTroveCollateralValue = updatedTrove.collateral.mul(price);
-	const line = Decimal.min(liquidationPoint, newTroveCollateralRatio);
-	const newDebtToLiquidate = Decimal.max(
-		updatedTrove.debt,
-		Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
-	);
+	// const newTroveCollateralRatio = updatedTrove.debt.eq(0) ? Decimal.ZERO : newCollateralRatio;
+	// const newTroveCollateralValue = updatedTrove.collateral.mul(price);
+	// const line = Decimal.min(liquidationPoint, newTroveCollateralRatio);
+	// const newDebtToLiquidate = Decimal.max(
+	// 	updatedTrove.debt,
+	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
+	// );
+	const newDebtToLiquidate = updatedTrove.debt;
 	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
 
 	useEffect(() => {
@@ -284,7 +285,8 @@ export const BorrowModal = ({
 						previousValue={Number(liquidationPrice)}
 						newValue={Number(newLiquidationPrice)}
 						nextPostfix={globalContants.USD}
-						positive={newLiquidationPrice.lt(liquidationPrice)} />
+						positive={newLiquidationPrice.lt(liquidationPrice)}
+						maximumFractionDigits={4} />
 				</div>
 
 				<div className="flex-row-space-between">
