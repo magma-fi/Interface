@@ -131,7 +131,9 @@ export const appController: {
 										if (!isNaN(p)) myUsersPoints += p;
 
 										const d = Number(element.stabilityDeposit.depositedAmount);
-										if (!isNaN(d)) myUsersPoints += d * 10 * (Date.now() - element.point.timestamp * 1000) / 3600000;
+										if (!isNaN(d)) myUsersPoints += d
+											* 10
+											* Math.floor((Date.now() - element.point.timestamp * 1000) / 3600000);
 									});
 								}
 
@@ -145,7 +147,9 @@ export const appController: {
 											lpScoreRes.users.forEach((element: any) => {
 												myUsersPoints += (
 													Number(element.point.point)
-													+ (Number(element.user.balance.balance) / 10 ** 18) * 4 * (Date.now() - element.user.point.timestamp * 1000) / 3600000
+													+ (Number(element.user.balance.balance) / 10 ** 18)
+													* 4
+													* Math.floor((Date.now() - element.user.point.timestamp * 1000) / 3600000)
 												);
 											});
 										}
@@ -194,7 +198,9 @@ export const appController: {
 							if (!isNaN(p)) stabilityScore = p;
 
 							const d = Number(data.user.stabilityDeposit.depositedAmount);
-							if (!isNaN(d)) stabilityScore += d * 10 * (Date.now() - data.user.point.timestamp * 1000) / 3600000;
+							if (!isNaN(d)) stabilityScore += d
+								* 10
+								* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
 						}
 
 						resolve(stabilityScore);
@@ -218,7 +224,9 @@ export const appController: {
 					chainId,
 					query,
 					(data: any) => {
-						if (data.user) lpScore = Number(data.user.point.point) + (Number(data.user.balance.balance) / 10 ** 18) * 4 * (Date.now() - data.user.point.timestamp * 1000) / 3600000;
+						if (data.user) lpScore = Number(data.user.point.point) + (Number(data.user.balance.balance) / 10 ** 18)
+							* 4
+							* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
 
 						resolve(lpScore);
 					},
