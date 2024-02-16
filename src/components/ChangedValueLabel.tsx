@@ -6,7 +6,8 @@ export const ChangedValueLabel = ({
 	previousPostfix,
 	nextPostfix,
 	positive = true,
-	showArrow = true
+	showArrow = true,
+	maximumFractionDigits = globalContants.DECIMALS_2
 }: {
 	previousValue: number;
 	newValue: number;
@@ -14,6 +15,7 @@ export const ChangedValueLabel = ({
 	nextPostfix?: string;
 	positive?: boolean;
 	showArrow?: boolean;
+	maximumFractionDigits?: number;
 }) => {
 	return <div
 		className="flex-row-align-left"
@@ -25,7 +27,7 @@ export const ChangedValueLabel = ({
 		<div
 			className="label labelSmall"
 			style={{ textDecoration: "line-through" }}>
-			{previousValue.toLocaleString("en-US", { maximumFractionDigits: globalContants.DECIMALS_2 })}
+			{previousValue.toLocaleString("en-US", { maximumFractionDigits })}
 
 			{previousPostfix && ((previousPostfix !== "%" ? " " : "") + previousPostfix)}
 		</div>
@@ -37,7 +39,7 @@ export const ChangedValueLabel = ({
 		<div
 			className="label"
 			style={{ color: "#F6F6F7" }}>
-			{newValue.toLocaleString("en-US", { maximumFractionDigits: globalContants.DECIMALS_2 })}
+			{newValue.toLocaleString("en-US", { maximumFractionDigits })}
 
 			{nextPostfix && ((nextPostfix !== "%" ? " " : "") + nextPostfix)}
 		</div>
