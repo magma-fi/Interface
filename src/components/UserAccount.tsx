@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { shortenAddress } from "../utils";
 import { useLang } from "../hooks/useLang";
-import { Address, Chain, useAccount, useDisconnect, useSwitchNetwork } from "wagmi";
+import { Address, Chain, useAccount, useDisconnect, usePrepareSendTransaction, useSwitchNetwork } from "wagmi";
 import { DropdownMenu } from "./DropdownMenu";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { OptionItem } from "../libs/types";
 import { PopupView } from "./PopupView";
 import { useLiquity } from "../hooks/LiquityContext";
+import { parseEther } from "viem";
+import { globalContants } from "../libs/globalContants";
 
 export const UserAccount = ({
   onConnect = () => { },
@@ -27,6 +29,21 @@ export const UserAccount = ({
   const { disconnect } = useDisconnect();
   const { switchNetwork } = useSwitchNetwork();
   const chain = chains?.find(item => item.id === chainId);
+
+  const { error } = usePrepareSendTransaction({
+    chainId,
+    to: account,
+    value: parseEther("0.0000000000001")
+  });
+
+  useEffect(() => {
+    if (error?.name === "ChainMismatchError" && chainId > 0) {
+      setTimeout(() => {
+        switchNetwork && switchNetwork(globalContants.DEFAULT_NETWORK_ID);
+      }, 3000);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, chainId]);
 
   const chainOptions = useMemo(() => {
     return chains.map((item: Chain) => {
