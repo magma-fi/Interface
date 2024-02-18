@@ -177,14 +177,14 @@ const validateTroveCreation = (
   constants?: Record<string, Decimal>
 ): JSX.Element | ErrorMessage | null => {
   const wenMinimumNetDebt = constants?.MIN_NET_DEBT || LUSD_MINIMUM_NET_DEBT;
-  const wenTotalSupply = constants?.wenTotalSupply;
+  // const wenTotalSupply = constants?.wenTotalSupply;
   const ccrPercent = new Percent(constants?.CCR || CRITICAL_COLLATERAL_RATIO).toString(0);
   const mcr = constants?.MCR || MINIMUM_COLLATERAL_RATIO;
   const mcrPercent = new Percent(mcr).toString(0);
 
-  if (wenTotalSupply?.add(borrowLUSD || 0).gt(1000000)) {
-    return { key: "limit1M" } as ErrorMessage;
-  }
+  // if (wenTotalSupply?.add(borrowLUSD || 0).gt(1000000)) {
+  //   return { key: "limit1M" } as ErrorMessage;
+  // }
 
   if (borrowLUSD.lt(wenMinimumNetDebt)) {
     // return (
@@ -269,15 +269,15 @@ const validateTroveAdjustment = (
   constants?: Record<string, Decimal>
 ): JSX.Element | ErrorMessage | null => {
   const wenMinimumDebt = constants?.MIN_NET_DEBT.add(constants?.LUSD_GAS_COMPENSATION) || LUSD_MINIMUM_DEBT;
-  const wenTotalSupply = constants?.wenTotalSupply;
+  // const wenTotalSupply = constants?.wenTotalSupply;
   const ccr = constants?.CCR || CRITICAL_COLLATERAL_RATIO;
   const ccrPercent = new Percent(ccr).toString(0);
   const mcr = constants?.MCR || MINIMUM_COLLATERAL_RATIO;
   const mcrPercent = new Percent(mcr).toString(0);
 
-  if (wenTotalSupply?.add(borrowLUSD || 0).gt(1000000)) {
-    return { key: "limit1M" } as ErrorMessage;
-  }
+  // if (wenTotalSupply?.add(borrowLUSD || 0).gt(1000000)) {
+  //   return { key: "limit1M" } as ErrorMessage;
+  // }
 
   if (recoveryMode) {
     if (withdrawCollateral) {
