@@ -101,14 +101,19 @@ export const DepositeModal = ({
 	const errorInfo = txErrorMessages || errorMessages;
 
 	const newCollateralRatio = updatedTrove.collateralRatio(price);
-	const newTroveCollateralRatio = updatedTrove.debt.eq(0) ? Decimal.ZERO : newCollateralRatio;
-	const newTroveCollateralValue = updatedTrove.collateral.mul(price);
-	const line = Decimal.min(liquidationPoint, newTroveCollateralRatio);
-	const newDebtToLiquidate = Decimal.max(
-		updatedTrove.debt,
-		Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
-	);
+
+	// const newTroveCollateralRatio = updatedTrove.debt.eq(0) ? Decimal.ZERO : newCollateralRatio;
+	// const newTroveCollateralValue = updatedTrove.collateral.mul(price);
+	// const line = Decimal.min(liquidationPoint, newTroveCollateralRatio);
+	// const newDebtToLiquidate = Decimal.max(
+	// 	updatedTrove.debt,
+	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
+	// );
+	const newDebtToLiquidate = updatedTrove.debt;
 	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
+
+	const newURPercentNumber = Number(Decimal.ONE.div(newCollateralRatio).mul(100));
+	const urIsGood = troveUtilizationRateNumber > newURPercentNumber;
 
 	const init = () => {
 		setValueForced(-1);
@@ -342,40 +347,52 @@ export const DepositeModal = ({
 					<div className="label">{t("utilizationRate")}</div>
 
 					<ChangedValueLabel
-						previousValue={troveUtilizationRateNumber.toFixed(2) + "%"}
-						newValue={((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(newCollateralRatio).mul(100).toString(2) : 0) + "%"} />
+						previousValue={troveUtilizationRateNumber}
+						previousPostfix="%"
+						newValue={(updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? newURPercentNumber : 0}
+						nextPostfix="%"
+						positive={urIsGood} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("deposited")}</div>
 
 					<ChangedValueLabel
-						previousValue={trove.collateral.toString(2)}
-						newValue={updatedTrove.collateral.toString(2) + " " + market.symbol} />
+						previousValue={Number(trove.collateral)}
+						newValue={Number(updatedTrove.collateral)}
+						nextPostfix={market.symbol}
+						positive={urIsGood} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("depositedValue")}</div>
 
 					<ChangedValueLabel
-						previousValue={trove.collateral.mul(price).toString(2)}
-						newValue={updatedTrove.collateral.mul(price).toString(2) + " " + globalContants.USD} />
+						previousValue={Number(trove.collateral.mul(price))}
+						newValue={Number(updatedTrove.collateral.mul(price))}
+						nextPostfix={globalContants.USD}
+						positive={urIsGood} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("available2Withdraw")}</div>
 
 					<ChangedValueLabel
-						previousValue={trove.debt.gt(0) ? availableWithdrawal.toString(2) : 0}
-						newValue={(updatedTrove.debt.gt(0) ? calculateAvailableWithdrawal(updatedTrove, price, liquidationPoint).toString(2) : 0) + " " + market.symbol} />
+						previousValue={trove.debt.gt(0) ? Number(availableWithdrawal) : 0}
+						newValue={updatedTrove.debt.gt(0) ? Number(calculateAvailableWithdrawal(updatedTrove, price, liquidationPoint)) : 0}
+						nextPostfix={market.symbol}
+						positive={urIsGood} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("liquidationPrice")}(1&nbsp;{market?.symbol})</div>
 
 					<ChangedValueLabel
-						previousValue={liquidationPrice.toString(2)}
-						newValue={newLiquidationPrice.toString(2) + " " + globalContants.USD} />
+						previousValue={Number(liquidationPrice)}
+						newValue={Number(newLiquidationPrice)}
+						nextPostfix={globalContants.USD}
+						positive={urIsGood}
+						maximumFractionDigits={4} />
 				</div>
 
 				{showExpandBorrowView && <>
@@ -383,8 +400,10 @@ export const DepositeModal = ({
 						<div className="label">{t("available2Borrow")}</div>
 
 						<ChangedValueLabel
-							previousValue={trove.debt.gt(0) ? availableBorrow.toString(2) : 0}
-							newValue={(updatedTrove.debt.gt(0) ? calculateAvailableBorrow(updatedTrove, price, liquidationPoint).toString(2) : 0) + " " + WEN.symbol} />
+							previousValue={trove.debt.gt(0) ? Number(availableBorrow) : 0}
+							newValue={updatedTrove.debt.gt(0) ? Number(calculateAvailableBorrow(updatedTrove, price, liquidationPoint)) : 0}
+							nextPostfix={WEN.symbol}
+							positive={urIsGood} />
 					</div>
 
 					<div className="flex-row-space-between">
@@ -393,7 +412,8 @@ export const DepositeModal = ({
 						<div
 							className="label"
 							style={{ color: "#F6F6F7" }}>
-							{updatedTrove.debt.mul(borrowingRate).toString(2)}&nbsp;{WEN.symbol}
+							{/* {updatedTrove.debt.mul(borrowingRate).toString(2)}&nbsp;{WEN.symbol} */}
+							{fee.toString(2)}&nbsp;{WEN.symbol}
 						</div>
 					</div>
 
@@ -419,8 +439,10 @@ export const DepositeModal = ({
 						<div className="label">{t("vaultDebt")}</div>
 
 						<ChangedValueLabel
-							previousValue={trove.debt.toString(2)}
-							newValue={updatedTrove.debt.toString(2) + " " + globalContants.USD} />
+							previousValue={Number(trove.debt)}
+							newValue={Number(updatedTrove.debt)}
+							nextPostfix={globalContants.USD}
+							positive={urIsGood} />
 					</div>
 				</>}
 			</div>

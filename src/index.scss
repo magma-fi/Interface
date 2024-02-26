@@ -33,7 +33,7 @@
   --surface-card-stroke: #201c21;
   --surface-text-input: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, rgba(255, 255, 255, 0.02) 100%), #06020B;
   --button-secondary-stroke: #291d1d;
-  --button-secondary-fill: #1a100e;
+  --button-secondary-fill: rgba(255, 147, 59, 0.06);
   --button-secondary-text: #FF9407;
   --text-secondary: #A3A2AC;
   --badge-id-background-color: #0d121b;
@@ -366,6 +366,14 @@ h4 {
   .logoOnTopBar {
     display: none;
   }
+
+  .userAccountBox {
+    display: flex;
+    flex-direction: row;
+    gap: var(--flex-gap-middle);
+    justify-content: flex-end;
+    align-items: center;
+  }
 }
 
 .selectionTrigger {
@@ -626,6 +634,10 @@ h4 {
   grid-template-columns: auto auto;
   gap: var(--flex-gap-larger);
   width: 100%;
+}
+
+.poolView {
+  // 
 }
 
 .marketViewLayout {
@@ -1181,6 +1193,7 @@ input {
     flex-direction: column;
     width: 100vw;
     height: fit-content;
+    margin-bottom: 8rem;
   }
 
   .sider {
@@ -1298,6 +1311,10 @@ input {
     flex-direction: column;
   }
 
+  .poolView {
+    flex-direction: column;
+  }
+
   .card {
     width: calc(100% - var(--flex-gap-small) * 2);
     padding: var(--flex-gap-small);
@@ -1395,6 +1412,15 @@ input {
 
     .logoOnTopBar {
       display: block;
+    }
+
+    .userAccountBox {
+      flex-direction: column-reverse;
+      align-items: flex-end;
+  
+      .points{
+        margin-right: 1rem;
+      }
     }
   }
 

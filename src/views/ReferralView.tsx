@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { useAccount } from "wagmi";
 import { useLang } from "../hooks/useLang";
 // import { useMyTransactionState, useTransactionFunction } from "../components/Transaction";
 import { useEffect, useState } from "react";
@@ -14,7 +13,6 @@ import { MAGMA, WEN, globalContants } from "../libs/globalContants";
 import copy from "copy-to-clipboard";
 import { DappContract } from "../libs/DappContract.";
 import refererFactory from "../abis/refererFactory.json";
-import referrerABI from "../abis/referer.json";
 import { shortenAddress } from "../utils";
 // import { ethers } from "ethers";
 // import { EthersSigner } from "lib-ethers";
@@ -24,17 +22,18 @@ export const ReferralView = ({
 	haveDeposited = false,
 	referralCode = "",
 	referrer = "",
-	deposits
+	deposits,
+	points
 }: {
 	isReferrer: boolean;
 	haveDeposited: boolean;
 	referralCode: string;
 	referrer: string;
 	deposits?: DepositByReferrer[];
+	points: number;
 }) => {
 	const { t } = useLang();
-	const { address } = useAccount();
-	const { liquity, chainId, provider, signer, publicClient } = useLiquity();
+	const { liquity, chainId, provider, signer, publicClient, account } = useLiquity();
 	// const txId = useMemo(() => String(Date.now()), []);
 	// const transactionState = useMyTransactionState(txId, true);
 	const [loading, setLoading] = useState(false);
@@ -56,8 +55,8 @@ export const ReferralView = ({
 
 	useEffect(() => {
 		const read = async () => {
-			if (stabilityPoolStatus === "LOADED" && address) {
-				// const res = await stabilityPoolDefault?.getFrontEndLQTYGain(address);
+			if (stabilityPoolStatus === "LOADED" && account) {
+				// const res = await stabilityPoolDefault?.getFrontEndLQTYGain(account);
 				const res = await stabilityPoolDefault?.getFrontEndLQTYGain(referrer);
 				if (res) {
 					setFrontendRewards(Decimal.from(res.toString()).div(MAGMA.decimals));
@@ -66,7 +65,7 @@ export const ReferralView = ({
 		};
 
 		read();
-	}, [address, stabilityPoolDefault, stabilityPoolStatus]);
+	}, [account, stabilityPoolDefault, stabilityPoolStatus]);
 
 	const handleRegisterFrontend = async () => {
 		if (!chainId || !provider || kickbackRate?.eq(0) || !signer || !refererFactoryAddress) return;
@@ -168,7 +167,7 @@ export const ReferralView = ({
 							paddingLeft: "5rem",
 							paddingRight: "5rem"
 						}}
-						disabled={!address || loading || !refererFactoryAddress}
+						disabled={!account || loading || !refererFactoryAddress}
 						onClick={handleRegisterFrontend}>
 						<img src="images/wallet-dark.png" />
 
@@ -192,7 +191,8 @@ export const ReferralView = ({
 						src="images/magma.png"
 						width="24px" />
 
-					<h4>{frontendRewards.toString(2)}&nbsp;{t("magmaPoints")}</h4>
+					{/* <h4>{frontendRewards.toString(2)}&nbsp;{t("magmaPoints")}</h4> */}
+					<h4>{points.toFixed(0)}&nbsp;{t("magmaPoints")}</h4>
 				</div>
 			</div>
 

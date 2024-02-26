@@ -3,8 +3,8 @@ import appConfig from "../appConfig.json";
 import { JsonObject } from "./types";
 
 export const graphqlAsker = {
-	ask: function (chainId: number, query: string, doneCallback: (data: unknown) => void) {
-		const uri = this._getGraph(chainId);
+	ask: function (chainId: number, query: string, doneCallback: (data: unknown) => void, graphURL = undefined) {
+		const uri = graphURL ?? this._getGraph(chainId);
 
 		if (!uri) {
 			return doneCallback(null);
@@ -51,21 +51,21 @@ export const graphqlAsker = {
 		`;
 	},
 
-	requestVaults: function (fromIndex = 0, howMany = 100) {
+	requestStabilityDepositChanges: function (account: string, howMany: number) {
 		return `
 		{
-			troves(
+			stabilityDepositChanges(
 				first: ${howMany}
-				skip: ${fromIndex}
-				where: {status: "open"}
-				orderBy: collateralRatioSortKey
+				where: {stabilityDeposit_contains_nocase: "${account}"}
+				orderBy: sequenceNumber
 				orderDirection: desc
 			) {
-				id
-				status
-				rawCollateral
-				rawDebt
-				collateralRatioSortKey
+				sequenceNumber
+				stabilityDepositOperation
+				depositedAmountChange
+				transaction {
+					timestamp
+				}
 			}
 		}
 		`;
@@ -130,6 +130,106 @@ export const graphqlAsker = {
 				owner {
 					id
 				}
+			}
+		}
+		`;
+	},
+
+	requestUsersWithReferrer: function (referrer: string) {
+		return `
+		{
+			users(where: {frontend_contains_nocase: "${referrer}"}) {
+				id
+				stabilityDeposit {
+					depositedAmount
+				}
+			}
+		}
+		`;
+	},
+
+	requestUserWENScore: function (user: string) {
+		return `
+		{
+			user(id: "${user}") {
+				point {
+					point
+					timestamp
+				}
+				stabilityDeposit {
+					depositedAmount
+				}
+			}
+		}
+		`;
+	},
+
+	requestUserLPScore: function (user: string) {
+		return `
+		{
+			user(id: "${user}") {
+				id
+				point {
+					point
+					timestamp
+				}
+				balance {
+					balance
+				}
+			}
+		}
+		`;
+	},
+
+	requestWENScoreOfUsers: function (users: string[]) {
+		return `
+		{
+			users(where: {id_in: [${users}]}) {
+				id
+				point {
+					point
+					timestamp
+				}
+				stabilityDeposit {
+					depositedAmount
+				}
+			}
+		}
+		`;
+	},
+
+	requestLPScoreOfUsers: function (users: string[]) {
+		return `
+		{
+			users(where: {id_in: [${users}]}) {
+				id
+				point {
+					point
+					timestamp
+				}
+				balance {
+					balance
+				}
+			}
+		}
+		`;
+	},
+
+	requestVaults: function (fromIndex = 0, howMany = 100) {
+		return `
+		{
+			troves(
+				first: ${howMany}
+				skip: ${fromIndex}
+				where: {status: "open"}
+				orderBy: collateralRatioSortKey
+				orderDirection: desc
+			) {
+				id
+				status
+				rawCollateral
+				rawDebt
+				collateralRatioSortKey
 			}
 		}
 		`;

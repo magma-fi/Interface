@@ -15,7 +15,7 @@ import { HintHelpers, SortedTroves, TroveManager } from "lib-ethers/dist/types";
 import { SnackBar } from "../components/SnackBar";
 import { useContract } from "../hooks/useContract";
 import { useLiquity } from "../hooks/LiquityContext";
-import { Address, useAccount, useWaitForTransaction } from "wagmi";
+import { Address } from "wagmi";
 
 export const SwapWEN2IOTXModal = ({
 	isOpen = false,
@@ -33,15 +33,15 @@ export const SwapWEN2IOTXModal = ({
 	trove: UserTrove;
 }) => {
 	const { t } = useLang();
-	const { address } = useAccount();
-	const { provider, liquity, walletClient } = useLiquity();
+	const { provider, liquity, walletClient, account } = useLiquity();
 	const [valueForced, setValueForced] = useState(-1);
 	const [swapAmount, setSwapAmount] = useState(0);
 	const maxNumber = Number(max);
 	const [fee, setFee] = useState(Decimal.ZERO);
 	const redeemRate = price;
-	const feeDecimals = fee.div(globalContants.IOTX_DECIMALS);
-	const receive = Decimal.ONE.div(redeemRate).mul(swapAmount);
+	const feeDecimals = fee.div(globalContants.WEN_DECIMALS);
+	const feePercent = Number(feeDecimals.div(swapAmount).mul(100));
+	const receive = Decimal.ONE.div(redeemRate).mul(Decimal.from(swapAmount).sub(feeDecimals));
 	const [sending, setSending] = useState(false);
 	const [iotxAsUnit, setIOTXAsUnit] = useState(true);
 	const [useMax, setUseMax] = useState(false);
@@ -80,8 +80,8 @@ export const SwapWEN2IOTXModal = ({
 
 	useEffect(() => {
 		const getData = async () => {
-			if (troveManagerDefaultStatus === "LOADED" && troveManagerDefault) {
-				const res = await troveManagerDefault.REDEMPTION_FEE_FLOOR();
+			if (troveManagerDefaultStatus === "LOADED" && troveManagerDefault && swapAmount > 0) {
+				const res = await troveManagerDefault.getRedemptionFeeWithDecay(Decimal.from(swapAmount).mul(globalContants.WEN_DECIMALS).toString());
 				if (res) {
 					setFee(Decimal.from(res.toString()));
 				}
@@ -89,7 +89,7 @@ export const SwapWEN2IOTXModal = ({
 		}
 
 		getData();
-	}, [troveManagerDefaultStatus, troveManagerDefault]);
+	}, [troveManagerDefaultStatus, troveManagerDefault, swapAmount]);
 
 	const listenHash = async (txHash: string) => {
 		if (!txHash) return;
@@ -115,14 +115,14 @@ export const SwapWEN2IOTXModal = ({
 		const { firstRedemptionHint, partialRedemptionHintNICR } = await hintHelpersDefault!.getRedemptionHints(wenAmount, price.mul(globalContants.IOTX_DECIMALS).toString(), 0);
 		const { 0: upperPartialRedemptionHint, 1: lowerPartialRedemptionHint } = await sortedTrovesDefault!.findInsertPosition(
 			partialRedemptionHintNICR,
-			address!,
-			address!
+			account!,
+			account!
 		)
 
 		let txHash = "";
 		try {
 			txHash = await walletClient!.writeContract({
-				account: address,
+				account: account as Address,
 				address: liquity.connection.addresses.troveManager as Address,
 				abi: TroveManagerAbi,
 				functionName: 'redeemCollateral',
@@ -225,11 +225,11 @@ export const SwapWEN2IOTXModal = ({
 				</div>
 
 				<div className="flex-row-space-between">
-					<div className="label">{t("conversionFee")}&nbsp;({feeDecimals.mul(100).toString(2)})%</div>
+					<div className="label">{t("conversionFee")}&nbsp;({swapAmount > 0 ? feePercent.toFixed(2) : 0})%</div>
 
 					<div
 						className="label"
-						style={{ color: "#F6F6F7" }}>{feeDecimals.mul(max).toString(2)}&nbsp;{WEN.symbol}</div>
+						style={{ color: "#F6F6F7" }}>{feeDecimals.toString(2)}&nbsp;{WEN.symbol}</div>
 				</div>
 
 				<div className="flex-row-space-between">
@@ -261,7 +261,7 @@ export const SwapWEN2IOTXModal = ({
 				|| troveManagerDefaultStatus !== "LOADED"
 				|| !sortedTrovesDefault
 				|| sortedTrovesDefaultStatus !== "LOADED"
-				|| !address
+				|| !account
 				|| !walletClient
 				|| sending
 			}

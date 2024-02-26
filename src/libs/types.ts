@@ -109,3 +109,17 @@ export type callRequest = {
 	call: string;
 	parseFunc: (args: string[]) => void;
 }
+
+export enum StabilityDepositOperation {
+	depositTokens = "Stake",
+	withdrawTokens = "Unstake",
+	withdrawCollateralGain = "Claim"
+}
+
+export type StabilityTransactionRecord = {
+	id: number;
+	operation: StabilityDepositOperation;
+	amount: number;
+	timestamp: number;
+	tx: string;
+}
