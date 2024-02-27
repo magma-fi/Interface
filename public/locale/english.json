@@ -17,7 +17,7 @@
 	"walletBalance": "Wallet Balance",
 	"marketOverview": "market overview",
 	"totalUtilizationRate": "Total Utilization Rate",
-	"recoveryModeAt": "Recovery Mode at {recovery}%",
+	"recoveryModeAt": "Recovery Mode at {recovery}",
 	"totalDeposits": "Total Deposits",
 	"numberOfVaults": "Number of Vaults",
 	"borrowFee": "Borrow Deposit Fee",

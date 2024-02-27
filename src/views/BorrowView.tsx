@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useState } from "react";
 import { Tab } from "../components/Tab";
@@ -5,12 +6,12 @@ import { useLang } from "../hooks/useLang";
 import { Troves, WEN, globalContants } from "../libs/globalContants";
 import { Coin } from "../libs/types";
 import { MarketView } from "./MarketView";
-import { Decimal } from "lib-base";
 
-export const BorrowView = ({ constants, isReferrer, externalDataDone }: {
-	constants: Record<string, Decimal>;
+export const BorrowView = ({ isReferrer, externalDataDone, magmaData, refreshTrigger }: {
 	isReferrer: boolean;
 	externalDataDone?: boolean;
+	magmaData?: Record<string, any>;
+	refreshTrigger: () => void;
 }) => {
 	const { t } = useLang();
 	const [currentTrove, setCurrentTrove] = useState<Coin>(globalContants.COINS.IOTX);
@@ -38,7 +39,8 @@ export const BorrowView = ({ constants, isReferrer, externalDataDone }: {
 		<MarketView
 			isReferrer={isReferrer}
 			market={currentTrove}
-			constants={constants}
-			externalDataDone={externalDataDone} />
+			externalDataDone={externalDataDone}
+			magmaData={magmaData}
+			refreshTrigger={refreshTrigger} />
 	</div>
 };

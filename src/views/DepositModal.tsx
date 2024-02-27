@@ -1,139 +1,99 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, JsonObject, ValidationContext } from "../libs/types";
+import { Coin, ErrorMessage, JsonObject } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { ExpandableView } from "./ExpandableView";
-import { Decimal, Trove, Difference, LUSD_LIQUIDATION_RESERVE } from "lib-base";
-import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
-import { Fees } from "lib-base/dist/src/Fees";
-import { useStableTroveChange } from "../hooks/useStableTroveChange";
-import { TroveAction } from "../components/Trove/TroveAction";
-import { calculateAvailableBorrow, calculateAvailableWithdrawal, feeFrom } from "../utils";
+import { formatAsset, formatAssetAmount, formatPercent } from "../utils";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
-import { useMyTransactionState } from "../components/Transaction";
 import appConfig from "../appConfig.json";
 import { useLiquity } from "../hooks/LiquityContext";
+import BigNumber from "bignumber.js";
+import { Vault } from "../libs/Vault";
+import { magma } from "../libs/magma";
 
 export const DepositeModal = ({
 	isOpen = false,
 	onClose = () => { },
-	accountBalance = Decimal.ZERO,
-	price = Decimal.ZERO,
-	trove,
+	accountBalance = globalContants.BIG_NUMBER_0,
+	price = 0,
+	vault,
 	market,
 	fees,
-	validationContext,
 	onDone = () => { },
 	constants,
 	depositAndBorrow = true,
 	liquidationPrice,
 	availableWithdrawal,
-	recoveryMode,
 	liquidationPoint,
 	availableBorrow
 }: {
 	isOpen: boolean;
 	onClose: () => void;
 	market: Coin;
-	accountBalance: Decimal;
-	price: Decimal;
-	trove: Trove;
-	fees: Fees;
-	validationContext: ValidationContext;
+	accountBalance: BigNumber;
+	price: number;
+	vault: Vault;
+	fees: Record<string, any>;
 	onDone: (tx: string) => void;
-	constants?: Record<string, Decimal>;
+	constants?: Record<string, any>;
 	depositAndBorrow: boolean;
-	liquidationPrice: Decimal;
-	availableWithdrawal: Decimal;
-	recoveryMode: boolean;
-	liquidationPoint: Decimal;
-	availableBorrow: Decimal;
+	liquidationPrice: number;
+	availableWithdrawal: BigNumber;
+	liquidationPoint: number;
+	availableBorrow: number;
 }) => {
 	const { chainId } = useLiquity();
+	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
 	const { t } = useLang();
-	// const amountDeposited = Number(trove.collateral);
+	const [tx, setTx] = useState("");
+	const [sending, setSending] = useState(false);
+	const accountBalanceDecimals = formatAssetAmount(accountBalance, market.decimals);
+	const vaultCollateralDecimals = formatAssetAmount(vault.collateral, market.decimals);
 	const [valueForced, setValueForced] = useState(-1);
 	const [depositValue, setDepositValue] = useState(0);
+	const depositAmount = BigNumber(depositValue).shiftedBy(market.decimals);
+	const newVaultCollateralDecimals = vaultCollateralDecimals + depositValue;
 	const [borrowValue, setBorrowValue] = useState(0);
+	const borrowAmount = BigNumber(borrowValue).shiftedBy(WEN.decimals);
 	const [showExpandBorrowView, setShowExpandBorrowView] = useState(depositAndBorrow);
-	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION.gt(0) ? constants?.LUSD_GAS_COMPENSATION : LUSD_LIQUIDATION_RESERVE;
-	const borrowingRate = fees.borrowingRate();
-	const previousTrove = useRef<Trove>(trove);
-	const remainBorrowingRate = Decimal.ONE.sub(borrowingRate);
-	const [newAvailableBorrow, setNewAvailableBorrow] = useState(availableBorrow);
-	const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
+	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || BigNumber(cfg.wenGasCompensation).shiftedBy(market.decimals);
+	const borrowingRate = fees.borrowingRate;
 	const [defaultBorrowAmount, setDefaultBorrowAmount] = useState(-1);
-	const troveUtilizationRateNumber = Number(Decimal.ONE.div(trove.collateralRatio(price)).mul(100));
-	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId, true);
-	const [desireCollateral, setDesireCollateral] = useState(previousTrove.current?.collateral);
-	const [desireNetDebt, setDesireNetDebt] = useState(previousNetDebt);
-	const troveNetDebt = trove.debt.gt(wenLiquidationReserve) ? trove.netDebt : Decimal.ZERO;
-	const isDirty = !previousTrove.current.collateral.eq(desireCollateral) || !previousNetDebt.eq(desireNetDebt);
-	const isDebtIncrease = desireNetDebt.gt(troveNetDebt);
-	const debtIncreaseAmount = isDebtIncrease ? desireNetDebt.sub(troveNetDebt) : Decimal.ZERO;
-	const [useMaxBalance, setUseMaxBalance] = useState(false);
-	const fee = !depositAndBorrow
-		? (
-			isDebtIncrease
-				? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
-				: Decimal.ZERO
-		) : borrowingRate.mul(borrowValue);
-	const updatedTrove = isDirty ? new Trove(desireCollateral, desireNetDebt.add(wenLiquidationReserve).add(fee)) : trove;
-	const [troveChange, description] = validateTroveChange(
-		trove!,
-		updatedTrove!,
-		borrowingRate,
-		validationContext,
-		constants
-	);
-	const stableTroveChange = useStableTroveChange(troveChange);
-	const txErrorMessages = (description?.key || description?.string) && description as ErrorMessage;
-
-	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
-
-	const errorInfo = txErrorMessages || errorMessages;
-
-	const newCollateralRatio = updatedTrove.collateralRatio(price);
-
-	// const newTroveCollateralRatio = updatedTrove.debt.eq(0) ? Decimal.ZERO : newCollateralRatio;
-	// const newTroveCollateralValue = updatedTrove.collateral.mul(price);
-	// const line = Decimal.min(liquidationPoint, newTroveCollateralRatio);
-	// const newDebtToLiquidate = Decimal.max(
-	// 	updatedTrove.debt,
-	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
-	// );
-	const newDebtToLiquidate = updatedTrove.debt;
-	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
-
-	const newURPercentNumber = Number(Decimal.ONE.div(newCollateralRatio).mul(100));
-	const urIsGood = troveUtilizationRateNumber > newURPercentNumber;
+	const vaultCollateralRatio = vault.collateralRatio(price);
+	const vaultUtilizationRateNumber = vaultCollateralRatio > 0 ? 1 / vaultCollateralRatio * 100 : 0;
+	const fee = borrowAmount.multipliedBy(borrowingRate);
+	const [errorInfo, setErrorInfo] = useState<ErrorMessage>();
+	const updatedVaultCollateral = vault.collateral.plus(depositAmount);
+	const updatedVaultDebt = vault.debt.gt(0) ? vault.debt.plus(borrowAmount).plus(fee) : vault.debt.plus(borrowAmount).plus(wenLiquidationReserve).plus(fee);
+	const newCollateralRatio = Vault.computeCollateralRatio(updatedVaultCollateral, updatedVaultDebt, price, 1, market, WEN);
+	const newAvailableBorrow = Vault.calculateAvailableBorrow(updatedVaultCollateral, vault.nominalNetDebt, price, chainId, market, WEN, liquidationPoint, borrowingRate);
+	const newAvailableBorrowNumber = newAvailableBorrow.shiftedBy(-WEN.decimals).toNumber();
+	const newAvailableBorrowFiat = formatAsset(formatAssetAmount(newAvailableBorrow, WEN.decimals), WEN);
+	const newLiquidationPrice = updatedVaultCollateral.gt(0) ? updatedVaultDebt.dividedBy(updatedVaultCollateral).toNumber() : 0;
+	const newURPercentNumber = newCollateralRatio > 0 ? 1 / newCollateralRatio * 100 : 0;
+	const urIsGood = vaultUtilizationRateNumber > newURPercentNumber;
 
 	const init = () => {
 		setValueForced(-1);
 		setDepositValue(0);
 		setBorrowValue(0);
 		setShowExpandBorrowView(depositAndBorrow);
-		setNewAvailableBorrow(availableBorrow);
 		setDefaultBorrowAmount(-1);
-		setErrorMessages(undefined);
-		setUseMaxBalance(false);
 	};
 
 	useEffect(init, []);
 
 	const handleMax = () => {
-		const val = Number(accountBalance);
+		const val = accountBalanceDecimals;
 		setValueForced(val);
 		setDepositValue(val);
-		setErrorMessages(undefined);
-		setUseMaxBalance(true);
 	};
 
 	const handleExpandBorrow = () => {
@@ -155,13 +115,13 @@ export const DepositeModal = ({
 					<div
 						className="label labelBig"
 						style={{ color: "#F6F6F7" }}>
-						{newAvailableBorrow?.toString(2)}&nbsp;{WEN.symbol}
+						{newAvailableBorrowFiat}
 					</div>
 
 					{newAvailableBorrow.gt(availableBorrow) && <div
 						className="label labelSmall"
 						style={{ textDecoration: "line-through" }}>
-						{availableBorrow?.toString(2)}
+						{availableBorrow.toFixed(globalContants.DECIMALS_2)}
 					</div>}
 				</div>
 			</div>
@@ -182,7 +142,7 @@ export const DepositeModal = ({
 	}
 
 	const handleMaxBorrow = () => {
-		const val = Number(newAvailableBorrow?.sub(previousNetDebt));
+		const val = newAvailableBorrow?.minus(vault.debt).shiftedBy(-WEN.decimals).toNumber();
 		setDefaultBorrowAmount(val);
 		setBorrowValue(val);
 	};
@@ -198,17 +158,17 @@ export const DepositeModal = ({
 			<button
 				className="textButton smallTextButton"
 				onClick={handleMaxBorrow}>
-				{t("max")}:&nbsp;{newAvailableBorrow?.toString(2)}&nbsp;{WEN.symbol}
+				{t("max")}:&nbsp;{newAvailableBorrowFiat}
 			</button>
 		</div>
 
 		<AmountInput
 			coin={WEN}
-			price={Decimal.ONE}
+			price={1}
 			allowSwap={false}
 			valueForced={defaultBorrowAmount}
 			onInput={handleInputBorrow}
-			max={Number(newAvailableBorrow?.toString())}
+			max={newAvailableBorrowNumber}
 			error={errorInfo && (errorInfo.string || t(errorInfo.key!, errorInfo.values))}
 			warning={undefined}
 			allowReduce={true}
@@ -216,86 +176,63 @@ export const DepositeModal = ({
 			allowIncrease={true} />
 	</div>
 
-	const applyUnsavedCollateralChanges = (unsavedChanges: Difference, trove: Trove) => {
-		if (unsavedChanges.absoluteValue) {
-			if (unsavedChanges.positive) {
-				return trove.collateral.add(unsavedChanges.absoluteValue);
-			}
-			if (unsavedChanges.negative) {
-				if (unsavedChanges.absoluteValue.lt(trove.collateral)) {
-					return trove.collateral.sub(unsavedChanges.absoluteValue);
-				}
-			}
-			return trove.collateral;
-		}
-		return trove.collateral;
-	};
-
-	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
-		if (unsavedChanges.absoluteValue) {
-			if (unsavedChanges.positive) {
-				return previousNetDebt.add(unsavedChanges.absoluteValue);
-			}
-			if (unsavedChanges.negative) {
-				if (unsavedChanges.absoluteValue.lt(previousNetDebt)) {
-					return previousNetDebt.sub(unsavedChanges.absoluteValue);
-				}
-			}
-			return previousNetDebt;
-		}
-		return previousNetDebt;
-	};
-
-	useEffect(() => {
-		if (!trove) return;
-
-		if (depositValue >= 0) {
-			const newCollateral = previousTrove.current?.collateral.add(useMaxBalance ? accountBalance : depositValue);
-			const unsavedChanges = Difference.between(newCollateral, previousTrove.current?.collateral);
-			const nextCollateral = applyUnsavedCollateralChanges(unsavedChanges, trove);
-			setDesireCollateral(nextCollateral);
-
-			const newMaxAvailableBorrow = newCollateral.mul(price).div(liquidationPoint).mul(remainBorrowingRate);
-			const newBorrow = newMaxAvailableBorrow.gt(wenLiquidationReserve) ? newMaxAvailableBorrow.sub(wenLiquidationReserve) : Decimal.ZERO;
-			setNewAvailableBorrow(newBorrow.gt(previousNetDebt) ? newBorrow.sub(previousNetDebt).mul((appConfig.constants as JsonObject)[String(chainId)].appMMROffset) : Decimal.ZERO);
-		}
-
-		if (borrowValue >= 0) {
-			let nextNetDebt: Decimal;
-
-			if (!depositAndBorrow) {
-				const tempNetDebt = previousNetDebt.add(borrowValue);
-				const unsavedChanges = Difference.between(tempNetDebt, previousNetDebt);
-				nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
-			} else {
-				nextNetDebt = Decimal.from(borrowValue);
-			}
-
-			setDesireNetDebt(nextNetDebt);
-		}
-	}, [trove, depositValue, price, borrowValue]);
-
 	const handleInputDeposit = (val: number) => {
 		setValueForced(-1);
 		setDepositValue(val);
-		setErrorMessages(undefined);
-		setUseMaxBalance(false);
 	};
 
 	const handleCloseModal = () => {
 		onClose();
 	};
 
-	useEffect(() => {
-		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
-			setErrorMessages({ string: transactionState.error.reason || JSON.stringify(transactionState.error.message || transactionState.error).substring(0, 100) } as ErrorMessage);
-		}
+	const handleDeposit = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
 
-		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string);
-			transactionState.resolved = true;
+		setSending(true);
+
+		if (vault?.status === 1) {
+			// vault?.status === VaultStatus4Contract.active || vault?.status === VaultStatus4Subgraph.open
+			vault.adjust(
+				borrowingRate + cfg.feePercentSlippage,
+				globalContants.BIG_NUMBER_0,
+				globalContants.BIG_NUMBER_0,
+				false,
+				depositAmount,
+				updatedVaultCollateral,
+				updatedVaultDebt,
+				tx => {
+					console.debug("xxx 交易已出", tx);
+					setTx(tx);
+				},
+				error => {
+					setErrorInfo({ string: error.message } as ErrorMessage);
+					setSending(false);
+					setTx("");
+				},
+				() => {
+					setSending(false);
+					return onDone && onDone(tx);
+				}
+			);
+		} else {
+			magma.openVault(
+				vault,
+				borrowingRate + cfg.feePercentSlippage,
+				updatedVaultDebt,
+				depositAmount,
+				tx => setTx(tx),
+				error => {
+					setErrorInfo({ string: error.message } as ErrorMessage);
+					setSending(false);
+					setTx("");
+				},
+				() => {
+					setSending(false);
+					return onDone && onDone(tx);
+				}
+			);
 		}
-	}, [transactionState.type])
+	};
 
 	return isOpen ? <Modal
 		title={t("deposit") + " " + market?.symbol}
@@ -313,7 +250,7 @@ export const DepositeModal = ({
 						<button
 							className="textButton smallTextButton"
 							onClick={handleMax}>
-							{t("max")}:&nbsp;{accountBalance.toString(2)}&nbsp;{market.symbol}
+							{t("max")}:&nbsp;{formatAsset(accountBalanceDecimals, market)}
 						</button>
 					</div>
 
@@ -323,7 +260,7 @@ export const DepositeModal = ({
 						allowSwap={false}
 						valueForced={valueForced}
 						onInput={handleInputDeposit}
-						max={Number(accountBalance.toString())}
+						max={accountBalanceDecimals}
 						warning={undefined}
 						error={(!depositAndBorrow && errorInfo) ? (errorInfo.string || t(errorInfo.key!, errorInfo.values)) : undefined}
 						allowReduce={true}
@@ -347,9 +284,9 @@ export const DepositeModal = ({
 					<div className="label">{t("utilizationRate")}</div>
 
 					<ChangedValueLabel
-						previousValue={troveUtilizationRateNumber}
+						previousValue={vaultUtilizationRateNumber}
 						previousPostfix="%"
-						newValue={(updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? newURPercentNumber : 0}
+						newValue={newURPercentNumber}
 						nextPostfix="%"
 						positive={urIsGood} />
 				</div>
@@ -358,8 +295,8 @@ export const DepositeModal = ({
 					<div className="label">{t("deposited")}</div>
 
 					<ChangedValueLabel
-						previousValue={Number(trove.collateral)}
-						newValue={Number(updatedTrove.collateral)}
+						previousValue={vaultCollateralDecimals}
+						newValue={newVaultCollateralDecimals}
 						nextPostfix={market.symbol}
 						positive={urIsGood} />
 				</div>
@@ -368,8 +305,8 @@ export const DepositeModal = ({
 					<div className="label">{t("depositedValue")}</div>
 
 					<ChangedValueLabel
-						previousValue={Number(trove.collateral.mul(price))}
-						newValue={Number(updatedTrove.collateral.mul(price))}
+						previousValue={vaultCollateralDecimals * price}
+						newValue={newVaultCollateralDecimals * price}
 						nextPostfix={globalContants.USD}
 						positive={urIsGood} />
 				</div>
@@ -378,8 +315,8 @@ export const DepositeModal = ({
 					<div className="label">{t("available2Withdraw")}</div>
 
 					<ChangedValueLabel
-						previousValue={trove.debt.gt(0) ? Number(availableWithdrawal) : 0}
-						newValue={updatedTrove.debt.gt(0) ? Number(calculateAvailableWithdrawal(updatedTrove, price, liquidationPoint)) : 0}
+						previousValue={formatAssetAmount(availableWithdrawal, market.decimals)}
+						newValue={formatAssetAmount(availableWithdrawal, market.decimals) + depositValue}
 						nextPostfix={market.symbol}
 						positive={urIsGood} />
 				</div>
@@ -388,8 +325,8 @@ export const DepositeModal = ({
 					<div className="label">{t("liquidationPrice")}(1&nbsp;{market?.symbol})</div>
 
 					<ChangedValueLabel
-						previousValue={Number(liquidationPrice)}
-						newValue={Number(newLiquidationPrice)}
+						previousValue={liquidationPrice}
+						newValue={newLiquidationPrice}
 						nextPostfix={globalContants.USD}
 						positive={urIsGood}
 						maximumFractionDigits={4} />
@@ -400,20 +337,19 @@ export const DepositeModal = ({
 						<div className="label">{t("available2Borrow")}</div>
 
 						<ChangedValueLabel
-							previousValue={trove.debt.gt(0) ? Number(availableBorrow) : 0}
-							newValue={updatedTrove.debt.gt(0) ? Number(calculateAvailableBorrow(updatedTrove, price, liquidationPoint)) : 0}
+							previousValue={availableBorrow}
+							newValue={newAvailableBorrowNumber}
 							nextPostfix={WEN.symbol}
 							positive={urIsGood} />
 					</div>
 
 					<div className="flex-row-space-between">
-						<div className="label">{t("borrowFee")}&nbsp;({borrowingRate.mul(100).toString(2)}%)</div>
+						<div className="label">{t("borrowFee")}&nbsp;({formatPercent(borrowingRate)})</div>
 
 						<div
 							className="label"
 							style={{ color: "#F6F6F7" }}>
-							{/* {updatedTrove.debt.mul(borrowingRate).toString(2)}&nbsp;{WEN.symbol} */}
-							{fee.toString(2)}&nbsp;{WEN.symbol}
+							{formatAsset(formatAssetAmount(fee, WEN.decimals), WEN)}
 						</div>
 					</div>
 
@@ -431,7 +367,7 @@ export const DepositeModal = ({
 						<div
 							className="label"
 							style={{ color: "#F6F6F7" }}>
-							{constants?.LUSD_GAS_COMPENSATION.toString(2)}&nbsp;{WEN.symbol}
+							{formatAsset(formatAssetAmount(constants?.LUSD_GAS_COMPENSATION, WEN.decimals), WEN)}
 						</div>
 					</div>
 
@@ -439,8 +375,8 @@ export const DepositeModal = ({
 						<div className="label">{t("vaultDebt")}</div>
 
 						<ChangedValueLabel
-							previousValue={Number(trove.debt)}
-							newValue={Number(updatedTrove.debt)}
+							previousValue={vault.debtDecimals}
+							newValue={updatedVaultDebt.shiftedBy(-WEN.decimals).toNumber()}
 							nextPostfix={globalContants.USD}
 							positive={urIsGood} />
 					</div>
@@ -448,31 +384,23 @@ export const DepositeModal = ({
 			</div>
 		</div>
 
-		{
-			stableTroveChange &&
-				(
-					(!transactionState.id && transactionState.type === "idle")
-					|| transactionState.type === "cancelled"
-				)
-				? <TroveAction
-					transactionId={txId}
-					change={stableTroveChange}
-					maxBorrowingRate={borrowingRate.add(0.005)}
-					borrowingFeeDecayToleranceMinutes={60}>
-					<button
-						className="primaryButton bigButton"
-						style={{ width: "100%" }}>
-						<img src="images/deposit.png" />
-
-						{depositAndBorrow ? t("depositAndBorrow") : t("deposit")}
-					</button>
-				</TroveAction> : <button
-					className="primaryButton bigButton"
-					style={{ width: "100%" }}
-					disabled>
-					<img src="images/deposit.png" />
-
-					{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t(depositAndBorrow ? "sending" : "depositing") + "...") : t(depositAndBorrow ? "depositAndBorrow" : "deposit")}
-				</button>}
+		<button
+			className="primaryButton bigButton"
+			style={{ width: "100%" }}
+			disabled={
+				accountBalance.lt(depositValue)
+				|| sending
+				|| (depositAndBorrow && (depositValue === 0 || borrowValue === 0))
+				|| (!depositAndBorrow && (depositValue === 0))
+				|| updatedVaultDebt.lt(constants?.MIN_NET_DEBT)
+			}
+			onClick={handleDeposit}>
+			<img src="images/deposit.png" />
+			{sending ? (
+				depositAndBorrow ? t("sending") : t("depositing")
+			) : (
+				depositAndBorrow ? t("depositAndBorrow") : t("deposit")
+			)}
+		</button>
 	</Modal> : <></>
 };

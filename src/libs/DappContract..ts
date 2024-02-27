@@ -86,9 +86,10 @@ class TrackableFunction {
 	}
 
 	public async run(
-		onWait: ((tx: string) => void) | undefined,
-		onFail: (error: Error | unknown) => void,
-		onDone: () => void,
+		onWait?: (tx: string) => void,
+		onFail?: (error: Error | unknown) => void,
+		onDone?: () => void,
+		overrides?: Record<string, any>,
 		...args: unknown[]
 	) {
 		this._tracker.onWait = onWait;
@@ -106,7 +107,7 @@ class TrackableFunction {
 			try {
 				this._tracker.state = "estimatingGas";
 
-				gasLimit = await this._estimateGasFunc(...args);
+				gasLimit = await this._estimateGasFunc(...args, overrides);
 			} catch (error) {
 				this._trackerGetError(error);
 			}
@@ -116,9 +117,12 @@ class TrackableFunction {
 			let res: TransactionResponse | undefined;
 			try {
 				if (gasLimit?.isZero()) {
-					res = await this._method(...args);
+					res = await this._method(...args, overrides);
 				} else {
-					res = await this._method(...args, { gasLimit: gasLimit.toString() });
+					res = await this._method(...args, {
+						...overrides,
+						gasLimit: gasLimit.toString()
+					});
 				}
 			} catch (error) {
 				console.error(error);
@@ -147,7 +151,7 @@ class TrackableFunction {
 
 	private _trackerGetError(error: Error | unknown) {
 		const err = error as MixedError;
-		this._tracker.error = new Error(err.reason || JSON.stringify(err.message || error).substring(0, 100));
+		this._tracker.error = new Error(err.reason || err.data?.message || err.message || JSON.stringify(error).substring(0, 100));
 		this._tracker.state = "failed";
 	}
 }

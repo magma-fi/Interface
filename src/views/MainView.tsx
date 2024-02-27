@@ -5,7 +5,7 @@ import { UserAccount } from "../components/UserAccount";
 import { Route, BrowserRouter, Switch, useParams } from "react-router-dom";
 import { BorrowView } from "./BorrowView";
 import { StakeView } from "./StakeView";
-import { Chain, useAccount, useNetwork } from "wagmi";
+import { Chain, useAccount, useBalance, useNetwork } from "wagmi";
 import { LiquidationsView } from "./LiquidationsView";
 import { useContract } from "../hooks/useContract";
 import { BorrowerOperations, LUSDToken, TroveManager } from "lib-ethers/dist/types";
@@ -26,11 +26,13 @@ import appConfig from "../appConfig.json";
 import { DepositByReferrer, JsonObject } from "../libs/types";
 import refererFactory from "../abis/refererFactory.json";
 import { appController } from "../libs/appController";
-import { zeroAddress } from "viem";
+import { Address, zeroAddress } from "viem";
 import { magma } from "../libs/magma";
 import { JsonRpcSigner } from "@ethersproject/providers";
+import { Vault } from "../libs/Vault";
+import BigNumber from "bignumber.js";
 
-const select = ({ trove }: LiquityStoreState) => ({ trove });
+// const select = ({ vault }: LiquityStoreState) => ({ vault });
 
 export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const { isConnected } = useAccount();
@@ -38,34 +40,37 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const [showTerms, setShowTerms] = useState(false);
 	const { chain } = useNetwork();
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
-	const { account, liquity, chainId, signer } = useLiquity();
+	const { account, chainId, signer } = useLiquity();
 	const [referrer, setReferrer] = useState<string | undefined>(undefined);
-	const [constants, setConstants] = useState<Record<string, Decimal>>({});
+	// const [constants, setConstants] = useState<Record<string, Decimal>>({});
 	const [externalDataDone, setExternalDataDone] = useState(false);
-	const dec = Math.pow(10, WEN.decimals || 18);
-	const [data, setData] = useState<Record<string, any>>();
+	// const dec = Math.pow(10, WEN.decimals || 18);
+	const [magmaData, setMagmaData] = useState<Record<string, any>>();
 	const [points, setPoints] = useState(0);
-
-	const { trove } = useLiquitySelector(select);
+	const { data } = useBalance({ address: account as Address, chainId });
+	const accountBalance = BigNumber(data?.value.toString() || 0) || globalContants.BIG_NUMBER_0;
+	// const { vault } = useLiquitySelector(select);
+	const [vault, setVault] = useState<Vault>();
 	const [isReferrer, setIsReferrer] = useState(false);
 	const [referralCode, setReferralCode] = useState("");
 	const [depositsByReferrer, setDepositsByReferrer] = useState<DepositByReferrer[]>()
-	const haveDeposited = trove?.collateral?.gt(0);
+	const haveDeposited = vault?.collateral?.gt(0);
+	const [refresh, setRefresh] = useState(false);
 
-	const [wenTokenDefault, wenTokenStatus] = useContract<LUSDToken>(
-		liquity.connection.addresses.lusdToken,
-		LUSDTokenAbi
-	);
+	// const [wenTokenDefault, wenTokenStatus] = useContract<LUSDToken>(
+	// 	liquity.connection.addresses.lusdToken,
+	// 	LUSDTokenAbi
+	// );
 
-	const [borrowerOperationsDefault, borrowerOperationsStatus] = useContract<BorrowerOperations>(
-		liquity.connection.addresses.borrowerOperations,
-		BorrowerOperationsAbi
-	);
+	// const [borrowerOperationsDefault, borrowerOperationsStatus] = useContract<BorrowerOperations>(
+	// 	liquity.connection.addresses.borrowerOperations,
+	// 	BorrowerOperationsAbi
+	// );
 
-	const [troveManagerDefault, troveManagerStatus] = useContract<TroveManager>(
-		liquity.connection.addresses.troveManager,
-		TroveManagerAbi
-	);
+	// const [troveManagerDefault, troveManagerStatus] = useContract<TroveManager>(
+	// 	liquity.connection.addresses.troveManager,
+	// 	TroveManagerAbi
+	// );
 
 	useEffect(() => {
 		if (chainId === 0) return;
@@ -143,56 +148,64 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 		}
 	}, [isConnected]);
 
+	// useEffect(() => {
+	// 	const getContants = async () => {
+	// 		let totalSupply;
+	// 		let minNetDebt;
+	// 		let wenGasGompensation;
+	// 		let mcr;
+	// 		let ccr;
+	// 		let tvl;
+
+	// 		if (borrowerOperationsStatus === "LOADED") {
+	// 			minNetDebt = await borrowerOperationsDefault?.MIN_NET_DEBT()
+	// 			wenGasGompensation = await borrowerOperationsDefault?.LUSD_GAS_COMPENSATION();
+	// 			mcr = await borrowerOperationsDefault?.MCR();
+	// 			ccr = await borrowerOperationsDefault?.CCR();
+	// 		}
+
+	// 		if (wenTokenStatus === "LOADED") {
+	// 			totalSupply = await wenTokenDefault?.totalSupply();
+	// 		}
+
+	// 		if (troveManagerStatus === "LOADED") {
+	// 			tvl = await troveManagerDefault?.getEntireSystemColl();
+	// 		}
+
+	// 		setConstants({
+	// 			...constants,
+	// 			MIN_NET_DEBT: Decimal.from(minNetDebt?.toString() || 0).div(dec),
+	// 			LUSD_GAS_COMPENSATION: Decimal.from(wenGasGompensation?.toString() || 0).div(dec),
+	// 			MCR: Decimal.from(mcr?.toString() || 0).div(dec),
+	// 			wenTotalSupply: Decimal.from(totalSupply?.toString() || 0).div(dec),
+	// 			CCR: Decimal.from(ccr?.toString() || 0).div(dec),
+	// 			TVL: Decimal.from(tvl?.toString() || 0).div(dec),
+	// 		});
+	// 	};
+
+	// 	getContants();
+	// }, [borrowerOperationsDefault, borrowerOperationsStatus, wenTokenStatus, wenTokenDefault, troveManagerStatus, troveManagerStatus]);
+
 	useEffect(() => {
-		const getContants = async () => {
-			let totalSupply;
-			let minNetDebt;
-			let wenGasGompensation;
-			let mcr;
-			let ccr;
-			let tvl;
+		if (chainId > 0 && signer && account) {
+			magma.init(chainId, signer as JsonRpcSigner, account);
 
-			if (borrowerOperationsStatus === "LOADED") {
-				minNetDebt = await borrowerOperationsDefault?.MIN_NET_DEBT()
-				wenGasGompensation = await borrowerOperationsDefault?.LUSD_GAS_COMPENSATION();
-				mcr = await borrowerOperationsDefault?.MCR();
-				ccr = await borrowerOperationsDefault?.CCR();
-			}
+			const getData = async () => {
+				const res = await magma.getMagmaData();
 
-			if (wenTokenStatus === "LOADED") {
-				totalSupply = await wenTokenDefault?.totalSupply();
-			}
-
-			if (troveManagerStatus === "LOADED") {
-				tvl = await troveManagerDefault?.getEntireSystemColl();
-			}
-
-			setConstants({
-				...constants,
-				MIN_NET_DEBT: Decimal.from(minNetDebt?.toString() || 0).div(dec),
-				LUSD_GAS_COMPENSATION: Decimal.from(wenGasGompensation?.toString() || 0).div(dec),
-				MCR: Decimal.from(mcr?.toString() || 0).div(dec),
-				wenTotalSupply: Decimal.from(totalSupply?.toString() || 0).div(dec),
-				CCR: Decimal.from(ccr?.toString() || 0).div(dec),
-				TVL: Decimal.from(tvl?.toString() || 0).div(dec),
-			});
-		};
-
-		getContants();
-	}, [borrowerOperationsDefault, borrowerOperationsStatus, wenTokenStatus, wenTokenDefault, troveManagerStatus, troveManagerStatus]);
-
-	useEffect(() => {
-		const getData = async () => {
-			const res = await magma.getMagmaData();
-			if (res) setData(res);
-		};
-
-		if (chainId > 0 && signer) {
-			magma.init(chainId, signer as JsonRpcSigner);
+				const v = await magma.getVaultByOwner(account);
+				if (v) setVault(v);
+				if (res) setMagmaData({
+					...res,
+					accountBalance,
+					vault: v
+				});
+			};
 
 			getData();
 		}
-	}, [chainId, signer]);
+	}, [account, chainId, signer, refresh]);
+	console.debug("xxx magmaData =", magmaData);
 
 	const handleConnectWallet = () => {
 		setShowConnectModal(true);
@@ -205,6 +218,10 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const handleCloseTermsModal = () => {
 		setShowTerms(false);
 		window.localStorage.setItem(globalContants.TERMS_SHOWED, "1");
+	};
+
+	const switchRefresh = () => {
+		setRefresh(!refresh);
 	};
 
 	return <>
@@ -234,11 +251,11 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 
 					<Switch>
 						<Route path="/stake">
-							<StakeView constants={constants} />
+							<StakeView constants={magmaData} />
 						</Route>
 
 						<Route path="/liquidations">
-							<LiquidationsView constants={constants} />
+							<LiquidationsView constants={magmaData} />
 						</Route>
 
 						<Route path="/referral">
@@ -254,8 +271,9 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 						<Route path="/">
 							<BorrowView
 								isReferrer={isReferrer}
-								constants={constants}
-								externalDataDone={externalDataDone} />
+								externalDataDone={externalDataDone}
+								magmaData={magmaData}
+								refreshTrigger={switchRefresh} />
 						</Route>
 
 						{/* <Route path="/bonds">

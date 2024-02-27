@@ -16,7 +16,7 @@ type LiquityFrontendProps = {
   chains?: Chain[];
   loader?: React.ReactNode;
 };
-export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader,chains }) => {
+export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader, chains }) => {
   const { account, provider, liquity } = useLiquity();
 
   // For console tinkering ;-)
@@ -30,20 +30,19 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader,chains 
     Wallet
   });
 
-  return <TransactionProvider>
-    <LiquityStoreProvider {...{ loader }} store={liquity.store}>
-      {/* <Router> */}
-      <TroveViewProvider>
-        <StabilityViewProvider>
-          <StakingViewProvider>
-            <BondsProvider>
-              <MainView chains={chains!} />
-            </BondsProvider>
-          </StakingViewProvider>
-        </StabilityViewProvider>
-      </TroveViewProvider>
-      {/* </Router> */}
-      {/* <TransactionMonitor /> */}
-    </LiquityStoreProvider>
-  </TransactionProvider>
+  return (
+    // <TransactionProvider>
+    // <LiquityStoreProvider {...{ loader }} store={liquity.store}>
+    // <TroveViewProvider>
+    // <StabilityViewProvider>
+    // <StakingViewProvider>
+    // <BondsProvider>
+    <MainView chains={chains!} />
+    // </BondsProvider>
+    // </StakingViewProvider>
+    // </StabilityViewProvider>
+    // </TroveViewProvider>
+    // </LiquityStoreProvider>
+    // </TransactionProvider>
+  )
 };

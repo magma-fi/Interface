@@ -61,13 +61,12 @@ const App = () => {
   }, []);
 
   return config.loaded ? <WagmiConfig config={wagmiCfg}>
-    <LiquityProvider
-      loader={loader}>
-      <TransactionProvider>
-        <LiquityFrontend
-          chains={chains}
-          loader={loader} />
-      </TransactionProvider>
+    <LiquityProvider loader={loader}>
+      {/* <TransactionProvider> */}
+      <LiquityFrontend
+        chains={chains}
+        loader={loader} />
+      {/* </TransactionProvider> */}
     </LiquityProvider>
   </WagmiConfig> : <></>
 };

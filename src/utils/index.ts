@@ -1,26 +1,45 @@
-import { JsonFragment } from "@ethersproject/abi";
 import { Trove, Decimal, CRITICAL_COLLATERAL_RATIO } from "lib-base";
 import { Abi, Narrow } from "viem";
+import { Vault } from "../libs/Vault";
+import appConfig from "../appConfig.json";
+import { Coin, JsonObject } from "../libs/types";
+import BigNumber from "bignumber.js";
+import { IOTX, globalContants } from "../libs/globalContants";
+import { Icon } from "@fortawesome/fontawesome-svg-core";
+import assert from "assert";
 
 export const shortenAddress = (address: string, b = 6, e = 4) => address.substr(0, b) + "..." + address.substr(-e);
 
-export const calculateAvailableWithdrawal = (forTrove: Trove, price: Decimal, collateralRatio: Decimal = CRITICAL_COLLATERAL_RATIO) => {
-	const collateralValue = forTrove.collateral.mul(price);
-	const debtLine = forTrove.debt.mul(collateralRatio);
+export const calculateAvailableWithdrawal = (forTrove: Vault, price: number, collRatio?: number, chainId?: number) => {
+	const collateralRatio: number = collRatio ?? (appConfig.constants as JsonObject)[String(chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO;
+	const collateralValue = forTrove.collateral.multipliedBy(price);
+	const debtLine = forTrove.debt.multipliedBy(collateralRatio);
 	if (collateralValue.gt(debtLine))
-		return collateralValue.sub(debtLine).div(price);
+		return collateralValue.minus(debtLine).dividedBy(price);
 	else
-		return Decimal.ZERO;
+		return globalContants.BIG_NUMBER_0;
 };
 
-export const calculateAvailableBorrow = (forTrove: Trove, price: Decimal, collateralRatio: Decimal = CRITICAL_COLLATERAL_RATIO) => {
-	const collateralValue = forTrove.collateral.mul(price);
-	const debtLine = collateralValue.div(collateralRatio);
-	const debt = forTrove.debt.gt(1) ? forTrove.netDebt : forTrove.debt;
+// export const calculateAvailableBorrow = (forTrove: Vault, price: number, collRatio?: number, chainId?: number) => {
+// 	const collateralRatio: number = collRatio ?? (appConfig.constants as JsonObject)[String(chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO;
+// 	const collateralValue = forTrove.collateral.multipliedBy(price);
+// 	const debtLine = collateralValue.dividedBy(collateralRatio);
+// 	const debt = forTrove.debt.gt(1) ? forTrove.netDebt : forTrove.debt;
+// 	if (debtLine.gt(debt)) {
+// 		return debtLine.minus(debt);
+// 	} else
+// 		return globalContants.BIG_NUMBER_0;
+// };
+
+export const calculateAvailableBorrow = (collateral: BigNumber, netDebt: BigNumber, price: number, collRatio?: number, chainId?: number) => {
+	const collateralRatio: number = collRatio ?? (appConfig.constants as JsonObject)[String(chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO;
+	const collateralValue = collateral.multipliedBy(price);
+	const debtLine = collateralValue.dividedBy(collateralRatio);
+	const debt = netDebt;
 	if (debtLine.gt(debt)) {
-		return debtLine.sub(debt);
+		return debtLine.minus(debt);
 	} else
-		return Decimal.ZERO;
+		return globalContants.BIG_NUMBER_0;
 };
 
 export const calculateUtilizationRate = (forTrove: Trove, price: Decimal) => {
@@ -45,3 +64,49 @@ export const loadABI = async (url: string): Promise<Narrow<Abi | readonly unknow
 		return;
 	}
 };
+
+export const formatAssetAmount = (bn: BigNumber, decimals = 18) => {
+	return bn.shiftedBy(-decimals).toNumber();
+};
+
+export const formatCurrency = (value: number) => {
+	return value.toLocaleString("en-US", {
+		style: "currency",
+		minimumFractionDigits: 0,
+		maximumFractionDigits: globalContants.DECIMALS_2,
+		currency: "USD",
+		notation: "compact",
+		compactDisplay: "short",
+	});
+};
+
+export const formatAsset = (amount: number, asset: Coin = IOTX, compact = false) => {
+	return amount.toLocaleString("en-US", {
+		style: "decimal",
+		minimumFractionDigits: 0,
+		maximumFractionDigits: globalContants.DECIMALS_2,
+		notation: compact ? "compact" : "standard",
+		compactDisplay: "short",
+	}) + " " + asset.symbol;
+};
+
+export const formatPercent = (value: number) => {
+	return value.toLocaleString("en-US", {
+		style: "percent",
+		minimumFractionDigits: 0,
+		maximumFractionDigits: 2		// minimumFractionDigits: globalContants.DECIMALS_2
+	});
+};
+
+export function* generateTrials(totalNumberOfTrials: number, chainId: number) {
+	assert(Number.isInteger(totalNumberOfTrials) && totalNumberOfTrials > 0);
+
+	while (totalNumberOfTrials) {
+		const numberOfTrials = Math.min(totalNumberOfTrials, (appConfig.constants as JsonObject)[String(chainId)].maxNumberOfTrialsAtOnce);
+		yield numberOfTrials;
+
+		totalNumberOfTrials -= numberOfTrials;
+	}
+};
+
+export const randomInteger = () => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);

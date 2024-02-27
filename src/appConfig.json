@@ -40,13 +40,21 @@
 	"constants": {
 		"4689": {
 			"MAGMA_MINIMUM_COLLATERAL_RATIO": 1.3,
+			"MAGMA_CRITICAL_COLLATERAL_RATIO": 1.5,
 			"appMMROffset": 0.91,
-			"appMCR": 1.428571428571429
+			"appMCR": 1.428571428571429,
+			"feePercentSlippage": 0.005,
+			"maxNumberOfTrialsAtOnce": 2500,
+			"wenGasCompensation": 1
 		},
 		"4690": {
 			"MAGMA_MINIMUM_COLLATERAL_RATIO": 1.3,
+			"MAGMA_CRITICAL_COLLATERAL_RATIO": 1.5,
 			"appMMROffset": 0.91,
-			"appMCR": 1.428571428571429
+			"appMCR": 1.428571428571429,
+			"feePercentSlippage": 0.005,
+			"maxNumberOfTrialsAtOnce": 2500,
+			"wenGasCompensation": 1
 		}
 	},
 	"refer": {

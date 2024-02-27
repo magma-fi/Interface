@@ -2,13 +2,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Coin } from "../libs/types"
 import { IconButton } from "./IconButton";
-import { globalContants } from "../libs/globalContants";
 import { debounce } from "../libs/debounce";
-import { Decimal } from "lib-base";
+import { formatCurrency } from "../utils";
 
 export const AmountInput = ({
 	coin = null,
-	price = Decimal.ZERO,
+	price = 0,
 	allowSwap = false,
 	valueForced = -1,
 	onInput = () => { },
@@ -20,19 +19,19 @@ export const AmountInput = ({
 	allowIncrease = true
 }: {
 	coin: Coin | null;
-	price: Decimal;
+	price: number;
 	allowSwap: boolean;
 	valueForced: number;
 	onInput: (val: number) => void;
 	max: number;
 	warning: string | undefined;
-	error: string | undefined;
+	error?: string | undefined;
 	allowReduce?: boolean;
 	currentValue?: number;
 	allowIncrease?: boolean;
 }) => {
 	const [inputValue, setInputValue] = useState<string>("");
-	const [fiatValue, setFiatValue] = useState("0");
+	const [fiatValue, setFiatValue] = useState(0);
 
 	const sendBack = useCallback(val => {
 		if (
@@ -59,7 +58,7 @@ export const AmountInput = ({
 	useEffect(() => {
 		if (valueForced >= 0) {
 			setInputValue(String(valueForced));
-			setFiatValue(price.mul(valueForced).toString(2));
+			setFiatValue(price * valueForced);
 
 			updateValue(valueForced, false);
 		}
@@ -70,7 +69,7 @@ export const AmountInput = ({
 		const val = Number(inputStr);
 
 		setInputValue(inputStr);
-		setFiatValue(price.mul(val).toString(2));
+		setFiatValue(price * val);
 
 		debounce.run(updateValue, 1500, val);
 	};
@@ -94,7 +93,7 @@ export const AmountInput = ({
 						value={inputValue}
 						onInput={handleChange} />
 
-					<div className="label labelSmall">{fiatValue}&nbsp;{globalContants.USD}</div>
+					<div className="label labelSmall">{formatCurrency(fiatValue)}</div>
 				</div>
 			</div>
 

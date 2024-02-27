@@ -83,6 +83,7 @@ export type JsonObject = { [key: string]: any };
 export type MixedError = {
 	reason?: string;
 	message?: string;
+	data?: any;
 }
 
 export type DepositByReferrer = {
@@ -92,14 +93,30 @@ export type DepositByReferrer = {
 	lastUpdate?: number;
 }
 
-export type VaultStatus = "open" | "closedByOwner" | "closedByRedemption";
+export enum VaultStatus4Contract {
+	active = 1,
+	closedByOwner = 2,
+	closedByLiquidation = 3,
+	closedByRedemption = 4
+}
+
+export enum VaultStatus4Subgraph {
+	open = 1,
+	closedByOwner = 2,
+	closedByLiquidation = 3,
+	closedByRedemption = 4
+}
+
+export type VaultStatus = VaultStatus4Contract | VaultStatus4Contract
 
 export type Vaultish = {
 	id: string;
 	status?: VaultStatus;
 	collateral?: BigNumber;
 	debt?: BigNumber;
-	collateralRatioSortKey?: string
+	stake?: BigNumber;
+	collateralRatioSortKey?: string,
+	arrayIndex?: BigNumber;
 }
 
 export type callRequest = {
@@ -122,4 +139,14 @@ export type StabilityTransactionRecord = {
 	amount: number;
 	timestamp: number;
 	tx: string;
+}
+
+type ResultInApproxHintObject = {
+	diff: BigNumber;
+	hintAddress: string;
+}
+
+export type ApproxHintObject = {
+	latestRandomSeed: BigNumber;
+	results: ResultInApproxHintObject[];
 }

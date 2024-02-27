@@ -33,7 +33,7 @@ export const CloseModal = ({
 	isOpen: boolean;
 	onClose: () => void;
 	trove: Trove;
-	fees: Fees;
+	fees: Record<string, any>;
 	validationContext: ValidationContext;
 	chainId: number;
 	balance: Decimal;
@@ -42,20 +42,20 @@ export const CloseModal = ({
 	const { provider, walletClient, publicClient, liquity, account } = useLiquity();
 	const { t } = useLang();
 	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId, true);
+	// const transactionState = useMyTransactionState(txId, true);
 	const indexOfConfig: string = String(chainId);
 	const [agree, setAgree] = useState(false);
 
 	const updatedTrove = new Trove(Decimal.ZERO, Decimal.ZERO);
-	const borrowingRate = fees.borrowingRate();
-	const [troveChange, description] = validateTroveChange(
-		trove!,
-		updatedTrove!,
-		borrowingRate,
-		validationContext
-	);
-	const stableTroveChange = useStableTroveChange(troveChange);
-	const errorMessages = description as ErrorMessage;
+	const borrowingRate = fees.borrowingRate;
+	// const [troveChange, description] = validateTroveChange(
+	// 	trove!,
+	// 	updatedTrove!,
+	// 	borrowingRate,
+	// 	validationContext
+	// );
+	// const stableTroveChange = useStableTroveChange(troveChange);
+	const errorMessages: ErrorMessage = {}; // description as ErrorMessage;
 	const needSwap = errorMessages?.key === "needMoreToClose";
 	const wenDec = Math.pow(10, WEN.decimals || 18);
 	const iotxDec = Math.pow(10, IOTX.decimals || 18);
@@ -105,12 +105,12 @@ export const CloseModal = ({
 		onClose();
 	};
 
-	useEffect(() => {
-		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onClose()
-			transactionState.resolved = true;
-		}
-	}, [transactionState.type])
+	// useEffect(() => {
+	// 	if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
+	// 		onClose()
+	// 		transactionState.resolved = true;
+	// 	}
+	// }, [transactionState.type])
 
 	const swap = async () => {
 		const txHash = await walletClient!.writeContract({
@@ -176,7 +176,7 @@ export const CloseModal = ({
 		<div
 			className="flex-column"
 			style={{ gap: "24px" }}>
-			<div>{description && errorMessages && t(errorMessages.key, errorMessages.values)}</div>
+			<div>{errorMessages && t(errorMessages.key, errorMessages.values)}</div>
 
 			{needSwap && <div className="flex-column-align-left">
 				<div>
@@ -214,7 +214,7 @@ export const CloseModal = ({
 		</div>
 
 
-		{stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
+		{/* {stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
 			transactionId={txId}
 			change={stableTroveChange}
 			maxBorrowingRate={borrowingRate.add(0.005)}
@@ -239,6 +239,13 @@ export const CloseModal = ({
 			<img src="images/repay-dark.png" />
 
 			{(transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" || swapping) ? (t("closing") + "...") : t("closeVault")}
-		</button>)}
+		</button>)} */}
+		<button
+			className="primaryButton bigButton"
+			style={{ width: "100%" }}>
+			<img src="images/repay-dark.png" />
+
+			{t("closeVault")}
+		</button>
 	</Modal> : <></>
 };

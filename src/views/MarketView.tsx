@@ -1,81 +1,86 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useLiquitySelector } from "@liquity/lib-react";
 import { useLang } from "../hooks/useLang";
-import { Coin, JsonObject, TroveChangeData, TroveChangeTx } from "../libs/types";
-import { useEffect, useMemo, useState } from "react";
-import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
-import { selectForTroveChangeValidation } from "../components/Trove/validation/validateTroveChange";
-import { CRITICAL_COLLATERAL_RATIO, LUSD_LIQUIDATION_RESERVE, MINIMUM_COLLATERAL_RATIO, Percent } from "lib-base";
+import { Coin, JsonObject, TroveChangeData, TroveChangeTx, VaultStatus4Contract, VaultStatus4Subgraph } from "../libs/types";
+import { useEffect, useState } from "react";
 import { IOTX, TroveOptions, WEN, globalContants } from "../libs/globalContants";
 import { IconButton } from "../components/IconButton";
 import { DropdownMenu } from "../components/DropdownMenu";
-import { Area, AreaChart, CartesianGrid, Cell, Label, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 import { DepositeModal } from "./DepositModal";
-import { Decimal } from "lib-base";
-import { calculateAvailableWithdrawal } from "../utils";
+import { formatAsset, formatAssetAmount, formatCurrency, formatPercent } from "../utils";
 import { BorrowModal } from "./BorrowModal";
 import { RepayModal } from "./RepayModal";
 import { WithdrawModal } from "./WithdrawModal";
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { graphqlAsker } from "../libs/graphqlAsker";
-import { useAccount } from "wagmi";
 import { CloseModal } from "./CloseModal";
 import { TransactiionListItem } from "./TransactiionListItem";
 import appConfig from "../appConfig.json";
 import { useLiquity } from "../hooks/LiquityContext";
 import React from "react";
 import { appController } from "../libs/appController";
+import BigNumber from "bignumber.js";
+import { Vault } from "../libs/Vault";
 
 export const MarketView = ({
 	market,
-	constants,
 	isReferrer,
-	externalDataDone
+	externalDataDone,
+	magmaData,
+	refreshTrigger
 }: {
 	market: Coin;
-	constants: Record<string, Decimal>;
 	isReferrer: boolean;
 	externalDataDone?: boolean;
+	magmaData?: Record<string, any>;
+	refreshTrigger: () => void;
 }) => {
-	const selector = useMemo(() => {
-		return (state: LiquityStoreState) => {
-			const {
-				price,
-				accountBalance,
-				total,
-				numberOfTroves,
-				borrowingRate,
-				trove,
-				fees,
-				lusdBalance
-			} = state;
+	if (!magmaData) return <></>
 
-			return {
-				price,
-				accountBalance,
-				validationContext: selectForTroveChangeValidation(state),
-				total,
-				numberOfTroves,
-				borrowingRate,
-				trove,
-				fees,
-				lusdBalance
-			};
-		};
-	}, []);
+	// const selector = useMemo(() => {
+	// 	return (state: LiquityStoreState) => {
+	// 		const {
+	// 			price,
+	// 			accountBalance,
+	// 			total,
+	// 			numberOfTroves,
+	// 			borrowingRate,
+	// 			trove,
+	// 			fees,
+	// 			lusdBalance
+	// 		} = state;
+
+	// 		return {
+	// 			price,
+	// 			accountBalance,
+	// 			validationContext: selectForTroveChangeValidation(state),
+	// 			total,
+	// 			numberOfTroves,
+	// 			borrowingRate,
+	// 			trove,
+	// 			fees,
+	// 			lusdBalance
+	// 		};
+	// 	};
+	// }, []);
 	const { t } = useLang();
 	const {
 		price,
 		accountBalance,
 		validationContext,
-		total,
-		numberOfTroves,
-		borrowingRate,
-		trove,
-		fees,
 		lusdBalance
-	} = useLiquitySelector(selector);
+	} = magmaData; // useLiquitySelector(selector);
+	if (!magmaData) return <></>;
+
+	const vault: Vault = magmaData.vault;
+	const total = {
+		collateral: magmaData.entireSystemColl,
+		debt: magmaData.entireSystemDebt
+	}
+	const numberOfTroves = magmaData.troveOwnersCount;
+	const fees = { borrowingRate: magmaData.borrowingRateWithDecay };
 	const { walletClient, chainId, liquity, account } = useLiquity()
 	const [txHash, setTxHash] = useState("");
 	const [showDepositModal, setShowDepositModal] = useState(false);
@@ -90,48 +95,50 @@ export const MarketView = ({
 	const [showWithdrawDoneModal, setShowWithdrawDoneModal] = useState(false);
 	const [withdrawnAmount, setWithdrawnAmount] = useState(0);
 	const [showCloseModal, setShowCloseModal] = useState(false);
-	// const borrowingRate =fees.borrowingRate();
-	const feePct = new Percent(borrowingRate);
+	const borrowingRate = magmaData.borrowingRateWithDecay;
+	const feePct = borrowingRate;
 	// const totalCollateralRatio = total.collateralRatio(price);
 	// const totalCollateralRatioPct = new Percent(totalCollateralRatio);
 	// const recoveryMode = totalCollateralRatio.div(CRITICAL_COLLATERAL_RATIO);
-	const recoveryMode = total.collateralRatioIsBelowCritical(price);
-	const CCR = constants?.CCR?.gt(0) ? constants?.CCR : CRITICAL_COLLATERAL_RATIO;
+	const recoveryMode = magmaData.recoveryMode;
 	const appConfigConstants = (appConfig.constants as JsonObject)[String(chainId)];
-	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : appConfigConstants.MAGMA_MINIMUM_COLLATERAL_RATIO;
+	const CCR = magmaData?.CCR > 0 ? magmaData?.CCR : appConfigConstants.MAGMA_CRITICAL_COLLATERAL_RATIO;
+	const MCR = magmaData?.MCR > 0 ? magmaData?.MCR : appConfigConstants.MAGMA_MINIMUM_COLLATERAL_RATIO;
 	const appMMROffset = appConfigConstants.appMMROffset;
-	const TVL = constants?.TVL || Decimal.ZERO;
-	const mcrPercent = Decimal.ONE.div(MCR)
-	const recoveryModeAt = CCR.gt(0) ? Decimal.ONE.div(CCR) : Decimal.ZERO;
+	const TVL = magmaData?.TVL || globalContants.BIG_NUMBER_0;
+	const formatedTVL = formatAssetAmount(TVL);
+	const mcrPercent = 1 / MCR;
+	const recoveryModeAt = CCR > 0 ? 1 / CCR : 0;
 	const liquidationPoint = recoveryMode ? CCR : MCR;
 	const appLiquidationPoint = recoveryMode ? CCR : appConfigConstants.appMCR;
-	const borrowingFeePct = new Percent(borrowingRate);
-	const troveCollateralValue = trove.collateral.mul(price);
+	const troveCollatera = formatAssetAmount(vault.collateral, IOTX.decimals);
+	const troveCollateralValue = troveCollatera * price;
 
-	// const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateralRatio(price);
+	// const troveCollateralRatio = vault.debt.eq(0) ? Decimal.ZERO : vault.collateralRatio(price);
 	// const line = Decimal.min(liquidationPoint, troveCollateralRatio);
 	// const debtToLiquidate = Decimal.max(
-	// 	trove.debt,
+	// 	vault.debt,
 	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(troveCollateralValue)
 	// );
-	const debtToLiquidate = trove.debt;
-	const liquidationPrice = trove.collateral.gt(0) ? debtToLiquidate.div(trove.collateral) : Decimal.ZERO;
+	const troveDebtValue = formatAssetAmount(vault.debt, WEN.decimals);
+	const debtToLiquidate = vault.debt;
+	const liquidationPrice = vault.collateral.gt(0) ? debtToLiquidate.dividedBy(vault.collateral).toNumber() : 0;
 
-	const maxAvailableBorrow = troveCollateralValue.div(liquidationPoint).mul(appMMROffset);
-	const maxAvailableBorrowSubFee = maxAvailableBorrow.mul(Decimal.ONE.sub(borrowingRate));
-	const availableBorrow = maxAvailableBorrowSubFee.gt(trove.debt) ? maxAvailableBorrowSubFee.sub(trove.debt) : Decimal.ZERO;
-	const currentNetDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	const minNetDebt = constants?.MIN_NET_DEBT || Decimal.ZERO;
-	const reserve = constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE;
-	const maxAvailableRepay = currentNetDebt.gt(minNetDebt.add(reserve)) ? currentNetDebt.sub(minNetDebt).sub(reserve) : Decimal.ZERO;
-	const totalUtilizationRate = total.collateral.gt(reserve) ? total.debt.div(total.collateral.mul(price)) : Decimal.ZERO;
-	const troveUtilizationRate = trove.collateral.gt(0) ? trove.debt.div(troveCollateralValue).mul(100) : Decimal.ZERO;
-	const troveUtilizationRateNumber = Number(troveUtilizationRate);
+	const maxAvailableBorrow = (troveCollateralValue / liquidationPoint) * appMMROffset;
+	const maxAvailableBorrowSubFee = maxAvailableBorrow * (1 - borrowingRate);
+	const availableBorrow = maxAvailableBorrowSubFee > troveDebtValue ? maxAvailableBorrowSubFee - troveDebtValue : 0;
+	const currentNetDebt = vault.debt.gt(1) ? vault.netDebt : globalContants.BIG_NUMBER_0;
+	const minNetDebt = magmaData?.MIN_NET_DEBT;
+	const reserve = magmaData?.LUSD_GAS_COMPENSATION;
+	const maxAvailableRepay = currentNetDebt.gt(minNetDebt.plus(reserve)) ? currentNetDebt.minus(minNetDebt).minus(reserve) : globalContants.BIG_NUMBER_0;
+	const totalUtilizationRate = total.collateral.gt(reserve) ? total.debt.dividedBy(total.collateral.multipliedBy(price)).toNumber() : 0;
+	const troveUtilizationRate = vault.collateral.gt(0) ? troveDebtValue / troveCollateralValue : 0;
 
+	const troveUtilizationRate100 = troveUtilizationRate * 100;
 	const RADIAN = Math.PI / 180;
 	const chartData = [
-		{ name: '', value: troveUtilizationRateNumber },
-		{ name: '', value: 100 - troveUtilizationRateNumber }
+		{ name: '', value: troveUtilizationRate100 },
+		{ name: '', value: 100 - troveUtilizationRate100 }
 	];
 	const COLORS = ['#7ecf29', '#2b2326'];
 	const needle = (value: number, cx: number, cy: number, color: string | undefined) => {
@@ -149,8 +156,9 @@ export const MarketView = ({
 		return [<path d={`M ${xpc} ${ypc} L${xp} ${yp}`} stroke={color} strokeWidth="2" fill={color} />];
 	};
 
-	const availableWithdrawal = calculateAvailableWithdrawal(trove, price, appLiquidationPoint);
-	const availableWithdrawalFiat = availableWithdrawal.mul(price);
+	const availableWithdrawal = vault.getAvailableWithdrawal(price);
+	const availableWithdrawalDecimals = formatAssetAmount(availableWithdrawal, IOTX.decimals);
+	const availableWithdrawalFiat = availableWithdrawalDecimals * price;
 	const [txs, setTxs] = useState<TroveChangeTx[]>([]);
 	const [changes, setChanges] = useState<TroveChangeData[]>([]);
 	const [chartBoxWidth, setChartBoxWidth] = useState(700)
@@ -217,7 +225,7 @@ export const MarketView = ({
 				const key: string = cursor.key.toString();
 
 				tempArr.push({
-					collateralAfter: Number(price.mul(cursor.value.collateral)) / 1000,
+					collateralAfter: Number(price * cursor.value.collateral) / 1000,
 					debtAfter: Number(cursor.value.debt) / 1000,
 					date: key.substring(0, key.lastIndexOf("/"))
 				} as TroveChangeData)
@@ -269,6 +277,8 @@ export const MarketView = ({
 		setTxHash(tx);
 		setShowDepositModal(false);
 		setShowDepositDoneModal(true);
+
+		return refreshTrigger && refreshTrigger();
 	};
 
 	const handleBorrowDone = (tx: string) => {
@@ -359,7 +369,7 @@ export const MarketView = ({
 			id="marketView"
 			className="marketView marketViewLayout">
 			<div>
-				{trove.status !== "open" && <div className="card">
+				{vault.status !== VaultStatus4Contract.active && vault.status !== VaultStatus4Subgraph.open && <div className="card">
 					<img className="illustration" src="images/1wen=1usd.png" />
 
 					<div>
@@ -367,7 +377,7 @@ export const MarketView = ({
 
 						<p className="description">{t("letsGetStartedDEscription", {
 							interest: "0%",
-							percent: feePct.toString(2)
+							percent: feePct.toFixed(2)
 						})}</p>
 					</div>
 
@@ -387,10 +397,10 @@ export const MarketView = ({
 						style={{
 							width: "100%",
 							textAlign: "center"
-						}}>{t("walletBalance")}&nbsp;{accountBalance.toString(2)}&nbsp;{market?.symbol}</div>
+						}}>{t("walletBalance")}&nbsp;{formatAsset(formatAssetAmount(accountBalance), IOTX)}</div>
 				</div>}
 
-				{trove.status === "open" && <div
+				{(vault.status === VaultStatus4Contract.active || vault.status === VaultStatus4Subgraph.open) && <div
 					className="card"
 					style={{ paddingTop: "0.5rem" }}>
 					<div
@@ -418,17 +428,17 @@ export const MarketView = ({
 							</div>
 
 							<div className="flex-column-align-left">
-								<div>{price.gt(liquidationPrice) ? price.sub(liquidationPrice).div(price).mul(100).toString(2) : 0}%</div>
+								<div>{formatPercent(price > liquidationPrice ? (price - liquidationPrice) / price : 0)}</div>
 								<div className="label labelSmall">{t("belowCurrentPrice")}</div>
 							</div>
 
 							<div className="flex-column-align-left">
-								<div>{liquidationPrice.toString(5)}&nbsp;{globalContants.USD}</div>
+								<div>{formatCurrency(liquidationPrice)}</div>
 
 								<div className="label labelSmall">{t("liquidationPrice")}</div>
 							</div>
 
-							<div className="label labelSmall">{t("currentPrice")}:&nbsp;{price.toString(5)}&nbsp;{globalContants.USD}</div>
+							<div className="label labelSmall">{t("currentPrice")}:&nbsp;{formatCurrency(price)}</div>
 						</div>
 
 						<div
@@ -456,17 +466,17 @@ export const MarketView = ({
 										))}
 									</Pie>
 
-									{needle(Number(mcrPercent.mul(360)), 50, 50, '#F25454')}
+									{needle(mcrPercent * 360, 50, 50, '#F25454')}
 								</PieChart>
 
-								<div className="label">{troveUtilizationRateNumber.toFixed(2)}%</div>
+								<div className="label">{formatPercent(troveUtilizationRate)}</div>
 							</div>
 
 							<div className="flex-column">
 								<div className="flex-row-align-left label labelSmall">
 									<div className="label labelSmall">{t("liquidationAt")}</div>
 
-									<div style={{ color: "#F25454" }}>{mcrPercent.mul(100).toString(2)}%</div>
+									<div style={{ color: "#F25454" }}>{formatPercent(mcrPercent)}</div>
 								</div>
 							</div>
 						</div>
@@ -484,9 +494,9 @@ export const MarketView = ({
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{troveCollateralValue.toString(2)}&nbsp;{globalContants.USD}</div>
+									<div>{formatCurrency(troveCollateralValue)}</div>
 
-									<div className="label labelSmall">{trove.collateral.toString(2)}&nbsp;{IOTX.symbol}</div>
+									<div className="label labelSmall">{formatAsset(troveCollatera, IOTX)}</div>
 								</div>
 							</div>
 						</div>
@@ -509,7 +519,7 @@ export const MarketView = ({
 								style={{
 									textAlign: "center",
 									width: "100%"
-								}}>{t("balance")}&nbsp;{accountBalance.toString(2)}&nbsp;{IOTX.symbol}</div>
+								}}>{t("balance")}&nbsp;{formatAsset(formatAssetAmount(accountBalance, IOTX.decimals), IOTX)}</div>
 						</div>
 					</div>
 
@@ -525,9 +535,9 @@ export const MarketView = ({
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{availableBorrow.toString(2)}&nbsp;{globalContants.USD}</div>
+									<div>{formatCurrency(availableBorrow)}</div>
 
-									<div className="label labelSmall">{availableBorrow.toString(2)}&nbsp;{WEN.symbol}</div>
+									<div className="label labelSmall">{formatAsset(availableBorrow, WEN)}</div>
 								</div>
 							</div>
 						</div>
@@ -538,7 +548,7 @@ export const MarketView = ({
 							<button
 								className="primaryButton"
 								onClick={handleBorrow}
-								disabled={availableBorrow.lt(0.01)}>
+								disabled={availableBorrow < 0.01}>
 								<img src="images/borrow-dark.png" />
 
 								{t("borrow") + " " + WEN.symbol}
@@ -549,7 +559,7 @@ export const MarketView = ({
 								style={{
 									textAlign: "center",
 									width: "100%"
-								}}>{t("currentFee")}&nbsp;{borrowingFeePct.toString(2)}</div>
+								}}>{t("currentFee")}&nbsp;{formatPercent(feePct)}</div>
 						</div>
 					</div>
 
@@ -565,9 +575,9 @@ export const MarketView = ({
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{trove.debt.toString(2)}&nbsp;{globalContants.USD}</div>
+									<div>{formatCurrency(troveDebtValue)}</div>
 
-									<div className="label labelSmall">{trove.debt.toString(2)}&nbsp;{WEN.symbol}</div>
+									<div className="label labelSmall">{formatAsset(troveDebtValue, WEN)}</div>
 								</div>
 							</div>
 						</div>
@@ -591,7 +601,7 @@ export const MarketView = ({
 									width: "100%"
 								}}>
 								{maxAvailableRepay.lt(0.01)
-									? t("available2Repay") + ": " + maxAvailableRepay.toString(2)
+									? t("available2Repay") + ": " + maxAvailableRepay.toFixed(2)
 									: (lusdBalance.eq(0) && " " + WEN.symbol + " " + t("balance") + ": 0")}
 							</div>}
 						</div>
@@ -612,9 +622,9 @@ export const MarketView = ({
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{availableWithdrawalFiat.gt(0) ? availableWithdrawalFiat.toString(2) : "0"}&nbsp;{globalContants.USD}</div>
+									<div>{formatCurrency(availableWithdrawalFiat)}</div>
 
-									<div className="label labelSmall">{availableWithdrawal.gt(0) ? availableWithdrawal.toString(2) : "0"}&nbsp;{IOTX.symbol}</div>
+									<div className="label labelSmall">{formatAsset(availableWithdrawalDecimals, IOTX)}</div>
 								</div>
 							</div>
 						</div>
@@ -653,8 +663,8 @@ export const MarketView = ({
 						<div className="description">{t("totalUtilizationRate")}</div>
 
 						<div className="flex-column-align-right">
-							<div>{totalUtilizationRate.mul(100).toString(2)}%</div>
-							<div className="comments">{t("recoveryModeAt", { recovery: recoveryModeAt.mul(100).toString(2) })}</div>
+							<div>{formatPercent(totalUtilizationRate)}</div>
+							<div className="comments">{t("recoveryModeAt", { recovery: formatPercent(recoveryModeAt) })}</div>
 						</div>
 					</div>
 
@@ -662,15 +672,16 @@ export const MarketView = ({
 						<div className="description">{t("totalDeposits")}&nbsp;(TVL)</div>
 
 						<div className="flex-column-align-right">
-							<div>{TVL.mul(price).shorten()}&nbsp;{globalContants.USD}</div>
-							<div className="comments">{TVL.shorten()}&nbsp;{market?.symbol}</div>
+							<div>{formatCurrency(formatedTVL * price)}</div>
+							{/* <div className="comments">{formatedTVL.toFixed(globalContants.DECIMALS_2)}&nbsp;{market?.symbol}</div> */}
+							<div className="comments">{formatAsset(formatedTVL)}</div>
 						</div>
 					</div>
 
 					<div className="flex-row-space-between">
 						<div className="description">{t("wenTotalSupply")}</div>
 
-						<div>{constants?.wenTotalSupply?.toString(2) + " " + WEN.symbol}</div>
+						<div>{formatAsset(formatAssetAmount(magmaData?.wenTotalSupply), WEN)}</div>
 					</div>
 
 					<div className="flex-row-space-between">
@@ -682,25 +693,25 @@ export const MarketView = ({
 					<div className="flex-row-space-between">
 						<div className="description">{t("borrowFee")}</div>
 
-						<div>{borrowingFeePct.toString(2)}</div>
+						<div>{formatPercent(feePct)}</div>
 					</div>
 
 					<div className="flex-row-space-between">
 						<div className="description">{t("liquidationReserve")}</div>
 
-						<div>{LUSD_LIQUIDATION_RESERVE.toString(2)}</div>
+						<div>{formatAsset(formatAssetAmount(reserve), WEN)}</div>
 					</div>
 
 					{/* <div className="flex-row-space-between">
 						<div className="description">{t("loanToValue")}&nbsp;(LTV)</div>
 
-						<div>{total.collateral.gt(0) ? total.debt.div(total.collateral.mul(price)).mul(100).toString(2) : 0}%</div>
+						<div>{total.collateral.gt(0) ? total.debt.div(total.collateral.mul(price)).mul(100).toFixed(2) : 0}%</div>
 					</div> */}
 
 					<div className="flex-row-space-between">
 						<div className="description">{market.symbol}&nbsp;{t("price")}</div>
 
-						<div>{price.toString(4)}&nbsp;{globalContants.USD}</div>
+						<div>{formatCurrency(price)}</div>
 					</div>
 				</div>
 
@@ -795,16 +806,14 @@ export const MarketView = ({
 			market={market}
 			accountBalance={accountBalance}
 			price={price}
-			trove={trove}
+			vault={vault}
 			fees={fees}
-			validationContext={validationContext}
 			onDone={handleDepositDone}
-			constants={constants}
+			constants={magmaData}
 			depositAndBorrow={depositAndBorrow}
 			liquidationPrice={liquidationPrice}
 			availableWithdrawal={availableWithdrawal}
 			availableBorrow={availableBorrow}
-			recoveryMode={recoveryMode}
 			liquidationPoint={liquidationPoint} />}
 
 		{showDepositDoneModal && <TxDone
@@ -817,7 +826,7 @@ export const MarketView = ({
 					txHash={txHash}
 					title={t("deposited")}
 					logo="images/iotx.png"
-					amount={trove.collateral.toString(2) + " " + IOTX.symbol} />
+					amount={formatAsset(formatAssetAmount(vault.collateral, market.decimals), market)} />
 
 				{depositAndBorrow && <button
 					className="textButton smallTextButton"
@@ -833,12 +842,12 @@ export const MarketView = ({
 			onClose={handleCloseBorrowModal}
 			market={market}
 			price={price}
-			trove={trove}
+			trove={vault}
 			fees={fees}
 			validationContext={validationContext}
 			max={availableBorrow}
 			onDone={handleBorrowDone}
-			constants={constants}
+			constants={magmaData}
 			liquidationPrice={liquidationPrice}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
@@ -856,7 +865,7 @@ export const MarketView = ({
 					txHash={txHash}
 					title={t("borrowed")}
 					logo={WEN.logo}
-					amount={trove.debt.toString(2) + " " + WEN.symbol} />
+					amount={vault.debt.toFixed(2) + " " + WEN.symbol} />
 
 				<button
 					className="textButton smallTextButton"
@@ -872,12 +881,12 @@ export const MarketView = ({
 			onClose={handleCloseRepayModal}
 			market={market}
 			price={price}
-			trove={trove}
+			trove={vault}
 			fees={fees}
 			validationContext={validationContext}
-			max={Decimal.min(maxAvailableRepay, lusdBalance)}
+			max={BigNumber.min(maxAvailableRepay, lusdBalance)}
 			onDone={handleRepayDone}
-			constants={constants}
+			constants={magmaData}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
 			// liquidationPoint={liquidationPoint}
@@ -902,12 +911,12 @@ export const MarketView = ({
 			onClose={handleCloseWithdrawModal}
 			market={market}
 			price={price}
-			trove={trove}
+			trove={vault}
 			fees={fees}
 			validationContext={validationContext}
 			max={availableWithdrawal}
 			onDone={handleWithdrawDone}
-			constants={constants}
+			constants={magmaData}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
 			// liquidationPoint={liquidationPoint}
@@ -929,7 +938,7 @@ export const MarketView = ({
 		{showCloseModal && <CloseModal
 			isOpen={showCloseModal}
 			onClose={handleCloseClosureModal}
-			trove={trove}
+			trove={vault}
 			fees={fees}
 			validationContext={validationContext}
 			chainId={chainId}
