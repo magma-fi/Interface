@@ -402,7 +402,7 @@ export const PoolView = ({ market, constants }: {
 		{showModal?.action === ModalAction.Unstake && showModal.isShow && <UnstakeModal
 			isOpen={showModal.isShow}
 			onClose={handleCloseModal}
-			accountBalance={stabilityDeposit.currentLUSD}
+			accountBalance={lusdBalance}
 			onDone={handleModalDone}
 			stabilityDeposit={stabilityDeposit}
 			validationContext={validationContext}
