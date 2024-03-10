@@ -136,10 +136,32 @@ export const UserAccount = ({
       </div>}
 
       {isConnected && account && <div className="userAccountBox">
-        {points >= 0 && <div className="flex-row-align-left points">
-          <div className="label">{t("points")}:</div>
-          <div className="label fat">{points.toFixed(0)}</div>
-        </div>}
+        {points >= 0 && <PopupView
+          entryView={<div className="flex-row-align-left points">
+            <div className="label">{t("points")}:</div>
+            <div className="label fat">{points.toFixed(0)}</div>
+
+            <div
+              className="flex-column"
+              style={{
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                height: "1rem"
+              }}>
+              <img
+                src="/images/info.png"
+                width="12px" />
+            </div>
+          </div>}
+          showArrows={false}
+          alignTop={true}
+          popupView={<div
+            className="flex-column-align-center"
+            style={{ gap: "1rem" }}>
+            <div>asdfa</div>
+            <div>asdfa</div>
+          </div>}
+          forcedClass={""} />}
 
         <div className="flex-row-align-left">
           <DropdownMenu
