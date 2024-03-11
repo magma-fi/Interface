@@ -1,6 +1,7 @@
 import { JsonFragment } from "@ethersproject/abi";
 import { Trove, Decimal, CRITICAL_COLLATERAL_RATIO } from "lib-base";
 import { Abi, Narrow } from "viem";
+import { globalContants } from "../libs/globalContants";
 
 export const shortenAddress = (address: string, b = 6, e = 4) => address.substr(0, b) + "..." + address.substr(-e);
 
@@ -44,4 +45,13 @@ export const loadABI = async (url: string): Promise<Narrow<Abi | readonly unknow
 		console.error(error);
 		return;
 	}
+};
+
+export const formatNumber = (value: number, decimals = globalContants.DECIMALS_2) => {
+	return value.toLocaleString("en-US", {
+		minimumFractionDigits: 0,
+		maximumFractionDigits: decimals,
+		compactDisplay: "short"
+		// notation:"compact"
+	})
 };

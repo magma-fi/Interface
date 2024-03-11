@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { shortenAddress } from "../utils";
+import { formatNumber, shortenAddress } from "../utils";
 import { useLang } from "../hooks/useLang";
 import { Address, Chain, useAccount, useDisconnect, usePrepareSendTransaction, useSwitchNetwork } from "wagmi";
 import { DropdownMenu } from "./DropdownMenu";
@@ -104,6 +104,60 @@ export const UserAccount = ({
     </button>
   </div>
 
+  const pointsView = <div className="flex-row-align-left">
+    <img
+      src="images/magma.png"
+      height="18px"
+      style={{ width: "34px" }} />
+
+    <div
+      className="flex-column-align-left"
+      style={{ gap: "4px" }}>
+      <div className="label">{t("points")}</div>
+
+      <div className="label bigLabel fat">{formatNumber(points, 0)}</div>
+    </div>
+  </div>
+
+  const pointsListView = pointObject ? <div
+    className="flex-column-align-left"
+    style={{
+      gap: "1rem",
+      padding: "1rem"
+    }}>
+    <div className="flex-row-space-between points">
+      <div className="label">{t("stabilityPoolPoints")}</div>
+      <div className="label fat">{formatNumber(pointObject.stabilityScore, 0)}</div>
+    </div>
+
+    <div className="flex-row-space-between points">
+      <div className="label">{t("lpPoints")}</div>
+      <div className="label fat">{formatNumber(pointObject.lpScore, 0)}</div>
+    </div>
+
+    {pointObject.referrerPoints && <div className="flex-row-space-between points">
+      <div className="label">{t("referralsPoints")}</div>
+      <div className="label fat">{formatNumber(pointObject.referrerPoints, 0)}</div>
+    </div>}
+
+    <div
+      className="flex-row-align-right label labelSmall"
+      style={{
+        textAlign: "right",
+        width: "100%"
+      }}>
+      <a
+        href="https://docs.magma.finance/protocol-concepts/magma-points"
+        target="_blank">
+        <span>Magma Points&nbsp;</span>
+
+        <img
+          src="/images/info.png"
+          width="12px" />
+      </a>
+    </div>
+  </div> : <></>
+
   return (
     <div className="topBar">
       <img
@@ -138,50 +192,12 @@ export const UserAccount = ({
       </div>}
 
       {isConnected && account && <div className="userAccountBox">
-        {points >= 0 && pointObject && <PopupView
-          entryView={<div className="flex-row-align-left points">
-            <div className="label">{t("points")}:</div>
-            <div className="label fat">{points.toFixed(0)}</div>
-          </div>}
-          showArrows={false}
+        <PopupView
+          forcedClass="selectionTrigger"
+          entryView={pointsView}
+          showArrows={true}
           alignTop={true}
-          popupView={<div
-            className="flex-column-align-left"
-            style={{
-              gap: "1rem",
-              padding: "1rem"
-            }}>
-            <div className="flex-row-space-between points">
-              <div className="label">{t("stabilityPoolPoints")}</div>
-              <div className="label fat">{pointObject.stabilityScore.toFixed(0)}</div>
-            </div>
-
-            <div className="flex-row-space-between points">
-              <div className="label">{t("lpPoints")}</div>
-              <div className="label fat">{pointObject.lpScore.toFixed(0)}</div>
-            </div>
-
-            {pointObject.referrerPoints && <div className="flex-row-space-between points">
-              <div className="label">{t("referralsPoints")}</div>
-              <div className="label fat">{pointObject.referrerPoints.toFixed(0)}</div>
-            </div>}
-
-            <div
-              className="flex-row-align-right label labelSmall"
-              style={{
-                textAlign: "right",
-                width: "100%"
-              }}>
-              <a
-                href="https://docs.magma.finance/protocol-concepts/magma-points"
-                target="_blank">Magma Points&nbsp;</a>
-
-              <img
-                src="/images/info.png"
-                width="12px" />
-            </div>
-          </div>}
-          forcedClass={""} />}
+          popupView={pointsListView} />
 
         <div className="flex-row-align-left">
           <DropdownMenu
