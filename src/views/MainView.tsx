@@ -42,6 +42,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const [externalDataDone, setExternalDataDone] = useState(false);
 	const dec = Math.pow(10, WEN.decimals || 18);
 	const [points, setPoints] = useState(0);
+	const [pointObject, setPointObject] = useState<Record<string, number>>();
 
 	const { trove } = useLiquitySelector(select);
 	const [isReferrer, setIsReferrer] = useState(false);
@@ -106,8 +107,9 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			chainId,
 			account.toLowerCase(),
 			referrer,
-			res => {
+			(res, resObject) => {
 				setPoints(res);
+				setPointObject(resObject);
 			});
 	}, [chainId, account, referrer]);
 
@@ -213,7 +215,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 							isSupportedNetwork={isSupportedNetwork}
 							chains={chains}
 							chainId={chainId}
-							points={points} />
+							points={points}
+							pointObject={pointObject} />
 					</div>
 
 					<Switch>

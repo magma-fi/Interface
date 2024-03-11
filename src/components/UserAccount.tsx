@@ -15,13 +15,15 @@ export const UserAccount = ({
   isSupportedNetwork = true,
   chainId = 0,
   chains = [],
-  points
+  points,
+  pointObject
 }: {
   onConnect: () => void;
   isSupportedNetwork: boolean;
   chainId: number;
   chains: Chain[];
   points: number;
+  pointObject: Record<string, number>;
 }) => {
   const { publicClient, account } = useLiquity();
   const { t } = useLang();
@@ -136,30 +138,48 @@ export const UserAccount = ({
       </div>}
 
       {isConnected && account && <div className="userAccountBox">
-        {points >= 0 && <PopupView
+        {points >= 0 && pointObject && <PopupView
           entryView={<div className="flex-row-align-left points">
             <div className="label">{t("points")}:</div>
             <div className="label fat">{points.toFixed(0)}</div>
-
-            <div
-              className="flex-column"
-              style={{
-                justifyContent: "flex-start",
-                alignItems: "flex-start",
-                height: "1rem"
-              }}>
-              <img
-                src="/images/info.png"
-                width="12px" />
-            </div>
           </div>}
           showArrows={false}
           alignTop={true}
           popupView={<div
-            className="flex-column-align-center"
-            style={{ gap: "1rem" }}>
-            <div>asdfa</div>
-            <div>asdfa</div>
+            className="flex-column-align-left"
+            style={{
+              gap: "1rem",
+              padding: "1rem"
+            }}>
+            <div className="flex-row-space-between points">
+              <div className="label">{t("stabilityPoolPoints")}</div>
+              <div className="label fat">{pointObject.stabilityScore.toFixed(0)}</div>
+            </div>
+
+            <div className="flex-row-space-between points">
+              <div className="label">{t("lpPoints")}</div>
+              <div className="label fat">{pointObject.lpScore.toFixed(0)}</div>
+            </div>
+
+            {pointObject.referrerPoints && <div className="flex-row-space-between points">
+              <div className="label">{t("referralsPoints")}</div>
+              <div className="label fat">{pointObject.referrerPoints.toFixed(0)}</div>
+            </div>}
+
+            <div
+              className="flex-row-align-right label labelSmall"
+              style={{
+                textAlign: "right",
+                width: "100%"
+              }}>
+              <a
+                href="https://docs.magma.finance/protocol-concepts/magma-points"
+                target="_blank">Magma Points&nbsp;</a>
+
+              <img
+                src="/images/info.png"
+                width="12px" />
+            </div>
           </div>}
           forcedClass={""} />}
 
