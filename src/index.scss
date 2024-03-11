@@ -154,7 +154,7 @@ h4 {
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  // gap: var(--flex-gap-larger);
+  gap: 1rem;
 }
 
 .footer {
@@ -747,7 +747,7 @@ h4 {
 .label {
   color: var(--text-secondary);
   font-size: 0.875rem;
-  // white-space: nowrap;
+  white-space: nowrap;
   // text-transform: capitalize;
 }
 
@@ -1417,7 +1417,7 @@ input {
     .userAccountBox {
       flex-direction: column-reverse;
       align-items: flex-end;
-  
+      
       .points{
         margin-right: 1rem;
       }

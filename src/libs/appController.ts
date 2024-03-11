@@ -15,7 +15,7 @@ export const appController: {
 	_db: IDBDatabase | undefined;
 	openDB: (chainId: number, onDone: () => void) => void;
 	readAll: (onDone: (arg?: IDBCursor) => void) => void;
-	getUserPoints: (chainId: number, user: string, referrer: string, onDone: (point: number) => void) => void;
+	getUserPoints: (chainId: number, user: string, referrer: string, onDone: (point: number, resObject: Record<string, number>) => void) => void;
 	_getUserWENScore: (chainId: number, user: string) => Promise<number>;
 	_getLPScore: (chainId: number, user: string) => Promise<number>;
 	_getUserStabilityAndLpScore: (chainId: number, user: string, onDone: (res: Record<string, number>) => void) => void;
@@ -109,12 +109,12 @@ export const appController: {
 		this._getUserStabilityAndLpScore(chainId, user, res => {
 			let myUsersPoints = 0;
 
-			if (!referrer) return onDone && onDone(res.stabilityScore + res.lpScore);
+			if (!referrer) return onDone && onDone(res.stabilityScore + res.lpScore, res);
 
 			// 根据referrer取得用户的下线。
 			const query = graphqlAsker.requestUsersWithReferrer(referrer);
 			graphqlAsker.ask(chainId, query, (result: any) => {
-				if (result?.users) {
+				if (result?.users?.length > 0) {
 					const myUsers = result.users.map((item: { id: string; }) => '"' + item.id + '"');
 					if (myUsers.length > 0) {
 						const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
@@ -154,7 +154,15 @@ export const appController: {
 											});
 										}
 
-										return onDone && onDone(res.stabilityScore + res.lpScore + myUsersPoints * 0.1);
+										const referrerPoints = myUsersPoints * 0.01;
+
+										return onDone && onDone(
+											res.stabilityScore + res.lpScore + myUsersPoints * 0.1,
+											{
+												...res,
+												referrerPoints
+											}
+										);
 									},
 									lpScoreGraph
 								);
@@ -164,6 +172,8 @@ export const appController: {
 					} else {
 						return onDone && onDone(res.stabilityScore + res.lpScore);
 					}
+				} else {
+					return onDone && onDone(res.stabilityScore + res.lpScore, res);
 				}
 			});
 		});

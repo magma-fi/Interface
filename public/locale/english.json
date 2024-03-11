@@ -163,5 +163,8 @@
 	"lastUpdate": "Last Update",
 	"claim": "Claim",
 	"points": "Points",
-	"telegram": "Telegram"
+	"telegram": "Telegram",
+	"stabilityPoolPoints": "Stability Pool Points",
+	"lpPoints": "LP Points",
+	"referralsPoints": "Referrals' Points"
 }
