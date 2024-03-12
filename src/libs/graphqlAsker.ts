@@ -64,6 +64,7 @@ export const graphqlAsker = {
 				stabilityDepositOperation
 				depositedAmountChange
 				transaction {
+					id
 					timestamp
 				}
 			}
