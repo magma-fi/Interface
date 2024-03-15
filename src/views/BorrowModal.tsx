@@ -1,31 +1,29 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, ValidationContext } from "../libs/types";
+import { Coin, ErrorMessage, JsonObject } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useRef, useMemo } from "react";
-import { Decimal, Trove, Difference, LUSD_LIQUIDATION_RESERVE } from "lib-base";
-import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
-import { Fees } from "lib-base/dist/src/Fees";
-import { useStableTroveChange } from "../hooks/useStableTroveChange";
-import { TroveAction } from "../components/Trove/TroveAction";
-import { calculateAvailableBorrow, calculateAvailableWithdrawal, feeFrom } from "../utils";
+import { useState, useEffect } from "react";
+import { formatAsset, formatAssetAmount, formatPercent } from "../utils";
 import { Slider } from "../components/Slider";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
-import { useMyTransactionState } from "../components/Transaction";
+import { Vault } from "../libs/Vault";
+import BigNumber from "bignumber.js";
+import { useLiquity } from "../hooks/LiquityContext";
+import appConfig from "../appConfig.json";
 
 export const BorrowModal = ({
 	isOpen = false,
 	onClose = () => { },
-	price = Decimal.ZERO,
-	trove,
+	price,
+	vault,
 	market,
 	fees,
-	validationContext,
 	max,
 	onDone = () => { },
 	constants,
@@ -38,80 +36,48 @@ export const BorrowModal = ({
 	isOpen: boolean;
 	onClose: () => void;
 	market: Coin;
-	price: Decimal;
-	trove: Trove;
-	fees: Fees;
-	validationContext: ValidationContext;
-	max: Decimal;
+	price: number;
+	vault: Vault;
+	fees: Record<string, any>;
+	max: number;
 	onDone: (tx: string) => void;
-	constants?: Record<string, Decimal>;
-	liquidationPrice: Decimal;
+	constants?: Record<string, any>;
+	liquidationPrice: number;
 	recoveryMode: boolean;
-	liquidationPoint: Decimal;
-	availableWithdrawal: Decimal;
-	availableBorrow: Decimal;
+	liquidationPoint: number;
+	availableWithdrawal: BigNumber;
+	availableBorrow: number;
 }) => {
+	const { chainId } = useLiquity();
+	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
 	const { t } = useLang();
-	// const debt = Number(trove.debt);
-	const [borrowAmount, setBorrowAmount] = useState(-1);
-	const previousTrove = useRef<Trove>(trove);
-	const netDebt = trove.debt.gt(1) ? trove.netDebt : Decimal.ZERO;
-	// const netDebtNumber = Number(netDebt.toString());
+	const [borrowValue, setBorrowValue] = useState(-1);
+	const borrowAmount = BigNumber(borrowValue).shiftedBy(WEN.decimals);
 	const [valueForced, setValueForced] = useState(-1);
-	const maxSafe = Decimal.ONE.div(liquidationPoint);
-	const troveCollateralRatio = trove.collateralRatio(price);
-	const troveUtilizationRateNumber = Number(Decimal.ONE.div(troveCollateralRatio));
-	const troveUtilizationRateNumberPercent = troveUtilizationRateNumber * 100;
-	const [forcedSlideValue, setForcedSlideValue] = useState(troveUtilizationRateNumber);
-	// const dec = Math.pow(10, WEN.decimals || 0);
-	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || Decimal.ONE;
-	// const wenMinimumNetDebt = constants?.MIN_NET_DEBT.div(dec) || Decimal.ONE;
-	// const [slideValue, setSlideValue] = useState();
-	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId, true);
-	const [desireNetDebt, setDesireNextDebt] = useState(previousTrove.current?.netDebt);
-	const isDirty = !netDebt.eq(desireNetDebt);
-	const isDebtIncrease = desireNetDebt.gt(trove.netDebt);
-	const borrowingRate = fees.borrowingRate();
-	const fee = isDebtIncrease
-		? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(borrowAmount).add(borrowingRate.mul(borrowAmount))), borrowingRate)
-		: Decimal.ZERO;
-	const updatedTrove = isDirty ? new Trove(trove.collateral, desireNetDebt.add(wenLiquidationReserve).add(fee)) : trove;
-	const [troveChange, description] = validateTroveChange(
-		trove!,
-		updatedTrove!,
-		borrowingRate,
-		validationContext,
-		constants
-	);
-	const stableTroveChange = useStableTroveChange(troveChange);
-	let txErrorMessage: ErrorMessage;
-	const errorMessages = useMemo(() => {
-		if (description) return description as ErrorMessage;
-	}, [description]);
-	const errorMsg = errorMessages || txErrorMessage!;
-
-	const newCollateralRatio = updatedTrove.collateralRatio(price);
-	const newURisPositive = newCollateralRatio.gt(troveCollateralRatio);
-	const newUR = ((updatedTrove.collateral.gt(0) && updatedTrove.debt.gt(0)) ? Decimal.ONE.div(newCollateralRatio) : Decimal.ZERO);
-
-	// const newTroveCollateralRatio = updatedTrove.debt.eq(0) ? Decimal.ZERO : newCollateralRatio;
-	// const newTroveCollateralValue = updatedTrove.collateral.mul(price);
-	// const line = Decimal.min(liquidationPoint, newTroveCollateralRatio);
-	// const newDebtToLiquidate = Decimal.max(
-	// 	updatedTrove.debt,
-	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
-	// );
-	const newDebtToLiquidate = updatedTrove.debt;
-	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
+	const maxSafe = 1 / liquidationPoint;
+	const vaultCollateralRatio = vault.collateralRatio(price);
+	const vaultUtilizationRateNumber = 1 / vaultCollateralRatio;
+	const vaultUtilizationRateNumberPercent = vaultUtilizationRateNumber * 100;
+	const [forcedSlideValue, setForcedSlideValue] = useState(vaultUtilizationRateNumber);
+	const wenLiquidationReserve = constants?.LUSD_GAS_COMPENSATION || BigNumber(cfg.wenGasCompensation).shiftedBy(market.decimals);
+	const borrowingRate = fees.borrowingRate;
+	const fee = borrowAmount.gt(0) ? borrowAmount.multipliedBy(borrowingRate) : globalContants.BIG_NUMBER_0;
+	const updatedVaultDebt = borrowAmount.gt(0) ? vault.debt.plus(borrowAmount).plus(fee) : vault.debt;
+	const newCollateralRatio = Vault.computeCollateralRatio(vault.collateral, updatedVaultDebt, price, 1, market, WEN);
+	const newURisPositive = newCollateralRatio > vaultCollateralRatio;
+	const newUR = 1 / newCollateralRatio;
+	const [sending, setSending] = useState(false);
+	const [tx, setTx] = useState("");
+	const [errorMsg, setErrorMsg] = useState<ErrorMessage>();
+	const newLiquidationPrice = updatedVaultDebt.dividedBy(vault.collateral).toNumber();
 
 	useEffect(() => {
-		setForcedSlideValue(Number(newUR.toString()));
+		setForcedSlideValue(newUR);
 	}, [newUR])
 
 	const init = () => {
 		setValueForced(-1);
-		setBorrowAmount(-1);
+		setBorrowValue(-1);
 	};
 
 	useEffect(init, []);
@@ -119,45 +85,24 @@ export const BorrowModal = ({
 	const handleMax = () => {
 		const val = Number(max);
 		setValueForced(val);
-		setBorrowAmount(val);
+		setBorrowValue(val);
 	};
-
-	const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) => {
-		if (unsavedChanges.absoluteValue) {
-			if (unsavedChanges.positive) {
-				return netDebt.add(unsavedChanges.absoluteValue);
-			}
-			if (unsavedChanges.negative) {
-				if (unsavedChanges.absoluteValue.lt(netDebt)) {
-					return netDebt.sub(unsavedChanges.absoluteValue);
-				}
-			}
-			return netDebt;
-		}
-		return netDebt;
-	};
-
-	useEffect(() => {
-		if (!trove) return;
-
-		if (borrowAmount >= 0) {
-			const newNetDebt = netDebt.add(borrowAmount);
-			const previousNetDebt = previousTrove.current?.debt.gt(1) ? previousTrove.current?.netDebt : Decimal.from(0);
-			const unsavedChanges = Difference.between(newNetDebt, previousNetDebt);
-			const nextNetDebt = applyUnsavedNetDebtChanges(unsavedChanges, trove);
-			setDesireNextDebt(nextNetDebt);
-		}
-	}, [trove, borrowAmount, price]);
 
 	const handleSlideUtilRate = (val: number) => {
-		const newDebt = Number(previousTrove.current?.debt.mul(val).div(troveUtilizationRateNumber).sub(previousTrove.current.netDebt).sub(wenLiquidationReserve).toString());
-		setBorrowAmount(newDebt);
+		const newDebt = vault.debt
+			.multipliedBy(val)
+			.dividedBy(vaultUtilizationRateNumber)
+			.minus(vault.netDebt)
+			.minus(wenLiquidationReserve)
+			.shiftedBy(-WEN.decimals)
+			.toNumber();
+		setBorrowValue(newDebt);
 		setValueForced(newDebt);
 	};
 
 	const handleInputBorrowValue = (val: number) => {
 		setValueForced(-1);
-		setBorrowAmount(val);
+		setBorrowValue(val);
 	};
 
 	const handleCloseModal = () => {
@@ -165,16 +110,33 @@ export const BorrowModal = ({
 		onClose();
 	};
 
-	useEffect(() => {
-		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
-			txErrorMessage = { string: transactionState.error.reason || JSON.stringify(transactionState.error.message || transactionState.error).substring(0, 100) } as ErrorMessage;
-		}
+	const handleBorrow = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
 
-		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string);
-			transactionState.resolved = true;
-		}
-	}, [transactionState.type])
+		setSending(true);
+
+		vault.adjust(
+			borrowingRate + cfg.feePercentSlippage,
+			globalContants.BIG_NUMBER_0,
+			borrowAmount,
+			true,
+			globalContants.BIG_NUMBER_0,
+			vault.collateral,
+			updatedVaultDebt,
+			tx => {
+				setTx(tx);
+			},
+			error => {
+				setErrorMsg({ string: error.message } as ErrorMessage);
+				setSending(false);
+				setTx("");
+			},
+			tx => {
+				setSending(false);
+				return onDone && onDone(tx);
+			}
+		);
+	};
 
 	return isOpen ? <Modal
 		title={t("borrow") + " " + WEN.symbol}
@@ -187,22 +149,22 @@ export const BorrowModal = ({
 					<div
 						className="flex-row-space-between"
 						style={{ alignItems: "center" }}>
-						<div className="label fat">{t("borrowAmount")}</div>
+						<div className="label fat">{t("borrowValue")}</div>
 
 						<button
 							className="textButton smallTextButton"
 							onClick={handleMax}>
-							{t("max")}:&nbsp;{max.toString(2)}&nbsp;{WEN.symbol}
+							{t("max")}:&nbsp;{formatAsset(max, WEN)}
 						</button>
 					</div>
 
 					<AmountInput
 						coin={WEN}
-						price={Decimal.ONE}
+						price={1}
 						allowSwap={false}
 						valueForced={valueForced}
 						onInput={handleInputBorrowValue}
-						max={Number(max.toString())}
+						max={max}
 						warning={undefined}
 						error={errorMsg && (errorMsg.string || t(errorMsg.key!, errorMsg.values))}
 						allowReduce={true}
@@ -216,21 +178,16 @@ export const BorrowModal = ({
 						style={{ alignItems: "center" }}>
 						<div className="label fat">{t("utilizationRate")}</div>
 
-						{/* <button
-							className="textButton smallTextButton"
-							onClick={handleMax}>
-							{t("maxSafe")}:&nbsp;{maxSafe.mul(100).toString(2)}%
-						</button> */}
-						<div className="label">{t("maxSafe")}:&nbsp;{maxSafe.mul(100).toString(2)}%</div>
+						<div className="label">{t("maxSafe")}:&nbsp;{formatPercent(maxSafe)}</div>
 					</div>
 
 					<Slider
 						min={0}
-						max={Number(maxSafe)}
+						max={maxSafe}
 						onChange={handleSlideUtilRate}
 						forcedValue={forcedSlideValue}
 						allowReduce={false}
-						limitValue={troveUtilizationRateNumber}
+						limitValue={vaultUtilizationRateNumber}
 						allowIncrease={true} />
 				</div>
 			</div>
@@ -241,9 +198,9 @@ export const BorrowModal = ({
 					<div className="label">{t("utilizationRate")}</div>
 
 					<ChangedValueLabel
-						previousValue={troveUtilizationRateNumberPercent.valueOf()}
+						previousValue={vaultUtilizationRateNumberPercent}
 						previousPostfix="%"
-						newValue={Number(newUR.mul(100)).valueOf()}
+						newValue={newUR * 100}
 						nextPostfix="%"
 						positive={newURisPositive} />
 				</div>
@@ -252,8 +209,8 @@ export const BorrowModal = ({
 					<div className="label">{t("available2Borrow")}</div>
 
 					<ChangedValueLabel
-						previousValue={trove.debt.gt(0) ? Number(availableBorrow) : 0}
-						newValue={updatedTrove.debt.gt(0) ? Number(calculateAvailableBorrow(updatedTrove, price, liquidationPoint)) : 0}
+						previousValue={availableBorrow}
+						newValue={availableBorrow - (borrowValue > 0 ? borrowValue : 0)}
 						nextPostfix={WEN.symbol}
 						positive={newURisPositive} />
 				</div>
@@ -262,8 +219,8 @@ export const BorrowModal = ({
 					<div className="label">{t("available2Withdraw")}</div>
 
 					<ChangedValueLabel
-						previousValue={trove.debt.gt(0) ? Number(availableWithdrawal) : 0}
-						newValue={updatedTrove.debt.gt(0) ? Number(calculateAvailableWithdrawal(updatedTrove, price, liquidationPoint)) : 0}
+						previousValue={availableWithdrawal.shiftedBy(-WEN.decimals).toNumber()}
+						newValue={Vault.calculateAvailableWithdrawal(vault.collateral, updatedVaultDebt, price, chainId, market, WEN).shiftedBy(-market.decimals).toNumber()}
 						nextPostfix={market.symbol}
 						positive={newURisPositive} />
 				</div>
@@ -272,8 +229,8 @@ export const BorrowModal = ({
 					<div className="label">{t("vaultDebt")}</div>
 
 					<ChangedValueLabel
-						previousValue={Number(trove.debt)}
-						newValue={Number(updatedTrove.debt)}
+						previousValue={vault.debt.shiftedBy(-WEN.decimals).toNumber()}
+						newValue={updatedVaultDebt.shiftedBy(-WEN.decimals).toNumber()}
 						nextPostfix={globalContants.USD}
 						positive={newURisPositive} />
 				</div>
@@ -282,21 +239,20 @@ export const BorrowModal = ({
 					<div className="label">{t("liquidationPrice")}(1&nbsp;{market?.symbol})</div>
 
 					<ChangedValueLabel
-						previousValue={Number(liquidationPrice)}
-						newValue={Number(newLiquidationPrice)}
+						previousValue={liquidationPrice}
+						newValue={newLiquidationPrice}
 						nextPostfix={globalContants.USD}
-						positive={newLiquidationPrice.lt(liquidationPrice)}
+						positive={newLiquidationPrice < liquidationPrice}
 						maximumFractionDigits={4} />
 				</div>
 
 				<div className="flex-row-space-between">
-					<div className="label">{t("borrowFee")}&nbsp;({borrowingRate.mul(100).toString(2)}%)</div>
+					<div className="label">{t("borrowFee")}&nbsp;({formatPercent(borrowingRate)})</div>
 
 					<div
 						className="label"
 						style={{ color: "#F6F6F7" }}>
-						{/* {updatedTrove.debt.mul(borrowingRate).toString(2)}&nbsp;{WEN.symbol} */}
-						{fee.toString(2)}&nbsp;{WEN.symbol}
+						{formatAsset(formatAssetAmount(fee, WEN.decimals), WEN)}
 					</div>
 				</div>
 
@@ -314,37 +270,20 @@ export const BorrowModal = ({
 					<div
 						className="label"
 						style={{ color: "#F6F6F7" }}>
-						{LUSD_LIQUIDATION_RESERVE.toString(2)}&nbsp;{WEN.symbol}
+						{formatAsset(formatAssetAmount(wenLiquidationReserve, WEN.decimals), WEN)}
 					</div>
 				</div>
 			</div>
 		</div>
 
-		{
-			stableTroveChange &&
-				(
-					(!transactionState.id && transactionState.type === "idle")
-					|| transactionState.type === "cancelled"
-				)
-				? <TroveAction
-					transactionId={txId}
-					change={stableTroveChange}
-					maxBorrowingRate={borrowingRate.add(0.005)}
-					borrowingFeeDecayToleranceMinutes={60}>
-					<button
-						className="primaryButton bigButton"
-						style={{ width: "100%" }}>
-						<img src="images/borrow-dark.png" />
+		<button
+			className="primaryButton bigButton"
+			style={{ width: "100%" }}
+			disabled={borrowAmount.lte(0) || sending || borrowValue > availableBorrow}
+			onClick={handleBorrow}>
+			<img src="images/borrow-dark.png" />
 
-						{t("borrow")}
-					</button>
-				</TroveAction> : <button
-					className="primaryButton bigButton"
-					style={{ width: "100%" }}
-					disabled>
-					<img src="images/borrow-dark.png" />
-
-					{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("borrowing") + "...") : t("borrow")}
-				</button>}
+			{t("borrow")}
+		</button>
 	</Modal> : <></>
 };

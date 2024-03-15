@@ -13,7 +13,7 @@ class TransactionTracker {
 	public error?: Error | unknown;
 	public onWait?: (tx: string) => void;
 	public onFail?: (err: Error | unknown) => void;
-	public onDone?: () => void
+	public onDone?: (tx: string) => void
 
 	private _state: TransactionState = "idle";
 
@@ -34,7 +34,7 @@ class TransactionTracker {
 				break;
 
 			case "confirmed":
-				this.onDone && this.onDone();
+				this.onDone && this.onDone(this.hash);
 				break;
 
 			case "idle":
@@ -88,7 +88,7 @@ class TrackableFunction {
 	public async run(
 		onWait?: (tx: string) => void,
 		onFail?: (error: Error | unknown) => void,
-		onDone?: () => void,
+		onDone?: (tx: string) => void,
 		overrides?: Record<string, any>,
 		...args: unknown[]
 	) {
@@ -129,8 +129,8 @@ class TrackableFunction {
 				this._trackerGetError(error);
 			}
 
-			if (res?.raw) {
-				this._tracker.hash = res.raw;
+			if (res?.hash) {
+				this._tracker.hash = res.hash;
 				this._tracker.state = "waitingForConfirmation";
 			}
 

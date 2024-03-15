@@ -47,7 +47,7 @@ export const magma: {
 	_getMagmaDataStep2: () => Promise<void>;
 	_loadingData: boolean;
 	computeFee: () => number;
-	openVault: (vault: Vault, maxFeePercentage: number, debtChange: BigNumber, deposit: BigNumber, onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: () => void) => void;
+	openVault: (vault: Vault, maxFeePercentage: number, debtChange: BigNumber, deposit: BigNumber, onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void) => void;
 } = {
 	_account: globalContants.ADDRESS_PLACEHOLDER,
 	_loadingData: false,

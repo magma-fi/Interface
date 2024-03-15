@@ -201,7 +201,6 @@ export const DepositeModal = ({
 				updatedVaultCollateral,
 				updatedVaultDebt,
 				tx => {
-					console.debug("xxx 交易已出", tx);
 					setTx(tx);
 				},
 				error => {
@@ -209,7 +208,7 @@ export const DepositeModal = ({
 					setSending(false);
 					setTx("");
 				},
-				() => {
+				tx => {
 					setSending(false);
 					return onDone && onDone(tx);
 				}
@@ -226,7 +225,7 @@ export const DepositeModal = ({
 					setSending(false);
 					setTx("");
 				},
-				() => {
+				tx => {
 					setSending(false);
 					return onDone && onDone(tx);
 				}

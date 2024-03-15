@@ -285,6 +285,8 @@ export const MarketView = ({
 		setTxHash(tx);
 		setShowBorrowModal(false);
 		setShowBorrowDoneModal(true);
+
+		return refreshTrigger && refreshTrigger();
 	};
 
 	const handleRepayDone = (tx: string, repayAmount: number) => {
@@ -842,7 +844,7 @@ export const MarketView = ({
 			onClose={handleCloseBorrowModal}
 			market={market}
 			price={price}
-			trove={vault}
+			vault={vault}
 			fees={fees}
 			validationContext={validationContext}
 			max={availableBorrow}
@@ -851,7 +853,6 @@ export const MarketView = ({
 			liquidationPrice={liquidationPrice}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
-			// liquidationPoint={liquidationPoint}
 			liquidationPoint={appLiquidationPoint}
 			availableBorrow={availableBorrow} />}
 
@@ -865,7 +866,7 @@ export const MarketView = ({
 					txHash={txHash}
 					title={t("borrowed")}
 					logo={WEN.logo}
-					amount={vault.debt.toFixed(2) + " " + WEN.symbol} />
+					amount={formatAsset(formatAssetAmount(vault.debt, WEN.decimals), WEN)} />
 
 				<button
 					className="textButton smallTextButton"

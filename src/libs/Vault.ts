@@ -1,7 +1,6 @@
 import { IOTX, WEN, globalContants } from "./globalContants";
 import { Coin, JsonObject, VaultStatus, Vaultish } from "./types";
 import { BigNumber } from "bignumber.js";
-import { BigNumber as BN } from "@ethersproject/bignumber";
 import appConfig from "../appConfig.json"
 import { magma } from "./magma";
 
@@ -60,22 +59,22 @@ export class Vault {
 		}
 	}
 
-	public static calculateAvailableWithdrawal(collateral: BigNumber, netDebt: BigNumber, collateralPrice: number, chainId = globalContants.DEFAULT_NETWORK_ID, collateralToken: Coin, loanToken: Coin) {
+	public static calculateAvailableWithdrawal(collateral: BigNumber, debt: BigNumber, collateralPrice: number, chainId = globalContants.DEFAULT_NETWORK_ID, collateralToken: Coin, loanToken: Coin) {
 		const collateralRatio: number = (appConfig.constants as JsonObject)[String(chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO;
 		const collateralValue = collateral.shiftedBy(-collateralToken.decimals).multipliedBy(collateralPrice);
-		const debtLine = netDebt.shiftedBy(-loanToken.decimals).multipliedBy(collateralRatio);
+		const debtLine = debt.shiftedBy(-loanToken.decimals).multipliedBy(collateralRatio);
 		if (collateralValue.gt(debtLine))
 			return collateralValue.minus(debtLine).dividedBy(collateralPrice).shiftedBy(collateralToken.decimals);
 		else
 			return globalContants.BIG_NUMBER_0;
 	}
 
-	public static calculateAvailableBorrow(collateral: BigNumber, netDebt: BigNumber, collateralPrice: number, chainId = globalContants.DEFAULT_NETWORK_ID, collateralToken: Coin, loanToken: Coin, collRatio?: number, feeRate = 0) {
+	public static calculateAvailableBorrow(collateral: BigNumber, debt: BigNumber, collateralPrice: number, chainId = globalContants.DEFAULT_NETWORK_ID, collateralToken: Coin, loanToken: Coin, collRatio?: number, feeRate = 0) {
 		const appConfigConstants = (appConfig.constants as JsonObject)[String(chainId)];
 		const collateralRatio: number = collRatio ?? appConfigConstants.MAGMA_CRITICAL_COLLATERAL_RATIO;
 		const collateralValue = collateral.shiftedBy(-collateralToken.decimals).multipliedBy(collateralPrice);
 		const debtLine = collateralValue.dividedBy(collateralRatio);
-		const debtValue = netDebt.shiftedBy(-loanToken.decimals);
+		const debtValue = debt.shiftedBy(-loanToken.decimals);
 		if (debtLine.gt(debtValue)) {
 			return debtLine.minus(debtValue).shiftedBy(loanToken.decimals).multipliedBy(appConfigConstants.appMMROffset).multipliedBy(1 - feeRate);
 		} else
@@ -99,7 +98,7 @@ export class Vault {
 	}
 
 	public getAvailableWithdrawal(collateralPrice: number) {
-		return Vault.calculateAvailableWithdrawal(this.collateral, this.netDebt, collateralPrice, this._chainId, this._collateralToken, this._loanToken);
+		return Vault.calculateAvailableWithdrawal(this.collateral, this.debt, collateralPrice, this._chainId, this._collateralToken, this._loanToken);
 	}
 
 	public async adjust(
@@ -112,7 +111,7 @@ export class Vault {
 		updatedDebt: BigNumber,
 		onWait?: (tx: string) => void,
 		onFail?: (error: Error | any) => void,
-		onDone?: () => void
+		onDone?: (tx: string) => void
 	) {
 		const nominalCollateralRatio = Vault.calculateNominalCollateralRatio(updatedCollateral, updatedDebt);
 		const hints = await magma.findHintsForNominalCollateralRatio(nominalCollateralRatio, this.owner);
@@ -134,10 +133,10 @@ export class Vault {
 		if (this.debt.eq(0)) {
 			this.netDebt = globalContants.BIG_NUMBER_0;
 		} else {
-			this.netDebt = this.debt.multipliedBy(1 + this._borrowingRate).plus(this._gasCompensation);
+			this.netDebt = this.debt.minus(this._gasCompensation);
 		}
 
-		this.nominalNetDebt = this.debt.multipliedBy(1 + this._borrowingRate).plus(this._gasCompensation);
+		this.nominalNetDebt = this.netDebt;
 		this.netDebtDecimals = this.netDebt.shiftedBy(-this._loanToken.decimals).toNumber();
 	}
 }
