@@ -112,7 +112,7 @@ export const MarketView = ({
 	const liquidationPoint = recoveryMode ? CCR : MCR;
 	const appLiquidationPoint = recoveryMode ? CCR : appConfigConstants.appMCR;
 	const troveCollatera = formatAssetAmount(vault.collateral, IOTX.decimals);
-	const troveCollateralValue = troveCollatera * price;
+	const troveCollateralValue = vault.collateral.shiftedBy(-market.decimals).multipliedBy(price);
 
 	// const troveCollateralRatio = vault.debt.eq(0) ? Decimal.ZERO : vault.collateralRatio(price);
 	// const line = Decimal.min(liquidationPoint, troveCollateralRatio);
@@ -120,19 +120,20 @@ export const MarketView = ({
 	// 	vault.debt,
 	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(troveCollateralValue)
 	// );
-	const troveDebtValue = formatAssetAmount(vault.debt, WEN.decimals);
+	const troveDebtValue = vault.debt.shiftedBy(-WEN.decimals);
+	const vaultDebtValuneNumber = troveDebtValue.toNumber();
 	const debtToLiquidate = vault.debt;
 	const liquidationPrice = vault.collateral.gt(0) ? debtToLiquidate.dividedBy(vault.collateral).toNumber() : 0;
 
-	const maxAvailableBorrow = (troveCollateralValue / liquidationPoint) * appMMROffset;
-	const maxAvailableBorrowSubFee = maxAvailableBorrow * (1 - borrowingRate);
-	const availableBorrow = maxAvailableBorrowSubFee > troveDebtValue ? maxAvailableBorrowSubFee - troveDebtValue : 0;
+	const maxAvailableBorrow = troveCollateralValue.dividedBy(liquidationPoint).multipliedBy(appMMROffset);
+	const maxAvailableBorrowSubFee = maxAvailableBorrow.multipliedBy(1 - borrowingRate);
+	const availableBorrow = maxAvailableBorrowSubFee.gt(troveDebtValue) ? maxAvailableBorrowSubFee.minus(troveDebtValue) : globalContants.BIG_NUMBER_0;
 	const currentNetDebt = vault.debt.gt(1) ? vault.netDebt : globalContants.BIG_NUMBER_0;
 	const minNetDebt = magmaData?.MIN_NET_DEBT;
 	const reserve = magmaData?.LUSD_GAS_COMPENSATION;
 	const maxAvailableRepay = currentNetDebt.gt(minNetDebt.plus(reserve)) ? currentNetDebt.minus(minNetDebt).minus(reserve) : globalContants.BIG_NUMBER_0;
 	const totalUtilizationRate = total.collateral.gt(reserve) ? total.debt.dividedBy(total.collateral.multipliedBy(price)).toNumber() : 0;
-	const troveUtilizationRate = vault.collateral.gt(0) ? troveDebtValue / troveCollateralValue : 0;
+	const troveUtilizationRate = vault.collateral.gt(0) ? troveDebtValue.dividedBy(troveCollateralValue).toNumber() : 0;
 
 	const troveUtilizationRate100 = troveUtilizationRate * 100;
 	const RADIAN = Math.PI / 180;
@@ -496,7 +497,7 @@ export const MarketView = ({
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{formatCurrency(troveCollateralValue)}</div>
+									<div>{formatCurrency(troveCollateralValue.toNumber())}</div>
 
 									<div className="label labelSmall">{formatAsset(troveCollatera, IOTX)}</div>
 								</div>
@@ -537,9 +538,9 @@ export const MarketView = ({
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{formatCurrency(availableBorrow)}</div>
+									<div>{formatCurrency(availableBorrow.toNumber())}</div>
 
-									<div className="label labelSmall">{formatAsset(availableBorrow, WEN)}</div>
+									<div className="label labelSmall">{formatAsset(availableBorrow.toNumber(), WEN)}</div>
 								</div>
 							</div>
 						</div>
@@ -550,7 +551,7 @@ export const MarketView = ({
 							<button
 								className="primaryButton"
 								onClick={handleBorrow}
-								disabled={availableBorrow < 0.01}>
+								disabled={availableBorrow.lt(0.01)}>
 								<img src="images/borrow-dark.png" />
 
 								{t("borrow") + " " + WEN.symbol}
@@ -577,9 +578,9 @@ export const MarketView = ({
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{formatCurrency(troveDebtValue)}</div>
+									<div>{formatCurrency(vaultDebtValuneNumber)}</div>
 
-									<div className="label labelSmall">{formatAsset(troveDebtValue, WEN)}</div>
+									<div className="label labelSmall">{formatAsset(vaultDebtValuneNumber, WEN)}</div>
 								</div>
 							</div>
 						</div>
@@ -846,7 +847,6 @@ export const MarketView = ({
 			price={price}
 			vault={vault}
 			fees={fees}
-			validationContext={validationContext}
 			max={availableBorrow}
 			onDone={handleBorrowDone}
 			constants={magmaData}
@@ -882,7 +882,7 @@ export const MarketView = ({
 			onClose={handleCloseRepayModal}
 			market={market}
 			price={price}
-			trove={vault}
+			vault={vault}
 			fees={fees}
 			validationContext={validationContext}
 			max={BigNumber.min(maxAvailableRepay, lusdBalance)}
@@ -890,7 +890,6 @@ export const MarketView = ({
 			constants={magmaData}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
-			// liquidationPoint={liquidationPoint}
 			liquidationPoint={appLiquidationPoint}
 			availableBorrow={availableBorrow}
 			onCloseVault={handleCloseTroveFromRepayModal} />}

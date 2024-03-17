@@ -20,27 +20,27 @@ export const calculateAvailableWithdrawal = (forTrove: Vault, price: number, col
 		return globalContants.BIG_NUMBER_0;
 };
 
-// export const calculateAvailableBorrow = (forTrove: Vault, price: number, collRatio?: number, chainId?: number) => {
+export const calculateAvailableBorrow = (forTrove: Vault, price: number, collRatio?: number, chainId?: number) => {
+	// const collateralRatio: number = collRatio ?? (appConfig.constants as JsonObject)[String(chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO;
+	// const collateralValue = forTrove.collateral.multipliedBy(price);
+	// const debtLine = collateralValue.dividedBy(collateralRatio);
+	// const debt = forTrove.debt.gt(1) ? forTrove.netDebt : forTrove.debt;
+	// if (debtLine.gt(debt)) {
+	// 	return debtLine.minus(debt);
+	// } else
+	// 	return globalContants.BIG_NUMBER_0;
+};
+
+// export const calculateAvailableBorrow = (collateral: BigNumber, netDebt: BigNumber, price: number, collRatio?: number, chainId?: number) => {
 // 	const collateralRatio: number = collRatio ?? (appConfig.constants as JsonObject)[String(chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO;
-// 	const collateralValue = forTrove.collateral.multipliedBy(price);
+// 	const collateralValue = collateral.multipliedBy(price);
 // 	const debtLine = collateralValue.dividedBy(collateralRatio);
-// 	const debt = forTrove.debt.gt(1) ? forTrove.netDebt : forTrove.debt;
+// 	const debt = netDebt;
 // 	if (debtLine.gt(debt)) {
 // 		return debtLine.minus(debt);
 // 	} else
 // 		return globalContants.BIG_NUMBER_0;
 // };
-
-export const calculateAvailableBorrow = (collateral: BigNumber, netDebt: BigNumber, price: number, collRatio?: number, chainId?: number) => {
-	const collateralRatio: number = collRatio ?? (appConfig.constants as JsonObject)[String(chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO;
-	const collateralValue = collateral.multipliedBy(price);
-	const debtLine = collateralValue.dividedBy(collateralRatio);
-	const debt = netDebt;
-	if (debtLine.gt(debt)) {
-		return debtLine.minus(debt);
-	} else
-		return globalContants.BIG_NUMBER_0;
-};
 
 export const calculateUtilizationRate = (forTrove: Trove, price: Decimal) => {
 	return (forTrove.collateral.gt(0) && forTrove.debt.gt(0)) ? Decimal.ONE.div(forTrove.collateralRatio(price)) : Decimal.ZERO;

@@ -39,14 +39,14 @@ export const BorrowModal = ({
 	price: number;
 	vault: Vault;
 	fees: Record<string, any>;
-	max: number;
+	max: BigNumber;
 	onDone: (tx: string) => void;
 	constants?: Record<string, any>;
 	liquidationPrice: number;
 	recoveryMode: boolean;
 	liquidationPoint: number;
 	availableWithdrawal: BigNumber;
-	availableBorrow: number;
+	availableBorrow: BigNumber;
 }) => {
 	const { chainId } = useLiquity();
 	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
@@ -83,7 +83,7 @@ export const BorrowModal = ({
 	useEffect(init, []);
 
 	const handleMax = () => {
-		const val = Number(max);
+		const val = max.toNumber();
 		setValueForced(val);
 		setBorrowValue(val);
 	};
@@ -154,7 +154,7 @@ export const BorrowModal = ({
 						<button
 							className="textButton smallTextButton"
 							onClick={handleMax}>
-							{t("max")}:&nbsp;{formatAsset(max, WEN)}
+							{t("max")}:&nbsp;{formatAsset(formatAssetAmount(max, WEN.decimals), WEN)}
 						</button>
 					</div>
 
@@ -164,7 +164,7 @@ export const BorrowModal = ({
 						allowSwap={false}
 						valueForced={valueForced}
 						onInput={handleInputBorrowValue}
-						max={max}
+						max={formatAssetAmount(max, WEN.decimals)}
 						warning={undefined}
 						error={errorMsg && (errorMsg.string || t(errorMsg.key!, errorMsg.values))}
 						allowReduce={true}
@@ -209,8 +209,8 @@ export const BorrowModal = ({
 					<div className="label">{t("available2Borrow")}</div>
 
 					<ChangedValueLabel
-						previousValue={availableBorrow}
-						newValue={availableBorrow - (borrowValue > 0 ? borrowValue : 0)}
+						previousValue={availableBorrow.toNumber()}
+						newValue={availableBorrow.minus(borrowValue > 0 ? borrowValue : 0).toNumber()}
 						nextPostfix={WEN.symbol}
 						positive={newURisPositive} />
 				</div>
@@ -219,7 +219,7 @@ export const BorrowModal = ({
 					<div className="label">{t("available2Withdraw")}</div>
 
 					<ChangedValueLabel
-						previousValue={availableWithdrawal.shiftedBy(-WEN.decimals).toNumber()}
+						previousValue={availableWithdrawal.shiftedBy(-market.decimals).toNumber()}
 						newValue={Vault.calculateAvailableWithdrawal(vault.collateral, updatedVaultDebt, price, chainId, market, WEN).shiftedBy(-market.decimals).toNumber()}
 						nextPostfix={market.symbol}
 						positive={newURisPositive} />
@@ -279,7 +279,7 @@ export const BorrowModal = ({
 		<button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			disabled={borrowAmount.lte(0) || sending || borrowValue > availableBorrow}
+			disabled={borrowAmount.lte(0) || sending || borrowAmount.gt(availableBorrow)}
 			onClick={handleBorrow}>
 			<img src="images/borrow-dark.png" />
 

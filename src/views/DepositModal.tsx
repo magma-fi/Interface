@@ -47,7 +47,7 @@ export const DepositeModal = ({
 	liquidationPrice: number;
 	availableWithdrawal: BigNumber;
 	liquidationPoint: number;
-	availableBorrow: number;
+	availableBorrow: BigNumber;
 }) => {
 	const { chainId } = useLiquity();
 	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
@@ -336,7 +336,7 @@ export const DepositeModal = ({
 						<div className="label">{t("available2Borrow")}</div>
 
 						<ChangedValueLabel
-							previousValue={availableBorrow}
+							previousValue={availableBorrow.toNumber()}
 							newValue={newAvailableBorrowNumber}
 							nextPostfix={WEN.symbol}
 							positive={urIsGood} />
