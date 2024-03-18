@@ -144,7 +144,7 @@ export const UserAccount = ({
       <div className="label fat">{formatNumber(pointObject.stabilityScore, 0)}</div>
     </div>
 
-    <div className="flex-row-space-between points">
+    {/* <div className="flex-row-space-between points">
       <div className="label">
         <a
           className="label"
@@ -160,18 +160,18 @@ export const UserAccount = ({
         </a>
       </div>
       <div className="label fat">{formatNumber(pointObject.lpScore, 0)}</div>
-    </div>
+    </div> */}
 
     {pointObject.lps?.length > 0 && pointObject.lps.map((lp: LPScoreObject) => {
       return <div className="flex-row-space-between points">
-        <div className="label labelSmall">
-          <span>&nbsp;•&nbsp;</span>
+        <div className="label">
+          {/* <span>&nbsp;•&nbsp;</span> */}
 
           <a
-            className="textButton inLineTextButton labelSmall"
+            className="label"
             href={lp.link}
             target="_blank">
-            <span>{lp.name}&nbsp;LP</span>
+            <span>{lp.name}&nbsp;LP&nbsp;</span>
 
             <img
               src="/images/external-link.png"
@@ -180,7 +180,7 @@ export const UserAccount = ({
               }} />
           </a>
         </div>
-        <div className="label labelSmall">{formatNumber(lp.points || 0, 0)}</div>
+        <div className="label fat">{formatNumber(lp.points || 0, 0)}</div>
       </div>
     })}
 
