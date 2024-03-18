@@ -3,7 +3,7 @@ import appConfig from "../appConfig.json";
 import { JsonObject } from "./types";
 
 export const graphqlAsker = {
-	ask: function (chainId: number, query: string, doneCallback: (data: unknown) => void, graphURL = undefined) {
+	ask: function (chainId: number, query: string, doneCallback: (data: unknown) => void, graphURL?: string) {
 		const uri = graphURL ?? this._getGraph(chainId);
 
 		if (!uri) {
@@ -19,6 +19,25 @@ export const graphqlAsker = {
 		}).catch(error => {
 			console.error(error);
 			return doneCallback(null);
+		});
+	},
+
+	askAsync: async function (chainId: number, query: string, graphURL?: string): Promise<any> {
+		return new Promise(resolve => {
+			const uri = graphURL ?? this._getGraph(chainId);
+
+			if (!uri) {
+				return resolve(null);
+			}
+
+			const fetcher = createApolloFetch({ uri });
+			fetcher({ query }).then(result => {
+				const { data, errors } = result;
+				if (!errors) return resolve(data);
+			}).catch(error => {
+				console.error(error);
+				return resolve(null);
+			});
 		});
 	},
 
@@ -165,21 +184,41 @@ export const graphqlAsker = {
 		`;
 	},
 
-	requestUserLPScore: function (user: string) {
-		return `
-		{
-			user(id: "${user}") {
-				id
-				point {
-					point
-					timestamp
-				}
-				balance {
-					balance
+	requestUserLPScore: function (user: string, isStaking = false) {
+		if (isStaking) {
+			return `
+			{
+				user(id: "${user}") {
+					id
+					point {
+						point
+						timestamp
+					}
+					balance {
+						balance
+					}
+					staking {
+						amount
+					}
 				}
 			}
+			`;
+		} else {
+			return `
+			{
+				user(id: "${user}") {
+					id
+					point {
+						point
+						timestamp
+					}
+					balance {
+						balance
+					}
+				}
+			}
+			`;
 		}
-		`;
 	},
 
 	requestWENScoreOfUsers: function (users: string[]) {
@@ -199,21 +238,41 @@ export const graphqlAsker = {
 		`;
 	},
 
-	requestLPScoreOfUsers: function (users: string[]) {
-		return `
-		{
-			users(where: {id_in: [${users}]}) {
-				id
-				point {
-					point
-					timestamp
-				}
-				balance {
-					balance
+	requestLPScoreOfUsers: function (users: string[], staking = false) {
+		if (staking) {
+			return `
+			{
+				users(where: {id_in: [${users}]}) {
+					id
+					point {
+						point
+						timestamp
+					}
+					balance {
+						balance
+					}
+					staking{
+						amount
+					}
 				}
 			}
+			`;
+		} else {
+			return `
+			{
+				users(where: {id_in: [${users}]}) {
+					id
+					point {
+						point
+						timestamp
+					}
+					balance {
+						balance
+					}
+				}
+			}
+			`;
 		}
-		`;
 	},
 
 	_getGraph: function (chainId: number) {
