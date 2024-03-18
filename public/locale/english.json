@@ -164,7 +164,7 @@
 	"claim": "Claim",
 	"points": "Points",
 	"telegram": "Telegram",
-	"stabilityPoolPoints": "Stability Pool Points",
+	"stabilityPoolPoints": "Stability Pool",
 	"lpPoints": "LP Points",
-	"referralsPoints": "Referrals' Points"
+	"referralsPoints": "Referrals"
 }
