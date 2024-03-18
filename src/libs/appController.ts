@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Langs, globalContants } from "./globalContants";
 import appConfig from "../appConfig.json"
-import { JsonObject } from "./types";
+import { JsonObject, LPScoreObject } from "./types";
 import { graphqlAsker } from "./graphqlAsker";
+import { LoadStateErrorType } from "viem/_types/actions/test/loadState";
 
 export const appController: {
 	lang: Langs | null;
@@ -15,10 +17,10 @@ export const appController: {
 	_db: IDBDatabase | undefined;
 	openDB: (chainId: number, onDone: () => void) => void;
 	readAll: (onDone: (arg?: IDBCursor) => void) => void;
-	getUserPoints: (chainId: number, user: string, referrer: string, onDone: (point: number, resObject: Record<string, number>) => void) => void;
+	getUserPoints: (chainId: number, user: string, referrer: string, onDone: (point: number, resObject: Record<string, any>) => void) => void;
 	_getUserWENScore: (chainId: number, user: string) => Promise<number>;
-	_getLPScore: (chainId: number, user: string) => Promise<number>;
-	_getUserStabilityAndLpScore: (chainId: number, user: string, onDone: (res: Record<string, number>) => void) => void;
+	_getLPScore: (chainId: number, user: string) => Promise<{ totalLPScores: number, lpScores: LPScoreObject[] }>;
+	_getUserStabilityAndLpScore: (chainId: number, user: string, onDone: (res: Record<string, any>) => void) => void;
 } = {
 	_dbConnector: undefined,
 	_db: undefined,
@@ -107,15 +109,15 @@ export const appController: {
 
 	getUserPoints: function (chainId, user, referrer, onDone): void {
 		this._getUserStabilityAndLpScore(chainId, user, res => {
-			let myUsersPoints = 0;
-
 			if (!referrer) return onDone && onDone(res.stabilityScore + res.lpScore, res);
 
 			// 根据referrer取得用户的下线。
+			let myUsersPoints = 0;
 			const query = graphqlAsker.requestUsersWithReferrer(referrer);
 			graphqlAsker.ask(chainId, query, (result: any) => {
 				if (result?.users?.length > 0) {
 					const myUsers = result.users.map((item: { id: string; }) => '"' + item.id + '"');
+
 					if (myUsers.length > 0) {
 						const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
 
@@ -124,7 +126,7 @@ export const appController: {
 						graphqlAsker.ask(
 							chainId,
 							question4Wen,
-							(stabilityScoreRes: any) => {
+							async (stabilityScoreRes: any) => {
 								if (stabilityScoreRes?.users) {
 									stabilityScoreRes?.users.forEach((element: any) => {
 										const p = Number(element.point.point);
@@ -137,34 +139,33 @@ export const appController: {
 									});
 								}
 
-								const lpScoreGraph = cfg?.lpScore;
-								const question = graphqlAsker.requestLPScoreOfUsers(myUsers);
-								graphqlAsker.ask(
-									chainId,
-									question,
-									(lpScoreRes: any) => {
-										if (lpScoreRes?.users) {
-											lpScoreRes.users.forEach((element: any) => {
-												myUsersPoints += (
-													Number(element.point.point)
-													+ (Number(element.user.balance.balance) / 10 ** 18)
-													* 4
-													* Math.floor((Date.now() - element.user.point.timestamp * 1000) / 3600000)
-												);
-											});
-										}
+								const lpsConfig: any[] = Object.values(cfg?.lpScore);
+								let referrerPoints = 0;
+								for (let i = 0; i < lpsConfig.length; i++) {
+									const lpConfig = lpsConfig[i];
+									const question = graphqlAsker.requestLPScoreOfUsers(myUsers, lpConfig.staking);
+									const lpScoreRes = await graphqlAsker.askAsync(chainId, question, lpConfig.url);
 
-										const referrerPoints = myUsersPoints * 0.01;
+									if (lpScoreRes?.users) {
+										lpScoreRes.users.forEach((element: any) => {
+											myUsersPoints += (
+												Number(element.point.point)
+												+ (Number(element.user.balance.balance) / 10 ** 18)
+												* 4
+												* Math.floor((Date.now() - element.user.point.timestamp * 1000) / 3600000)
+											);
+										});
+									}
+								}
 
-										return onDone && onDone(
-											res.stabilityScore + res.lpScore + myUsersPoints * 0.1,
-											{
-												...res,
-												referrerPoints
-											}
-										);
-									},
-									lpScoreGraph
+								referrerPoints += myUsersPoints * 0.01;
+
+								return onDone && onDone(
+									res.stabilityScore + res.lpScore + myUsersPoints * 0.1,
+									{
+										...res,
+										referrerPoints
+									}
 								);
 							},
 							stabilityScoreGraph
@@ -180,13 +181,12 @@ export const appController: {
 	},
 
 	_getUserStabilityAndLpScore: async function (chainId, user, onDone) {
-		const res = {
-			stabilityScore: 0,
-			lpScore: 0
-		};
+		const res: any = {};
 
 		res.stabilityScore = await this._getUserWENScore(chainId, user);
-		res.lpScore = await this._getLPScore(chainId, user);
+		const result = await this._getLPScore(chainId, user);
+		res.lpScore = result.totalLPScores;
+		res.lps = result.lpScores;
 
 		return onDone && onDone(res);
 	},
@@ -224,27 +224,39 @@ export const appController: {
 	},
 
 	_getLPScore: function (chainId, user) {
-		return new Promise(resolve => {
+		return new Promise(async resolve => {
+			const lpScores: LPScoreObject[] = [];
+			let totalLPScores = 0;
 			const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
-			const lpScoreGraph = cfg?.lpScore;
-			let lpScore = 0;
-			if (lpScoreGraph) {
-				const query = graphqlAsker.requestUserLPScore(user);
-				graphqlAsker.ask(
-					chainId,
-					query,
-					(data: any) => {
-						if (data.user) lpScore = Number(data.user.point.point) + (Number(data.user.balance.balance) / 10 ** 18)
-							* 4
-							* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
+			const lpScoreGraphs = Object.entries(cfg?.lpScore);
+			if (lpScoreGraphs) {
+				for (let i = 0; i < lpScoreGraphs.length; i++) {
+					const tempO: any = lpScoreGraphs[i][1];
+					const lpScoreGraph = {
+						name: lpScoreGraphs[i][0],
+						staking: tempO?.staking,
+						url: tempO?.url,
+						link: tempO?.link
+					} as LPScoreObject;
 
-						resolve(lpScore);
-					},
-					lpScoreGraph
-				);
-			} else {
-				resolve(0);
+					if (lpScoreGraph.url) {
+						const query = graphqlAsker.requestUserLPScore(user, lpScoreGraph.staking);
+						const data = await graphqlAsker.askAsync(chainId, query, lpScoreGraph.url);
+
+						if (data?.user) {
+							lpScoreGraph.points = Number(data.user.point.point) + (Number(data.user.balance.balance) / 10 ** 18)
+								* 4
+								* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
+							totalLPScores += lpScoreGraph.points;
+						}
+
+						lpScores.push(lpScoreGraph);
+					}
+				}
+
+				resolve({ totalLPScores, lpScores });
 			}
+
 		});
 	}
 };
