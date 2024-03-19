@@ -109,4 +109,5 @@ export type LPScoreObject = {
 	url: string;
 	points?: number;
 	link?: string;
+	pointsPerHour: number;
 }
