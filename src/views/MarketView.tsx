@@ -115,7 +115,7 @@ export const MarketView = ({
 	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(troveCollateralValue)
 	// );
 	const debtToLiquidate = trove.debt;
-	const liquidationPrice = trove.collateral.gt(0) ? debtToLiquidate.div(trove.collateral) : Decimal.ZERO;
+	const liquidationPrice = trove.collateral.gt(0) ? debtToLiquidate.mul(MCR).div(trove.collateral) : Decimal.ZERO;
 
 	const maxAvailableBorrow = troveCollateralValue.div(liquidationPoint).mul(appMMROffset);
 	const maxAvailableBorrowSubFee = maxAvailableBorrow.mul(Decimal.ONE.sub(borrowingRate));

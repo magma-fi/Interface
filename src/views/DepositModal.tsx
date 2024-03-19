@@ -110,7 +110,9 @@ export const DepositeModal = ({
 	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
 	// );
 	const newDebtToLiquidate = updatedTrove.debt;
-	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
+	const appConfigConstants = (appConfig.constants as JsonObject)[String(chainId)];
+	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : appConfigConstants.MAGMA_MINIMUM_COLLATERAL_RATIO;
+	const newLiquidationPrice = (updatedTrove.collateral.gt(0) && borrowValue > 0) ? newDebtToLiquidate.mul(MCR).div(updatedTrove.collateral) : liquidationPrice;
 
 	const newURPercentNumber = Number(Decimal.ONE.div(newCollateralRatio).mul(100));
 	const urIsGood = troveUtilizationRateNumber > newURPercentNumber;
