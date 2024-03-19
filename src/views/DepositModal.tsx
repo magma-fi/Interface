@@ -110,7 +110,7 @@ export const DepositeModal = ({
 	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
 	// );
 	const newDebtToLiquidate = updatedTrove.debt;
-	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
+	const newLiquidationPrice = (updatedTrove.collateral.gt(0) && borrowValue > 0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
 
 	const newURPercentNumber = Number(Decimal.ONE.div(newCollateralRatio).mul(100));
 	const urIsGood = troveUtilizationRateNumber > newURPercentNumber;
