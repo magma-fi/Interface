@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Langs, globalContants } from "./globalContants";
 import appConfig from "../appConfig.json"
@@ -150,8 +151,8 @@ export const appController: {
 										lpScoreRes.users.forEach((element: any) => {
 											myUsersPoints += (
 												Number(element.point.point)
-												+ (Number(element.user.balance.balance) / 10 ** 18)
-												* 4
+												+ ((Number(element.user.balance.balance) + Number(element.user.staking?.amount || 0)) / 10 ** 18)
+												* lpConfig.pointsPerHour
 												* Math.floor((Date.now() - element.user.point.timestamp * 1000) / 3600000)
 											);
 										});
@@ -231,12 +232,13 @@ export const appController: {
 			const lpScoreGraphs = Object.entries(cfg?.lpScore);
 			if (lpScoreGraphs) {
 				for (let i = 0; i < lpScoreGraphs.length; i++) {
-					const tempO: any = lpScoreGraphs[i][1];
+					const tmp: any = lpScoreGraphs[i][1];
 					const lpScoreGraph = {
 						name: lpScoreGraphs[i][0],
-						staking: tempO?.staking,
-						url: tempO?.url,
-						link: tempO?.link
+						staking: tmp?.staking,
+						url: tmp?.url,
+						link: tmp?.link,
+						pointsPerHour: tmp?.pointsPerHour
 					} as LPScoreObject;
 
 					if (lpScoreGraph.url) {
@@ -244,8 +246,9 @@ export const appController: {
 						const data = await graphqlAsker.askAsync(chainId, query, lpScoreGraph.url);
 
 						if (data?.user) {
-							lpScoreGraph.points = Number(data.user.point.point) + (Number(data.user.balance.balance) / 10 ** 18)
-								* 4
+							lpScoreGraph.points = Number(data.user.point.point)
+								+ ((Number(data.user.balance.balance) + Number(data.user.staking?.amount || 0)) / 10 ** 18)
+								* lpScoreGraph.pointsPerHour
 								* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
 							totalLPScores += lpScoreGraph.points;
 						}
