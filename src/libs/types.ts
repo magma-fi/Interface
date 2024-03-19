@@ -102,3 +102,12 @@ export type StabilityTransactionRecord = {
 	timestamp: number;
 	tx: string;
 }
+
+export type LPScoreObject = {
+	name: string
+	staking: boolean;
+	url: string;
+	points?: number;
+	link?: string;
+	pointsPerHour: number;
+}
