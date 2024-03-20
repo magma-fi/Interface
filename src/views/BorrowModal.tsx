@@ -33,7 +33,8 @@ export const BorrowModal = ({
 	recoveryMode,
 	liquidationPoint,
 	availableWithdrawal,
-	availableBorrow
+	availableBorrow,
+	MCR
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -50,6 +51,7 @@ export const BorrowModal = ({
 	liquidationPoint: Decimal;
 	availableWithdrawal: Decimal;
 	availableBorrow: Decimal;
+	MCR: Decimal
 }) => {
 	const { t } = useLang();
 	// const debt = Number(trove.debt);
@@ -103,7 +105,7 @@ export const BorrowModal = ({
 	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
 	// );
 	const newDebtToLiquidate = updatedTrove.debt;
-	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
+	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.mul(MCR).div(updatedTrove.collateral) : Decimal.ZERO;
 
 	useEffect(() => {
 		setForcedSlideValue(Number(newUR.toString()));
