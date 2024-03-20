@@ -59,8 +59,7 @@ export class Vault {
 		}
 	}
 
-	public static calculateAvailableWithdrawal(collateral: BigNumber, debt: BigNumber, collateralPrice: number, chainId = globalContants.DEFAULT_NETWORK_ID, collateralToken: Coin, loanToken: Coin) {
-		const collateralRatio: number = (appConfig.constants as JsonObject)[String(chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO;
+	public static calculateAvailableWithdrawal(collateral: BigNumber, debt: BigNumber, collateralPrice: number, collateralRatio: number, collateralToken: Coin, loanToken: Coin) {
 		const collateralValue = collateral.shiftedBy(-collateralToken.decimals).multipliedBy(collateralPrice);
 		const debtLine = debt.shiftedBy(-loanToken.decimals).multipliedBy(collateralRatio);
 		if (collateralValue.gt(debtLine))
@@ -69,14 +68,12 @@ export class Vault {
 			return globalContants.BIG_NUMBER_0;
 	}
 
-	public static calculateAvailableBorrow(collateral: BigNumber, debt: BigNumber, collateralPrice: number, chainId = globalContants.DEFAULT_NETWORK_ID, collateralToken: Coin, loanToken: Coin, collRatio?: number, feeRate = 0) {
-		const appConfigConstants = (appConfig.constants as JsonObject)[String(chainId)];
-		const collateralRatio: number = collRatio ?? appConfigConstants.MAGMA_CRITICAL_COLLATERAL_RATIO;
+	public static calculateAvailableBorrow(collateral: BigNumber, debt: BigNumber, collateralPrice: number, collateralToken: Coin, loanToken: Coin, collateralRatio: number, feeRate = 0, offset = 1) {
 		const collateralValue = collateral.shiftedBy(-collateralToken.decimals).multipliedBy(collateralPrice);
-		const debtLine = collateralValue.dividedBy(collateralRatio);
+		const debtLine = collateralValue.dividedBy(collateralRatio).multipliedBy(offset);
 		const debtValue = debt.shiftedBy(-loanToken.decimals);
 		if (debtLine.gt(debtValue)) {
-			return debtLine.minus(debtValue).shiftedBy(loanToken.decimals).multipliedBy(appConfigConstants.appMMROffset).multipliedBy(1 - feeRate);
+			return debtLine.minus(debtValue).shiftedBy(loanToken.decimals).multipliedBy(1 - feeRate);
 		} else
 			return globalContants.BIG_NUMBER_0;
 	}
@@ -97,8 +94,33 @@ export class Vault {
 		return Vault.computeCollateralRatio(this.collateral, this.debt, collateralPrice, 1, this._collateralToken, this._loanToken);
 	}
 
-	public getAvailableWithdrawal(collateralPrice: number) {
-		return Vault.calculateAvailableWithdrawal(this.collateral, this.debt, collateralPrice, this._chainId, this._collateralToken, this._loanToken);
+	public getAvailabelBorrow(
+		collateralPrice: number,
+		collateralRatio = (appConfig.constants as JsonObject)[String(this._chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO,
+		feeRate = 0,
+		offset = 1
+	) {
+		return Vault.calculateAvailableBorrow(
+			this.collateral,
+			this.debt,
+			collateralPrice,
+			this._collateralToken,
+			this._loanToken,
+			collateralRatio,
+			feeRate,
+			offset
+		);
+	}
+
+	public getAvailableWithdrawal(collateralPrice: number, collateralRatio = (appConfig.constants as JsonObject)[String(this._chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO) {
+		return Vault.calculateAvailableWithdrawal(
+			this.collateral,
+			this.debt,
+			collateralPrice,
+			collateralRatio,
+			this._collateralToken,
+			this._loanToken
+		);
 	}
 
 	public async adjust(

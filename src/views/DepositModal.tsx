@@ -32,7 +32,8 @@ export const DepositeModal = ({
 	liquidationPrice,
 	availableWithdrawal,
 	liquidationPoint,
-	availableBorrow
+	availableBorrow,
+	appMMROffset = 1
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -48,6 +49,7 @@ export const DepositeModal = ({
 	availableWithdrawal: BigNumber;
 	liquidationPoint: number;
 	availableBorrow: BigNumber;
+	appMMROffset: number;
 }) => {
 	const { chainId } = useLiquity();
 	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
@@ -73,7 +75,7 @@ export const DepositeModal = ({
 	const updatedVaultCollateral = vault.collateral.plus(depositAmount);
 	const updatedVaultDebt = vault.debt.gt(0) ? vault.debt.plus(borrowAmount).plus(fee) : vault.debt.plus(borrowAmount).plus(wenLiquidationReserve).plus(fee);
 	const newCollateralRatio = Vault.computeCollateralRatio(updatedVaultCollateral, updatedVaultDebt, price, 1, market, WEN);
-	const newAvailableBorrow = Vault.calculateAvailableBorrow(updatedVaultCollateral, vault.nominalNetDebt, price, chainId, market, WEN, liquidationPoint, borrowingRate);
+	const newAvailableBorrow = Vault.calculateAvailableBorrow(updatedVaultCollateral, vault.nominalNetDebt, price, market, WEN, liquidationPoint, borrowingRate, appMMROffset);
 	const newAvailableBorrowNumber = newAvailableBorrow.shiftedBy(-WEN.decimals).toNumber();
 	const newAvailableBorrowFiat = formatAsset(formatAssetAmount(newAvailableBorrow, WEN.decimals), WEN);
 	const newLiquidationPrice = updatedVaultCollateral.gt(0) ? updatedVaultDebt.dividedBy(updatedVaultCollateral).toNumber() : 0;

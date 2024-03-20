@@ -55,6 +55,7 @@ export const RepayModal = ({
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
 	const [repayInput, setRepayInput] = useState(-1);
+	const non0RepayInput = repayInput >= 0 ? repayInput : 0;
 	const repayAmount = BigNumber(repayInput).shiftedBy(WEN.decimals);
 	const maxSafe = 1 / liquidationPoint;
 	const vaultUR = 1 / vault.collateralRatio(price);
@@ -74,6 +75,8 @@ export const RepayModal = ({
 	const [sliderForcedValue, setSliderForcedValue] = useState(vaultUtilizationRateNumber);
 	const maxNumber = formatAssetAmount(max, WEN.decimals);
 	const [sending, setSending] = useState(false);
+	const availableBorrowDecimals = formatAssetAmount(availableBorrow, WEN.decimals);
+	const debtDecimals = formatAssetAmount(vault.debt, WEN.decimals);
 
 	useEffect(() => {
 		setSliderForcedValue(Number(utilRate));
@@ -220,8 +223,8 @@ export const RepayModal = ({
 					<div className="label">{t("available2Borrow")}</div>
 
 					<ChangedValueLabel
-						previousValue={availableBorrow.toNumber()}
-						newValue={availableBorrow.plus(repayInput >= 0 ? repayInput : 0).toNumber()}
+						previousValue={availableBorrowDecimals}
+						newValue={availableBorrowDecimals + non0RepayInput}
 						nextPostfix={WEN.symbol}
 						positive={urIsGood} />
 				</div>
@@ -231,7 +234,7 @@ export const RepayModal = ({
 
 					<ChangedValueLabel
 						previousValue={availableWithdrawal.shiftedBy(-market.decimals).toNumber()}
-						newValue={Vault.calculateAvailableWithdrawal(vault.collateral, updatedVaultDebt, price, chainId, market, WEN).shiftedBy(-market.decimals).toNumber()}
+						newValue={Vault.calculateAvailableWithdrawal(vault.collateral, updatedVaultDebt, price, liquidationPoint, market, WEN).shiftedBy(-market.decimals).toNumber()}
 						nextPostfix={market.symbol}
 						positive={urIsGood} />
 				</div>
@@ -240,8 +243,8 @@ export const RepayModal = ({
 					<div className="label">{t("vaultDebt")}</div>
 
 					<ChangedValueLabel
-						previousValue={formatAssetAmount(vault.debt, WEN.decimals)}
-						newValue={formatAssetAmount(vault.debt.plus(repaidAmount), WEN.decimals)}
+						previousValue={debtDecimals}
+						newValue={debtDecimals + non0RepayInput}
 						nextPostfix={globalContants.USD}
 						positive={urIsGood} />
 				</div>

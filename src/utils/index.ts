@@ -11,13 +11,13 @@ import assert from "assert";
 export const shortenAddress = (address: string, b = 6, e = 4) => address.substr(0, b) + "..." + address.substr(-e);
 
 export const calculateAvailableWithdrawal = (forTrove: Vault, price: number, collRatio?: number, chainId?: number) => {
-	const collateralRatio: number = collRatio ?? (appConfig.constants as JsonObject)[String(chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO;
-	const collateralValue = forTrove.collateral.multipliedBy(price);
-	const debtLine = forTrove.debt.multipliedBy(collateralRatio);
-	if (collateralValue.gt(debtLine))
-		return collateralValue.minus(debtLine).dividedBy(price);
-	else
-		return globalContants.BIG_NUMBER_0;
+	// const collateralRatio: number = collRatio ?? (appConfig.constants as JsonObject)[String(chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO;
+	// const collateralValue = forTrove.collateral.multipliedBy(price);
+	// const debtLine = forTrove.debt.multipliedBy(collateralRatio);
+	// if (collateralValue.gt(debtLine))
+	// 	return collateralValue.minus(debtLine).dividedBy(price);
+	// else
+	// 	return globalContants.BIG_NUMBER_0;
 };
 
 export const calculateAvailableBorrow = (forTrove: Vault, price: number, collRatio?: number, chainId?: number) => {

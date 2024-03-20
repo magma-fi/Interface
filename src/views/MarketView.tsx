@@ -125,9 +125,11 @@ export const MarketView = ({
 	const debtToLiquidate = vault.debt;
 	const liquidationPrice = vault.collateral.gt(0) ? debtToLiquidate.dividedBy(vault.collateral).toNumber() : 0;
 
-	const maxAvailableBorrow = troveCollateralValue.dividedBy(liquidationPoint).multipliedBy(appMMROffset);
-	const maxAvailableBorrowSubFee = maxAvailableBorrow.multipliedBy(1 - borrowingRate);
-	const availableBorrow = maxAvailableBorrowSubFee.gt(troveDebtValue) ? maxAvailableBorrowSubFee.minus(troveDebtValue) : globalContants.BIG_NUMBER_0;
+	// const maxAvailableBorrow = troveCollateralValue.dividedBy(liquidationPoint).multipliedBy(appMMROffset);
+	// const maxAvailableBorrowSubFee = maxAvailableBorrow.multipliedBy(1 - borrowingRate);
+	// const availableBorrow = maxAvailableBorrowSubFee.gt(troveDebtValue) ? maxAvailableBorrowSubFee.minus(troveDebtValue) : globalContants.BIG_NUMBER_0;
+	const availableBorrow = vault.getAvailabelBorrow(price, liquidationPoint, borrowingRate, appMMROffset);
+	const availableBorrowDecimals = formatAssetAmount(availableBorrow, WEN.decimals);
 	const currentNetDebt = vault.debt.gt(1) ? vault.netDebt : globalContants.BIG_NUMBER_0;
 	const minNetDebt = magmaData?.MIN_NET_DEBT;
 	const reserve = magmaData?.LUSD_GAS_COMPENSATION;
@@ -157,7 +159,7 @@ export const MarketView = ({
 		return [<path d={`M ${xpc} ${ypc} L${xp} ${yp}`} stroke={color} strokeWidth="2" fill={color} />];
 	};
 
-	const availableWithdrawal = vault.getAvailableWithdrawal(price);
+	const availableWithdrawal = vault.getAvailableWithdrawal(price, appLiquidationPoint);
 	const availableWithdrawalDecimals = formatAssetAmount(availableWithdrawal, IOTX.decimals);
 	const availableWithdrawalFiat = availableWithdrawalDecimals * price;
 	const [txs, setTxs] = useState<TroveChangeTx[]>([]);
@@ -538,9 +540,9 @@ export const MarketView = ({
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{formatCurrency(availableBorrow.toNumber())}</div>
+									<div>{formatCurrency(availableBorrowDecimals)}</div>
 
-									<div className="label labelSmall">{formatAsset(availableBorrow.toNumber(), WEN)}</div>
+									<div className="label labelSmall">{formatAsset(availableBorrowDecimals, WEN)}</div>
 								</div>
 							</div>
 						</div>
@@ -817,7 +819,8 @@ export const MarketView = ({
 			liquidationPrice={liquidationPrice}
 			availableWithdrawal={availableWithdrawal}
 			availableBorrow={availableBorrow}
-			liquidationPoint={liquidationPoint} />}
+			liquidationPoint={liquidationPoint}
+			appMMROffset={appMMROffset} />}
 
 		{showDepositDoneModal && <TxDone
 			title={t("depositedSuccessfully")}
@@ -884,7 +887,6 @@ export const MarketView = ({
 			price={price}
 			vault={vault}
 			fees={fees}
-			validationContext={validationContext}
 			max={BigNumber.min(maxAvailableRepay, lusdBalance)}
 			onDone={handleRepayDone}
 			constants={magmaData}
@@ -911,17 +913,16 @@ export const MarketView = ({
 			onClose={handleCloseWithdrawModal}
 			market={market}
 			price={price}
-			trove={vault}
+			vault={vault}
 			fees={fees}
-			validationContext={validationContext}
 			max={availableWithdrawal}
 			onDone={handleWithdrawDone}
-			constants={magmaData}
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
 			// liquidationPoint={liquidationPoint}
 			liquidationPoint={appLiquidationPoint}
-			availableBorrow={availableBorrow} />}
+			availableBorrow={availableBorrow}
+			appMMROffset={appMMROffset} />}
 
 		{showWithdrawDoneModal && <TxDone
 			title={t("withdrawnSuccessfully")}

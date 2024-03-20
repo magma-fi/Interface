@@ -70,6 +70,7 @@ export const BorrowModal = ({
 	const [tx, setTx] = useState("");
 	const [errorMsg, setErrorMsg] = useState<ErrorMessage>();
 	const newLiquidationPrice = updatedVaultDebt.dividedBy(vault.collateral).toNumber();
+	const availableBorrowDecimals = formatAssetAmount(availableBorrow, WEN.decimals);
 
 	useEffect(() => {
 		setForcedSlideValue(newUR);
@@ -83,7 +84,7 @@ export const BorrowModal = ({
 	useEffect(init, []);
 
 	const handleMax = () => {
-		const val = max.toNumber();
+		const val = availableBorrowDecimals;
 		setValueForced(val);
 		setBorrowValue(val);
 	};
@@ -209,8 +210,8 @@ export const BorrowModal = ({
 					<div className="label">{t("available2Borrow")}</div>
 
 					<ChangedValueLabel
-						previousValue={availableBorrow.toNumber()}
-						newValue={availableBorrow.minus(borrowValue > 0 ? borrowValue : 0).toNumber()}
+						previousValue={availableBorrowDecimals}
+						newValue={availableBorrowDecimals - (borrowValue > 0 ? borrowValue : 0)}
 						nextPostfix={WEN.symbol}
 						positive={newURisPositive} />
 				</div>
@@ -283,7 +284,7 @@ export const BorrowModal = ({
 			onClick={handleBorrow}>
 			<img src="images/borrow-dark.png" />
 
-			{t("borrow")}
+			{sending ? t("borrowing") + "..." : t("borrow")}
 		</button>
 	</Modal> : <></>
 };
