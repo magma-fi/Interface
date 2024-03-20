@@ -36,7 +36,8 @@ export const DepositeModal = ({
 	availableWithdrawal,
 	recoveryMode,
 	liquidationPoint,
-	availableBorrow
+	availableBorrow,
+	MCR
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -54,6 +55,7 @@ export const DepositeModal = ({
 	recoveryMode: boolean;
 	liquidationPoint: Decimal;
 	availableBorrow: Decimal;
+	MCR: Decimal
 }) => {
 	const { chainId } = useLiquity();
 	const { t } = useLang();
@@ -110,7 +112,7 @@ export const DepositeModal = ({
 	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(newTroveCollateralValue)
 	// );
 	const newDebtToLiquidate = updatedTrove.debt;
-	const newLiquidationPrice = updatedTrove.collateral.gt(0) ? newDebtToLiquidate.div(updatedTrove.collateral) : Decimal.ZERO;
+	const newLiquidationPrice = (updatedTrove.collateral.gt(0) && borrowValue > 0) ? newDebtToLiquidate.mul(MCR).div(updatedTrove.collateral) : liquidationPrice;
 
 	const newURPercentNumber = Number(Decimal.ONE.div(newCollateralRatio).mul(100));
 	const urIsGood = troveUtilizationRateNumber > newURPercentNumber;
