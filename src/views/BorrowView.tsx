@@ -37,7 +37,6 @@ export const BorrowView = ({ isReferrer, externalDataDone, magmaData, refreshTri
 			onSelect={handleSelectTrove} />
 
 		<MarketView
-			isReferrer={isReferrer}
 			market={currentTrove}
 			externalDataDone={externalDataDone}
 			magmaData={magmaData}

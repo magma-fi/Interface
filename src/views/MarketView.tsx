@@ -26,52 +26,23 @@ import { Vault } from "../libs/Vault";
 
 export const MarketView = ({
 	market,
-	isReferrer,
 	externalDataDone,
 	magmaData,
 	refreshTrigger
 }: {
 	market: Coin;
-	isReferrer: boolean;
 	externalDataDone?: boolean;
 	magmaData?: Record<string, any>;
 	refreshTrigger: () => void;
 }) => {
 	if (!magmaData) return <></>
 
-	// const selector = useMemo(() => {
-	// 	return (state: LiquityStoreState) => {
-	// 		const {
-	// 			price,
-	// 			accountBalance,
-	// 			total,
-	// 			numberOfTroves,
-	// 			borrowingRate,
-	// 			trove,
-	// 			fees,
-	// 			lusdBalance
-	// 		} = state;
-
-	// 		return {
-	// 			price,
-	// 			accountBalance,
-	// 			validationContext: selectForTroveChangeValidation(state),
-	// 			total,
-	// 			numberOfTroves,
-	// 			borrowingRate,
-	// 			trove,
-	// 			fees,
-	// 			lusdBalance
-	// 		};
-	// 	};
-	// }, []);
 	const { t } = useLang();
 	const {
 		price,
 		accountBalance,
-		validationContext,
 		lusdBalance
-	} = magmaData; // useLiquitySelector(selector);
+	} = magmaData; 
 	if (!magmaData) return <></>;
 
 	const vault: Vault = magmaData.vault;
@@ -97,9 +68,6 @@ export const MarketView = ({
 	const [showCloseModal, setShowCloseModal] = useState(false);
 	const borrowingRate = magmaData.borrowingRateWithDecay;
 	const feePct = borrowingRate;
-	// const totalCollateralRatio = total.collateralRatio(price);
-	// const totalCollateralRatioPct = new Percent(totalCollateralRatio);
-	// const recoveryMode = totalCollateralRatio.div(CRITICAL_COLLATERAL_RATIO);
 	const recoveryMode = magmaData.recoveryMode;
 	const appConfigConstants = (appConfig.constants as JsonObject)[String(chainId)];
 	const CCR = magmaData?.CCR > 0 ? magmaData?.CCR : appConfigConstants.MAGMA_CRITICAL_COLLATERAL_RATIO;
@@ -113,21 +81,10 @@ export const MarketView = ({
 	const appLiquidationPoint = recoveryMode ? CCR : appConfigConstants.appMCR;
 	const troveCollatera = formatAssetAmount(vault.collateral, IOTX.decimals);
 	const troveCollateralValue = vault.collateral.shiftedBy(-market.decimals).multipliedBy(price);
-
-	// const troveCollateralRatio = vault.debt.eq(0) ? Decimal.ZERO : vault.collateralRatio(price);
-	// const line = Decimal.min(liquidationPoint, troveCollateralRatio);
-	// const debtToLiquidate = Decimal.max(
-	// 	vault.debt,
-	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(troveCollateralValue)
-	// );
 	const troveDebtValue = vault.debt.shiftedBy(-WEN.decimals);
 	const vaultDebtValuneNumber = troveDebtValue.toNumber();
 	const debtToLiquidate = vault.debt;
 	const liquidationPrice = vault.collateral.gt(0) ? debtToLiquidate.dividedBy(vault.collateral).toNumber() : 0;
-
-	// const maxAvailableBorrow = troveCollateralValue.dividedBy(liquidationPoint).multipliedBy(appMMROffset);
-	// const maxAvailableBorrowSubFee = maxAvailableBorrow.multipliedBy(1 - borrowingRate);
-	// const availableBorrow = maxAvailableBorrowSubFee.gt(troveDebtValue) ? maxAvailableBorrowSubFee.minus(troveDebtValue) : globalContants.BIG_NUMBER_0;
 	const availableBorrow = vault.getAvailabelBorrow(price, liquidationPoint, borrowingRate, appMMROffset);
 	const availableBorrowDecimals = formatAssetAmount(availableBorrow, WEN.decimals);
 	const currentNetDebt = vault.debt.gt(1) ? vault.netDebt : globalContants.BIG_NUMBER_0;
@@ -136,7 +93,6 @@ export const MarketView = ({
 	const maxAvailableRepay = currentNetDebt.gt(minNetDebt.plus(reserve)) ? currentNetDebt.minus(minNetDebt).minus(reserve) : globalContants.BIG_NUMBER_0;
 	const totalUtilizationRate = total.collateral.gt(reserve) ? total.debt.dividedBy(total.collateral.multipliedBy(price)).toNumber() : 0;
 	const troveUtilizationRate = vault.collateral.gt(0) ? troveDebtValue.dividedBy(troveCollateralValue).toNumber() : 0;
-
 	const troveUtilizationRate100 = troveUtilizationRate * 100;
 	const RADIAN = Math.PI / 180;
 	const chartData = [
@@ -178,40 +134,6 @@ export const MarketView = ({
 			});
 		}, 1000);
 	}, [account, chainId]);
-
-	// useEffect(() => {
-	// 	if (chainId <= 0 || changes.length > 0) return;
-
-	// 	setTimeout(() => {
-	// 		const startTime = Math.floor(Date.now() / 1000) - globalContants.MONTH_SECONDS;
-	// 		const query = graphqlAsker.requestChangeHistory(startTime);
-	// 		graphqlAsker.ask(chainId, query, (data: any) => {
-	// 			const tempArr: TroveChangeData[] = [];
-	// 			let yesterday = "";
-
-	// 			for (let i = data?.troveChanges.length - 1; i >= 0; i--) {
-	// 				const item = data.troveChanges[i];
-	// 				const time = new Date(item.transaction.timestamp * 1000);
-	// 				const month = time.getMonth() + 1;
-	// 				const day = time.getDate();
-	// 				const date = month + "-" + day;
-
-	// 				if (yesterday !== date) {
-	// 					yesterday = date;
-
-	// 					tempArr.push({
-	// 						collateralAfter: Math.floor(Number(price.mul(item.collateralAfter)) / 1000),
-	// 						debtAfter: Math.floor(Number(item.debtAfter) / 1000),
-	// 						timestamp: item.transaction.timestamp,
-	// 						date: yesterday
-	// 					} as TroveChangeData);
-	// 				}
-	// 			}
-
-	// 			setChanges(tempArr.reverse());
-	// 		});
-	// 	}, 2000);
-	// }, [chainId]);
 
 	useEffect(() => {
 		if (!externalDataDone || !price || changes.length > 0) return;
@@ -679,7 +601,6 @@ export const MarketView = ({
 
 						<div className="flex-column-align-right">
 							<div>{formatCurrency(formatedTVL * price)}</div>
-							{/* <div className="comments">{formatedTVL.toFixed(globalContants.DECIMALS_2)}&nbsp;{market?.symbol}</div> */}
 							<div className="comments">{formatAsset(formatedTVL)}</div>
 						</div>
 					</div>
@@ -707,12 +628,6 @@ export const MarketView = ({
 
 						<div>{formatAsset(formatAssetAmount(reserve), WEN)}</div>
 					</div>
-
-					{/* <div className="flex-row-space-between">
-						<div className="description">{t("loanToValue")}&nbsp;(LTV)</div>
-
-						<div>{total.collateral.gt(0) ? total.debt.div(total.collateral.mul(price)).mul(100).toFixed(2) : 0}%</div>
-					</div> */}
 
 					<div className="flex-row-space-between">
 						<div className="description">{market.symbol}&nbsp;{t("price")}</div>
