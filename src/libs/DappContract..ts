@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
 import { Provider, TransactionReceipt, TransactionResponse } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -87,7 +88,7 @@ class TrackableFunction {
 
 	public async run(
 		onWait?: (tx: string) => void,
-		onFail?: (error: Error | unknown) => void,
+		onFail?: (error: Error | any) => void,
 		onDone?: (tx: string) => void,
 		overrides?: Record<string, any>,
 		...args: unknown[]

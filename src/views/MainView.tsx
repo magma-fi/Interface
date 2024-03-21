@@ -51,6 +51,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const accountBalance = BigNumber(data?.value.toString() || 0) || globalContants.BIG_NUMBER_0;
 	// const { vault } = useLiquitySelector(select);
 	const [vault, setVault] = useState<Vault>();
+	const [pointObject, setPointObject] = useState<Record<string, number>>();
 	const [isReferrer, setIsReferrer] = useState(false);
 	const [referralCode, setReferralCode] = useState("");
 	const [depositsByReferrer, setDepositsByReferrer] = useState<DepositByReferrer[]>()
@@ -114,8 +115,9 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			chainId,
 			account.toLowerCase(),
 			referrer,
-			res => {
+			(res, resObject) => {
 				setPoints(res);
+				setPointObject(resObject);
 			});
 	}, [chainId, account, referrer]);
 
@@ -246,7 +248,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 							isSupportedNetwork={isSupportedNetwork}
 							chains={chains}
 							chainId={chainId}
-							points={points} />
+							points={points}
+							pointObject={pointObject} />
 					</div>
 
 					<Switch>

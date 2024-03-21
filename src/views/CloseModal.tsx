@@ -4,96 +4,74 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { ErrorMessage, ValidationContext } from "../libs/types";
-import React, { useEffect, useMemo, useState } from "react";
-import { Decimal, Trove } from "lib-base";
-import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
-import { Fees } from "lib-base/dist/src/Fees";
-import { useStableTroveChange } from "../hooks/useStableTroveChange";
-import { TroveAction } from "../components/Trove/TroveAction";
-import { useMyTransactionState } from "../components/Transaction";
+import { Coin, ErrorMessage, JsonObject } from "../libs/types";
+import React, { useEffect, useState } from "react";
 import appConfig from "../appConfig.json";
-import { loadABI } from "../utils";
+import { formatAssetAmount, formatCurrency, loadABI } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { IOTX, WEN, globalContants } from "../libs/globalContants";
 import { erc20ABI } from "wagmi";
-import { Address, parseEther } from "viem";
 import swapAndCloseTool from "../abis/swapAndCloseTool.json";
+import { Vault } from "../libs/Vault";
+import BigNumber from "bignumber.js";
+import { DappContract } from "../libs/DappContract.";
+import { magma } from "../libs/magma";
 
 export const CloseModal = ({
 	isOpen = false,
 	onClose = () => { },
-	trove,
-	fees,
-	validationContext,
+	vault,
 	chainId,
 	balance,
-	price
+	price,
+	wenBalance,
+	market
 }: {
 	isOpen: boolean;
 	onClose: () => void;
-	trove: Trove;
-	fees: Record<string, any>;
-	validationContext: ValidationContext;
+	vault: Vault;
 	chainId: number;
-	balance: Decimal;
-	price: Decimal;
+	balance: BigNumber;
+	price: number;
+	wenBalance: BigNumber;
+	market: Coin;
 }) => {
-	const { provider, walletClient, publicClient, liquity, account } = useLiquity();
+	const { liquity, account, signer } = useLiquity();
 	const { t } = useLang();
-	const txId = useMemo(() => String(new Date().getTime()), []);
-	// const transactionState = useMyTransactionState(txId, true);
-	const indexOfConfig: string = String(chainId);
+	const indexOfConfig = String(chainId);
 	const [agree, setAgree] = useState(false);
-
-	const updatedTrove = new Trove(Decimal.ZERO, Decimal.ZERO);
-	const borrowingRate = fees.borrowingRate;
-	// const [troveChange, description] = validateTroveChange(
-	// 	trove!,
-	// 	updatedTrove!,
-	// 	borrowingRate,
-	// 	validationContext
-	// );
-	// const stableTroveChange = useStableTroveChange(troveChange);
-	const errorMessages: ErrorMessage = {}; // description as ErrorMessage;
-	const needSwap = errorMessages?.key === "needMoreToClose";
-	const wenDec = Math.pow(10, WEN.decimals || 18);
-	const iotxDec = Math.pow(10, IOTX.decimals || 18);
-	const howMuchWEN = errorMessages?.values?.amount ? Decimal.from(errorMessages.values!.amount).mul(wenDec) : Decimal.ZERO;
-	const [howMuchIOTX, setHowMuchIOTX] = useState(Decimal.ZERO);
-	const howMuchIOTXDecimal = howMuchIOTX.div(iotxDec);
-	const theCfg = appConfig.swap[indexOfConfig];
+	const [errorMessages, setErrorMessages] = useState<ErrorMessage>();
+	const needSwap = vault.debt.gt(wenBalance);
+	const howMuchWEN = needSwap ? vault.debt.minus(wenBalance) : globalContants.BIG_NUMBER_0; // errorMessages?.values?.amount ? Decimal.from(errorMessages.values!.amount).mul(wenDec) : Decimal.ZERO;
+	const [howMuchIOTX, setHowMuchIOTX] = useState(globalContants.BIG_NUMBER_0);
+	const howMuchIOTXDecimal = formatAssetAmount(howMuchIOTX, market.decimals);
+	const theCfg = (appConfig.swap as JsonObject)[indexOfConfig];
 	const address = theCfg?.liquidity?.address;
 	const [swapping, setSwapping] = useState(false);
+	const [sending, setSending] = useState(false);
 
 	useEffect(() => {
 		if (!needSwap) return;
 
 		const getContract = async () => {
 			const abi = await loadABI(theCfg.liquidity.abi);
-			let res: bigint[] = [];
-
 			if (address && abi) {
+				const theContract = new DappContract(address, abi, signer);
+
 				try {
-					res = await publicClient!.readContract({
-						address,
-						abi,
-						functionName: 'getAmountsIn',
-						args: [
-							howMuchWEN.toString(),
-							[
-								appConfig.tokens.wrappedNativeCurrency[indexOfConfig].address,
-								// appConfig.tokens.wen[indexOfConfig].address
-								liquity.connection.addresses.lusdToken
-							]
+					const res = await theContract.dappFunctions.getAmountsIn.call(
+						howMuchWEN.toFixed(),
+						[
+							(appConfig.tokens.wrappedNativeCurrency as JsonObject)[indexOfConfig].address,
+							liquity.connection.addresses.lusdToken
 						]
-					}) as bigint[];
+					);
+
+					if (res) {
+						setHowMuchIOTX(BigNumber(res[0]._hex));
+					}
 				} catch (error) {
 					console.error(error);
-				}
-
-				if (res.length === 2) {
-					setHowMuchIOTX(Decimal.from(res[0].toString()));
 				}
 			}
 		};
@@ -105,45 +83,22 @@ export const CloseModal = ({
 		onClose();
 	};
 
-	// useEffect(() => {
-	// 	if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-	// 		onClose()
-	// 		transactionState.resolved = true;
-	// 	}
-	// }, [transactionState.type])
-
 	const swap = async () => {
-		const txHash = await walletClient!.writeContract({
-			account: account as Address,
-			address: appConfig.swap[indexOfConfig].swapAndCloseTool.address,
-			abi: swapAndCloseTool,
-			functionName: 'swapAndCloseTrove',
-			args: [],
-			value: parseEther(howMuchIOTX.mul(1.02).div(iotxDec).toString())
-		})
-
-		return listenHash(txHash, false);
-	};
-
-	const listenHash = async (txHash: string, approve = true) => {
-		if (!txHash) return;
-
-		const receipt = await provider.getTransactionReceipt(txHash);
-
-		if (!receipt) {
-			return setTimeout(() => {
-				listenHash(txHash, approve);
-			}, 5000);
-		}
-
-		if (receipt.status === 1) {
-			if (approve) {
-				await swap();
-			} else {
+		const theContract = new DappContract(theCfg.swapAndCloseTool.address, swapAndCloseTool, signer);
+		theContract.dappFunctions.swapAndCloseTrove.run(
+			undefined,
+			error => {
+				setErrorMessages({ string: error.message } as ErrorMessage);
+			},
+			tx => {
 				setSwapping(false);
-				onClose();
+				return onClose();
+			},
+			{
+				from: account,
+				value: howMuchIOTX.multipliedBy(1.02).toFixed(0)
 			}
-		}
+		);
 	};
 
 	const handeTermChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,23 +106,40 @@ export const CloseModal = ({
 	};
 
 	const handleSwap = async () => {
-		if (!publicClient) return;
-
-		const txHash = await walletClient!.writeContract({
-			account: account as Address,
-			// address: appConfig.tokens.wen[indexOfConfig].address,
-			address: liquity.connection.addresses.lusdToken as Address,
-			abi: erc20ABI,
-			functionName: 'approve',
-			args: [
-				appConfig.swap[indexOfConfig].swapAndCloseTool.address,
-				parseEther(trove.netDebt.toString())
-			],
-		})
-
+		// if (!publicClient) return;
 		setSwapping(true);
 
-		return listenHash(txHash);
+		const theContract = new DappContract((appConfig.magma as JsonObject)[indexOfConfig].lusdToken, erc20ABI, signer);
+		theContract.dappFunctions.approve.run(
+			undefined,
+			error => {
+				setErrorMessages({ string: error.message } as ErrorMessage);
+			},
+			tx => {
+				return swap();
+			},
+			{ from: account },
+			theCfg.swapAndCloseTool.address,
+			vault.netDebt.toFixed()
+		);
+	};
+
+	const handleClose = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
+
+		setSending(true);
+
+		magma.closeVault(
+			undefined,
+			error => {
+				setErrorMessages({ string: error.message } as ErrorMessage);
+				setSending(false);
+			},
+			tx => {
+				setSending(false);
+				return onClose();
+			}
+		);
 	};
 
 	return isOpen ? <Modal
@@ -176,22 +148,20 @@ export const CloseModal = ({
 		<div
 			className="flex-column"
 			style={{ gap: "24px" }}>
-			<div>{errorMessages && t(errorMessages.key, errorMessages.values)}</div>
-
 			{needSwap && <div className="flex-column-align-left">
 				<div>
 					{t("swapIotx2Wen", {
-						iotxAmount: howMuchIOTXDecimal.toString(2),
-						wenAmount: howMuchWEN.div(wenDec).toString(2)
+						iotxAmount: howMuchIOTXDecimal.toFixed(globalContants.DECIMALS_2),
+						wenAmount: formatAssetAmount(howMuchWEN, WEN.decimals).toFixed(globalContants.DECIMALS_2)
 					})}
 				</div>
 
 				<div className="label small">
-					{IOTX.symbol + " " + t("price") + ": " + price.toString(2) + " " + globalContants.USD}
+					{IOTX.symbol + " " + t("price") + ": " + formatCurrency(price)}
 				</div>
 
 				<div className="label small">
-					{IOTX.symbol + " " + t("balance") + ": " + balance.toString(2)}
+					{IOTX.symbol + " " + t("balance") + ": " + formatAssetAmount(balance, IOTX.decimals)}
 				</div>
 
 				<div style={{
@@ -211,38 +181,22 @@ export const CloseModal = ({
 						onChange={handeTermChange} />
 				</div>
 			</div>}
+
+			{errorMessages && <div
+				className="errorText"
+				style={{ color: "#F25454" }}>
+				{errorMessages.string || t(errorMessages.key!, errorMessages.values)}
+			</div>}
 		</div>
 
-
-		{/* {stableTroveChange && !transactionState.id && transactionState.type === "idle" ? <TroveAction
-			transactionId={txId}
-			change={stableTroveChange}
-			maxBorrowingRate={borrowingRate.add(0.005)}
-			borrowingFeeDecayToleranceMinutes={60}>
-			<button
-				className="primaryButton bigButton"
-				style={{ width: "100%" }}>
-				<img src="images/repay-dark.png" />
-
-				{t("closeVault")}
-			</button>
-		</TroveAction> : (agree && !swapping ? <button
-			className="primaryButton bigButton"
-			style={{ width: "100%" }}
-			onClick={handleSwap}>
-			<img src="images/repay-dark.png" />
-			{t("closeVault")}
-		</button> : <button
-			className="primaryButton bigButton"
-			style={{ width: "100%" }}
-			disabled>
-			<img src="images/repay-dark.png" />
-
-			{(transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" || swapping) ? (t("closing") + "...") : t("closeVault")}
-		</button>)} */}
 		<button
 			className="primaryButton bigButton"
-			style={{ width: "100%" }}>
+			style={{ width: "100%" }}
+			disabled={
+				(needSwap && (!agree || swapping))
+				|| (!needSwap && sending)
+			}
+			onClick={needSwap ? handleSwap : handleClose}>
 			<img src="images/repay-dark.png" />
 
 			{t("closeVault")}

@@ -230,7 +230,8 @@ export const MarketView = ({
 				tempArr.push({
 					collateralAfter: Number(price * cursor.value.collateral) / 1000,
 					debtAfter: Number(cursor.value.debt) / 1000,
-					date: key.substring(0, key.lastIndexOf("/"))
+					date: key.substring(0, key.lastIndexOf("/")),
+					timestamp: new Date(key).getTime()
 				} as TroveChangeData)
 
 				if (howMany < 15) {
@@ -769,7 +770,7 @@ export const MarketView = ({
 				<AreaChart
 					width={chartBoxWidth}
 					height={chartBoxWidth * 2 / 5}
-					data={changes}
+					data={changes.sort((a, b) => (a.timestamp - b.timestamp))}
 					margin={{
 						top: 0,
 						right: 0,
@@ -943,11 +944,11 @@ export const MarketView = ({
 		{showCloseModal && <CloseModal
 			isOpen={showCloseModal}
 			onClose={handleCloseClosureModal}
-			trove={vault}
-			fees={fees}
-			validationContext={validationContext}
+			vault={vault}
 			chainId={chainId}
 			balance={accountBalance}
-			price={price} />}
+			price={price}
+			wenBalance={lusdBalance}
+			market={market} />}
 	</>
 };

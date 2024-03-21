@@ -1,11 +1,10 @@
-import { Trove, Decimal, CRITICAL_COLLATERAL_RATIO } from "lib-base";
+import { Trove, Decimal } from "lib-base";
 import { Abi, Narrow } from "viem";
 import { Vault } from "../libs/Vault";
 import appConfig from "../appConfig.json";
 import { Coin, JsonObject } from "../libs/types";
 import BigNumber from "bignumber.js";
 import { IOTX, globalContants } from "../libs/globalContants";
-import { Icon } from "@fortawesome/fontawesome-svg-core";
 import assert from "assert";
 
 export const shortenAddress = (address: string, b = 6, e = 4) => address.substr(0, b) + "..." + address.substr(-e);
@@ -107,6 +106,15 @@ export function* generateTrials(totalNumberOfTrials: number, chainId: number) {
 
 		totalNumberOfTrials -= numberOfTrials;
 	}
-};
+}
 
 export const randomInteger = () => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+
+export const formatNumber = (value: number, decimals = globalContants.DECIMALS_2) => {
+	return value.toLocaleString("en-US", {
+		minimumFractionDigits: 0,
+		maximumFractionDigits: decimals,
+		compactDisplay: "short"
+		// notation:"compact"
+	})
+};

@@ -1,27 +1,31 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { shortenAddress } from "../utils";
+import { formatNumber, shortenAddress } from "../utils";
 import { useLang } from "../hooks/useLang";
 import { Address, Chain, useAccount, useDisconnect, usePrepareSendTransaction, useSwitchNetwork } from "wagmi";
 import { DropdownMenu } from "./DropdownMenu";
 import { useEffect, useMemo } from "react";
-import { OptionItem } from "../libs/types";
+import { LPScoreObject, OptionItem } from "../libs/types";
 import { PopupView } from "./PopupView";
 import { useLiquity } from "../hooks/LiquityContext";
 import { parseEther } from "viem";
 import { globalContants } from "../libs/globalContants";
+import { Link } from "react-router-dom";
 
 export const UserAccount = ({
   onConnect = () => { },
   isSupportedNetwork = true,
   chainId = 0,
   chains = [],
-  points
+  points,
+  pointObject
 }: {
   onConnect: () => void;
   isSupportedNetwork: boolean;
   chainId: number;
   chains: Chain[];
   points: number;
+  pointObject: Record<string, any>;
 }) => {
   const { publicClient, account } = useLiquity();
   const { t } = useLang();
@@ -102,6 +106,107 @@ export const UserAccount = ({
     </button>
   </div>
 
+  const pointsView = <div className="flex-row-align-left">
+    <img
+      src="images/magma.png"
+      height="18px"
+      style={{ width: "34px" }} />
+
+    <div
+      className="flex-column-align-left"
+      style={{ gap: "4px" }}>
+      <div className="label">{t("points")}</div>
+
+      <div className="label bigLabel fat">{formatNumber(points, 0)}</div>
+    </div>
+  </div>
+
+  const pointsListView = pointObject ? <div
+    className="flex-column-align-left"
+    style={{
+      gap: "1rem",
+      padding: "1rem"
+    }}>
+    <div className="flex-row-space-between points">
+      <div className="label">
+        <Link
+          className="label"
+          to="/stake">
+          <span>{t("stabilityPoolPoints")}&nbsp;</span>
+
+          <img
+            src="/images/external-link.png"
+            style={{
+              width: "0.75rem"
+            }} />
+        </Link>
+      </div>
+      <div className="label fat">{formatNumber(pointObject.stabilityScore, 0)}</div>
+    </div>
+
+    {/* <div className="flex-row-space-between points">
+      <div className="label">
+        <a
+          className="label"
+          href="https://mimo.exchange/add/0x6c0bf4b53696b5434a0d21c7d13aa3cbf754913e/IOTX"
+          target="_blank">
+          <span>{t("lpPoints")}&nbsp;</span>
+
+          <img
+            src="/images/external-link.png"
+            style={{
+              width: "0.75rem"
+            }} />
+        </a>
+      </div>
+      <div className="label fat">{formatNumber(pointObject.lpScore, 0)}</div>
+    </div> */}
+
+    {pointObject.lps?.length > 0 && pointObject.lps.map((lp: LPScoreObject) => {
+      return <div className="flex-row-space-between points">
+        <div className="label">
+          {/* <span>&nbsp;•&nbsp;</span> */}
+
+          <a
+            className="label"
+            href={lp.link}
+            target="_blank">
+            <span>{lp.name}&nbsp;LP&nbsp;</span>
+
+            <img
+              src="/images/external-link.png"
+              style={{
+                width: "0.65rem"
+              }} />
+          </a>
+        </div>
+        <div className="label fat">{formatNumber(lp.points || 0, 0)}</div>
+      </div>
+    })}
+
+    {pointObject.referrerPoints && <div className="flex-row-space-between points">
+      <div className="label">{t("referralsPoints")}</div>
+      <div className="label fat">{formatNumber(pointObject.referrerPoints, 0)}</div>
+    </div>}
+
+    <div
+      className="flex-row-align-right label labelSmall"
+      style={{
+        textAlign: "right",
+        width: "100%"
+      }}>
+      <a
+        href="https://docs.magma.finance/protocol-concepts/magma-points"
+        target="_blank">
+        <span>Magma Points&nbsp;</span>
+
+        <img
+          src="/images/info.png"
+          width="12px" />
+      </a>
+    </div>
+  </div> : <></>
+
   return (
     <div className="topBar">
       <img
@@ -136,10 +241,12 @@ export const UserAccount = ({
       </div>}
 
       {isConnected && account && <div className="userAccountBox">
-        {points >= 0 && <div className="flex-row-align-left points">
-          <div className="label">{t("points")}:</div>
-          <div className="label fat">{points.toFixed(0)}</div>
-        </div>}
+        <PopupView
+          forcedClass="selectionTrigger"
+          entryView={pointsView}
+          showArrows={true}
+          alignTop={true}
+          popupView={pointsListView} />
 
         <div className="flex-row-align-left">
           <DropdownMenu

@@ -150,3 +150,12 @@ export type ApproxHintObject = {
 	latestRandomSeed: BigNumber;
 	results: ResultInApproxHintObject[];
 }
+
+export type LPScoreObject = {
+	name: string
+	staking: boolean;
+	url: string;
+	points?: number;
+	link?: string;
+	pointsPerHour: number;
+}

@@ -204,7 +204,6 @@ export const DepositeModal = ({
 		setSending(true);
 
 		if (vault?.status === 1) {
-			// vault?.status === VaultStatus4Contract.active || vault?.status === VaultStatus4Subgraph.open
 			vault.adjust(
 				borrowingRate + cfg.feePercentSlippage,
 				globalContants.BIG_NUMBER_0,

@@ -42,13 +42,14 @@ export const magma: {
 	getVaultByOwner: (owner: string) => Promise<Vault | undefined>;
 	findHintsForNominalCollateralRatio: (nominalCollateralRatio: number, ownAddress?: string) => Promise<[string, string]>;
 	wouldBeRecoveryMode: (collateral: BigNumber, debt: BigNumber, collateralPrice: number, loanPrice: number, collateralToken: Coin, loanToken: Coin) => boolean;
+	computeFee: () => number;
+	openVault: (vault: Vault, maxFeePercentage: number, debtChange: BigNumber, deposit: BigNumber, onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void) => void;
+	closeVault: (onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void) => void;
 	_readyContracts: () => void;
 	_getVaults: () => void;
 	_getMagmaDataStep1: () => Promise<void>;
 	_getMagmaDataStep2: () => Promise<void>;
 	_loadingData: boolean;
-	computeFee: () => number;
-	openVault: (vault: Vault, maxFeePercentage: number, debtChange: BigNumber, deposit: BigNumber, onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void) => void;
 } = {
 	_account: globalContants.ADDRESS_PLACEHOLDER,
 	_loadingData: false,
@@ -394,7 +395,7 @@ export const magma: {
 	},
 
 	wouldBeRecoveryMode: function (collateral: BigNumber, debt: BigNumber, collateralPrice: number, loanPrice = 1, collateralToken: Coin, loanToken = WEN): boolean {
-		if (this.magmaData?.entireSystemColl || this.magmaData?.entireSystemDebt || this.magmaData?.CCR) throw new Error("magmaData.* is null");
+		if (!this.magmaData?.entireSystemColl || !this.magmaData?.entireSystemDebt || !this.magmaData?.CCR) throw new Error("magmaData.* is null");
 
 		if (debt.eq(0)) {
 			return false;
@@ -406,5 +407,9 @@ export const magma: {
 						.multipliedBy(loanPrice)
 				).lt(this.magmaData.CCR);
 		}
+	},
+
+	closeVault: function (onWait, onFail, onDone): void {
+		this.borrowerOperationsContract?.dappFunctions.closeTrove.run(onWait, onFail, onDone, { from: this._account });
 	}
 };
