@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { DappContract } from "./DappContract.";
 import appConfig from "../appConfig.json";
-import { ApproxHintObject, JsonObject, VaultStatus, Vaultish, callRequest } from "./types";
+import { ApproxHintObject, Coin, JsonObject, VaultStatus, Vaultish, callRequest } from "./types";
 import MultiTroveGetterAbi from "../abis/MultiTroveGetter.json";
 import { Vault } from "./Vault";
 import { graphqlAsker } from "./graphqlAsker";
@@ -41,6 +41,7 @@ export const magma: {
 	getMagmaData: () => Promise<Record<string, any> | undefined>;
 	getVaultByOwner: (owner: string) => Promise<Vault | undefined>;
 	findHintsForNominalCollateralRatio: (nominalCollateralRatio: number, ownAddress?: string) => Promise<[string, string]>;
+	wouldBeRecoveryMode: (collateral: BigNumber, debt: BigNumber, collateralPrice: number, loanPrice: number, collateralToken: Coin, loanToken: Coin) => boolean;
 	_readyContracts: () => void;
 	_getVaults: () => void;
 	_getMagmaDataStep1: () => Promise<void>;
@@ -391,4 +392,19 @@ export const magma: {
 
 		return [prev, next];
 	},
+
+	wouldBeRecoveryMode: function (collateral: BigNumber, debt: BigNumber, collateralPrice: number, loanPrice = 1, collateralToken: Coin, loanToken = WEN): boolean {
+		if (this.magmaData?.entireSystemColl || this.magmaData?.entireSystemDebt || this.magmaData?.CCR) throw new Error("magmaData.* is null");
+
+		if (debt.eq(0)) {
+			return false;
+		} else {
+			return collateral.shiftedBy(-collateralToken.decimals)
+				.multipliedBy(collateralPrice)
+				.dividedBy(
+					debt.shiftedBy(-loanToken.decimals)
+						.multipliedBy(loanPrice)
+				).lt(this.magmaData.CCR);
+		}
+	}
 };

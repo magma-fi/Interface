@@ -15,6 +15,7 @@ import { Vault } from "../libs/Vault";
 import BigNumber from "bignumber.js";
 import { useLiquity } from "../hooks/LiquityContext";
 import appConfig from "../appConfig.json";
+import { magma } from "../libs/magma";
 
 let amountWithdrawn = 0;
 
@@ -31,7 +32,8 @@ export const WithdrawModal = ({
 	liquidationPoint,
 	availableWithdrawal,
 	availableBorrow,
-	appMMROffset = 1
+	appMMROffset = 1,
+	ccr
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -46,6 +48,7 @@ export const WithdrawModal = ({
 	availableWithdrawal: BigNumber;
 	availableBorrow: BigNumber;
 	appMMROffset: number;
+	ccr: number;
 }) => {
 	const { chainId } = useLiquity();
 	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
@@ -61,10 +64,11 @@ export const WithdrawModal = ({
 	const [sliderForcedValue, setSliderForcedValue] = useState(vaultUtilizationRateNumber);
 	const borrowingRate = fees.borrowingRate;
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage>();
-	const updatedUtilRate = globalContants.BIG_NUMBER_1.dividedBy(Vault.computeCollateralRatio(vault.collateral.minus(withdrawAmount), vault.debt, price, 1, market, WEN));
+	const updatedCollateral = vault.collateral.minus(withdrawAmount);
+	const updatedUtilRate = globalContants.BIG_NUMBER_1.dividedBy(Vault.computeCollateralRatio(updatedCollateral, vault.debt, price, 1, market, WEN));
 	const newURPercentNumber = updatedUtilRate.toNumber() * 100;
 	const urIsGood = vaultUtilizationRateNumberPercent > newURPercentNumber;
-	const updatedAvailableBorrow = Vault.calculateAvailableBorrow(vault.collateral.minus(withdrawAmount), vault.debt, price, market, WEN, liquidationPoint, borrowingRate, appMMROffset);
+	const updatedAvailableBorrow = Vault.calculateAvailableBorrow(updatedCollateral, vault.debt, price, market, WEN, liquidationPoint, borrowingRate, appMMROffset);
 	const [sending, setSending] = useState(false);
 
 	useEffect(() => {
@@ -105,6 +109,13 @@ export const WithdrawModal = ({
 	const handleWithdraw = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 
+		if (magma.wouldBeRecoveryMode(updatedCollateral, vault.debt, price, 1, market, WEN)) {
+			return setErrorMessages({
+				key: "noOpenningToFall",
+				values: { ccr }
+			} as unknown as ErrorMessage);
+		}
+
 		setSending(true);
 
 		vault.adjust(
@@ -113,7 +124,7 @@ export const WithdrawModal = ({
 			globalContants.BIG_NUMBER_0,
 			false,
 			globalContants.BIG_NUMBER_0,
-			vault.collateral.minus(withdrawAmount),
+			updatedCollateral,
 			vault.debt,
 			undefined,
 			error => {
@@ -228,7 +239,7 @@ export const WithdrawModal = ({
 		<button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			disabled={withdrawAmount.lte(0) || sending || withdrawAmount.gt(availableWithdrawal)}
+			disabled={withdrawAmount.lte(0) || sending || withdrawAmount.gt(availableWithdrawal) || recoveryMode}
 			onClick={handleWithdraw}>
 			<img src="images/repay-dark.png" />
 

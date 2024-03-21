@@ -16,6 +16,7 @@ import { Vault } from "../libs/Vault";
 import BigNumber from "bignumber.js";
 import { useLiquity } from "../hooks/LiquityContext";
 import appConfig from "../appConfig.json";
+import { magma } from "../libs/magma";
 
 export const BorrowModal = ({
 	isOpen = false,
@@ -31,7 +32,8 @@ export const BorrowModal = ({
 	recoveryMode,
 	liquidationPoint,
 	availableWithdrawal,
-	availableBorrow
+	availableBorrow,
+	ccr
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -47,6 +49,7 @@ export const BorrowModal = ({
 	liquidationPoint: number;
 	availableWithdrawal: BigNumber;
 	availableBorrow: BigNumber;
+	ccr: number;
 }) => {
 	const { chainId } = useLiquity();
 	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
@@ -113,6 +116,13 @@ export const BorrowModal = ({
 
 	const handleBorrow = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
+
+		if (magma.wouldBeRecoveryMode(vault.collateral, updatedVaultDebt, price, 1, market, WEN)) {
+			return setErrorMsg({
+				key: "noOpenningToFall",
+				values: { ccr }
+			} as unknown as ErrorMessage);
+		}
 
 		setSending(true);
 
@@ -280,7 +290,7 @@ export const BorrowModal = ({
 		<button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			disabled={borrowAmount.lte(0) || sending || borrowAmount.gt(availableBorrow)}
+			disabled={borrowAmount.lte(0) || sending || borrowAmount.gt(availableBorrow) || recoveryMode}
 			onClick={handleBorrow}>
 			<img src="images/borrow-dark.png" />
 

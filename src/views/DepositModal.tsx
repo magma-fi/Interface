@@ -33,7 +33,9 @@ export const DepositeModal = ({
 	availableWithdrawal,
 	liquidationPoint,
 	availableBorrow,
-	appMMROffset = 1
+	appMMROffset = 1,
+	recoveryMode,
+	ccr
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -50,6 +52,8 @@ export const DepositeModal = ({
 	liquidationPoint: number;
 	availableBorrow: BigNumber;
 	appMMROffset: number;
+	recoveryMode: boolean;
+	ccr: number;
 }) => {
 	const { chainId } = useLiquity();
 	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
@@ -189,6 +193,13 @@ export const DepositeModal = ({
 
 	const handleDeposit = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
+
+		if (magma.wouldBeRecoveryMode(updatedVaultCollateral, updatedVaultDebt, price, 1, market, WEN)) {
+			return setErrorInfo({
+				key: "noOpenningToFall",
+				values: { ccr }
+			} as unknown as ErrorMessage);
+		}
 
 		setSending(true);
 
@@ -391,6 +402,7 @@ export const DepositeModal = ({
 			disabled={
 				accountBalance.lt(depositValue)
 				|| sending
+				|| recoveryMode
 				|| (depositAndBorrow && (depositValue === 0 || borrowValue === 0))
 				|| (!depositAndBorrow && (depositValue === 0))
 				|| updatedVaultDebt.lt(constants?.MIN_NET_DEBT)

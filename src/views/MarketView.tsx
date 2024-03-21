@@ -820,7 +820,9 @@ export const MarketView = ({
 			availableWithdrawal={availableWithdrawal}
 			availableBorrow={availableBorrow}
 			liquidationPoint={liquidationPoint}
-			appMMROffset={appMMROffset} />}
+			appMMROffset={appMMROffset}
+			recoveryMode={recoveryMode}
+			ccr={CCR} />}
 
 		{showDepositDoneModal && <TxDone
 			title={t("depositedSuccessfully")}
@@ -857,7 +859,8 @@ export const MarketView = ({
 			availableWithdrawal={availableWithdrawal}
 			recoveryMode={recoveryMode}
 			liquidationPoint={appLiquidationPoint}
-			availableBorrow={availableBorrow} />}
+			availableBorrow={availableBorrow}
+			ccr={CCR} />}
 
 		{showBorrowDoneModal && <TxDone
 			title={t("borrowedSuccessfully")}
@@ -922,7 +925,8 @@ export const MarketView = ({
 			// liquidationPoint={liquidationPoint}
 			liquidationPoint={appLiquidationPoint}
 			availableBorrow={availableBorrow}
-			appMMROffset={appMMROffset} />}
+			appMMROffset={appMMROffset}
+			ccr={CCR} />}
 
 		{showWithdrawDoneModal && <TxDone
 			title={t("withdrawnSuccessfully")}
