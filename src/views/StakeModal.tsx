@@ -4,66 +4,57 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { ErrorMessage, ValidationContextForStabilityPool } from "../libs/types";
-import { WEN } from "../libs/globalContants";
+import { ErrorMessage, StabilityDeposit } from "../libs/types";
+import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useMemo } from "react";
-import { Decimal, StabilityDeposit } from "lib-base";
+import { useState } from "react";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
-import { useMyTransactionState } from "../components/Transaction";
 import { TxLabel } from "../components/TxLabel";
-import { validateStabilityDepositChange } from "../components/Stability/validation/validateStabilityDepositChange";
-import { StabilityDepositAction } from "../components/Stability/StabilityDepositAction";
+import BigNumber from "bignumber.js";
+import { formatAsset, formatAssetAmount } from "../utils";
+import { magma } from "../libs/magma";
+import { useLiquity } from "../hooks/LiquityContext";
 
 let amountStaked = 0;
 
 export const StakeModal = ({
 	isOpen = false,
 	onClose = () => { },
-	wenBalance = Decimal.ZERO,
+	wenBalance = globalContants.BIG_NUMBER_0,
 	onDone = () => { },
 	stabilityDeposit,
-	validationContext,
 	lusdInStabilityPool
 }: {
 	isOpen: boolean;
 	onClose: () => void;
-	wenBalance: Decimal;
-	onDone: (tx: string, depositAmount: number) => void;
+	wenBalance: BigNumber;
+	onDone: (tx: string, depositInput: number) => void;
 	stabilityDeposit: StabilityDeposit;
-	validationContext: ValidationContextForStabilityPool;
-	lusdInStabilityPool: Decimal;
+	lusdInStabilityPool: BigNumber;
 }) => {
+	const { frontendTag } = useLiquity();
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
-	const [depositAmount, setDepositAmount] = useState(0);
-	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId, true);
-	const [useMax, setUseMax] = useState(false);
-
-	const [validChange, description] = validateStabilityDepositChange(
-		stabilityDeposit,
-		useMax ? wenBalance : stabilityDeposit.currentLUSD.add(depositAmount),
-		validationContext
-	);
-
-	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
+	const [depositInput, setDepositInput] = useState(0);
+	const depositAmount = BigNumber(depositInput).shiftedBy(WEN.decimals);
+	const wenBalanceDecimals = formatAssetAmount(wenBalance, WEN.decimals);
+	const stakedDecimals = formatAssetAmount(stabilityDeposit.currentLUSD, WEN.decimals);
+	const [sending, setSending] = useState(false);
+	const [errorMessages, setErrorMessages] = useState<ErrorMessage>();
 
 	const handleMax = () => {
-		const val = Number(wenBalance);
+		const val = wenBalanceDecimals;
 		setValueForced(val);
-		setDepositAmount(val);
+		setDepositInput(val);
 		setErrorMessages(undefined);
-		setUseMax(true);
 
 		amountStaked = val;
 	};
 
 	const handleInputDeposit = (val: number) => {
 		setValueForced(-1);
-		setDepositAmount(val);
+		setDepositInput(val);
 		setErrorMessages(undefined);
-		setUseMax(false);
 
 		amountStaked = val;
 	};
@@ -73,16 +64,22 @@ export const StakeModal = ({
 		onClose();
 	};
 
-	useEffect(() => {
-		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
-			setErrorMessages({ string: transactionState.error.reason || JSON.stringify(transactionState.error.message || transactionState.error).substring(0, 100) } as ErrorMessage);
-		}
+	const handleStake = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
 
-		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string, amountStaked);
-			transactionState.resolved = true;
-		}
-	}, [transactionState.type])
+		setSending(true);
+
+		magma.stake(
+			depositAmount,
+			frontendTag,
+			undefined,
+			error => setErrorMessages({ string: error.message } as ErrorMessage),
+			tx => {
+				setSending(false);
+				return onDone && onDone(tx, amountStaked);
+			}
+		);
+	};
 
 	return isOpen ? <Modal
 		title={t("stake") + " " + WEN.symbol}
@@ -109,13 +106,13 @@ export const StakeModal = ({
 					<button
 						className="textButton smallTextButton"
 						onClick={handleMax}>
-						{t("max")}:&nbsp;{wenBalance.toString(2)}&nbsp;{WEN.symbol}
+						{t("max")}:&nbsp;{formatAsset(wenBalanceDecimals, WEN)}
 					</button>
 				</div>
 
 				<AmountInput
 					coin={WEN}
-					price={Decimal.ONE}
+					price={1}
 					allowSwap={false}
 					valueForced={valueForced}
 					onInput={handleInputDeposit}
@@ -134,53 +131,43 @@ export const StakeModal = ({
 					<div className="label">{t("staked")}</div>
 
 					<ChangedValueLabel
-						previousValue={Number(stabilityDeposit.currentLUSD)}
-						newValue={Number(stabilityDeposit.currentLUSD.add(depositAmount))}
+						previousValue={stakedDecimals}
+						newValue={stakedDecimals + depositInput}
 						nextPostfix={WEN.symbol}
-						positive={depositAmount > 0} />
+						positive={depositInput > 0} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("walletBalance")}</div>
 
 					<ChangedValueLabel
-						previousValue={Number(wenBalance)}
-						newValue={Number(wenBalance.gt(depositAmount) ? wenBalance.sub(depositAmount) : Decimal.ZERO)}
+						previousValue={wenBalanceDecimals}
+						newValue={wenBalanceDecimals - depositInput}
 						nextPostfix={WEN.symbol}
-						positive={depositAmount > 0} />
+						positive={depositInput > 0} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("shareOfStabilityPool")}</div>
 
 					<ChangedValueLabel
-						previousValue={Number(stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool))}
+						previousValue={stabilityDeposit.currentLUSD.dividedBy(lusdInStabilityPool).toNumber() * 100}
 						previousPostfix="%"
-						newValue={Number(stabilityDeposit.currentLUSD.add(depositAmount).mulDiv(100, lusdInStabilityPool.add(depositAmount)))}
+						newValue={stabilityDeposit.currentLUSD.plus(depositAmount).dividedBy(lusdInStabilityPool.plus(depositAmount)).toNumber() * 100}
 						nextPostfix="%"
-						positive={depositAmount > 0} />
+						positive={depositInput > 0} />
 				</div>
 			</div>
 		</div>
 
-		{validChange && !transactionState.id && transactionState.type === "idle" ? <StabilityDepositAction
-			transactionId={txId}
-			change={validChange}>
-			<button
-				className="primaryButton bigButton"
-				style={{ width: "100%" }}
-				disabled={depositAmount === 0}>
-				<img src="images/stake-dark.png" />
-
-				{t("stake") + " " + WEN.symbol}
-			</button>
-		</StabilityDepositAction> : <button
+		<button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			disabled>
+			disabled={depositInput === 0 || sending}
+			onClick={handleStake}>
 			<img src="images/stake-dark.png" />
 
-			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("staking") + "...") : (t("stake") + " " + WEN.symbol)}
-		</button>}
+			{(sending ? (t("staking") + "...") : t("stake")) + " " + WEN.symbol}
+		</button>
 	</Modal> : <></>
 };

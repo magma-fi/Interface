@@ -1,83 +1,53 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLang } from "../hooks/useLang";
 import { IOTX, MAGMA, ModalAction, WEN, globalContants } from "../libs/globalContants";
-import { Coin, StabilityDepositOperation, StabilityTransactionRecord } from "../libs/types";
-import { LiquityStoreState } from "lib-base/dist/src/LiquityStore";
-import { useLiquitySelector } from "@liquity/lib-react";
+import { Coin, StabilityDepositOperation, StabilityTransactionRecord, StabilityDeposit } from "../libs/types";
 import { StakeModal } from "./StakeModal";
-import { selectForStabilityDepositChangeValidation } from "../components/Stability/validation/validateStabilityDepositChange";
 import { TxDone } from "../components/TxDone";
 import { TxLabel } from "../components/TxLabel";
 import { UnstakeModal } from "./UnstakeModal";
 import { useLiquity } from "../hooks/LiquityContext";
-import { Decimal, LUSD_LIQUIDATION_RESERVE } from "lib-base"
 import { SwapWEN2IOTXModal } from "./SwapWEN2IOTXModal";
-import { useMyTransactionState, useTransactionFunction } from "../components/Transaction";
 import { graphqlAsker } from "../libs/graphqlAsker";
 import { StabilityTransactionListItem } from "./StabilityTransactionListItem";
+import { formatAsset, formatAssetAmount, formatCurrency, formatPercent } from "../utils";
+import BigNumber from "bignumber.js";
 
 type ModalOpenning = {
 	action: ModalAction;
 	isShow: boolean;
 }
 
-export const PoolView = ({ market, constants }: {
+export const PoolView = ({ market, magmaData, refreshTrigger }: {
 	market: Coin;
-	constants: Record<string, Decimal>
+	magmaData?: Record<string, any>;
+	refreshTrigger: () => void;
 }) => {
-	const { t } = useLang();
-
-	const selector = useMemo(() => {
-		return (state: LiquityStoreState) => {
-			const {
-				lusdBalance,
-				stabilityDeposit,
-				lusdInStabilityPool,
-				numberOfTroves,
-				price,
-				trove
-			} = state;
-
-			return {
-				lusdBalance,
-				stabilityDeposit,
-				lusdInStabilityPool,
-				numberOfTroves,
-				price,
-				trove,
-				validationContext: selectForStabilityDepositChangeValidation(state)
-			};
-		};
-	}, []);
+	if (!magmaData) return <></>
 
 	const {
 		lusdBalance,
 		stabilityDeposit,
 		lusdInStabilityPool,
-		numberOfTroves,
+		vaultsCount,
 		price,
-		trove,
-		validationContext
-	} = useLiquitySelector(selector);
+		vault
+	} = magmaData;
+	const { t } = useLang();
 	const { liquity, walletClient, account, chainId } = useLiquity();
 	const [showModal, setShowModal] = useState<ModalOpenning | null>(null);
 	const [showTxResult, setTxResult] = useState<ModalOpenning | null>(null);
 	const [amountInTx, setAmountInTx] = useState(0);
 	const [txHash, setTxHash] = useState("");
-	const wenTotalSupply = constants?.wenTotalSupply || Decimal.ZERO;
-	// const [rewardsFromCollateral, setRewardsFromCollateral] = useState(Decimal.ZERO);
-	const rewardsFromCollateral = stabilityDeposit.collateralGain;
-	const netDebt = trove.debt.gt(constants?.LUSD_GAS_COMPENSATION || LUSD_LIQUIDATION_RESERVE) ? trove.netDebt : Decimal.ZERO;
-	const [resetTx, setResetTx] = useState(false);
-	const txId = useMemo(() => String(new Date().getTime()), [resetTx]);
-	const transactionState = useMyTransactionState(txId, true);
+	const wenTotalSupply = magmaData?.wenTotalSupply || globalContants.BIG_NUMBER_0;
+	const rewardsFromCollateral = formatAssetAmount(stabilityDeposit.collateralGain, WEN.decimals);
+	const reserve = magmaData?.LUSD_GAS_COMPENSATION;
+	const netDebt = vault.debt.gt(reserve) ? vault.netDebt : globalContants.BIG_NUMBER_0;
 	const [txs, setTxs] = useState<StabilityTransactionRecord[]>();
+	const stakedDecimals = formatAssetAmount(stabilityDeposit.currentLUSD, WEN.decimals);
 
-	const [sendTransaction] = useTransactionFunction(
-		txId,
-		liquity.send.withdrawGainsFromStabilityPool.bind(liquity.send)
-	);
 
 	const handleRedeemCollateral = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		setShowModal({
@@ -104,25 +74,6 @@ export const PoolView = ({ market, constants }: {
 			});
 		}, 1000);
 	}, [account, chainId]);
-
-	useEffect(() => {
-		if (transactionState.id === txId && transactionState.tx) {
-			setTxHash(transactionState.tx.rawSentTransaction as unknown as string);
-		}
-
-		if (transactionState.id === txId && (transactionState.type === "failed" || transactionState.type === "cancelled")) {
-			setResetTx(!resetTx);
-		}
-
-		if (transactionState.id === txId && (transactionState.type === "confirmed")) {
-			setTxResult({
-				action: ModalAction.ClaimRewards,
-				isShow: true
-			} as ModalOpenning);
-
-			setResetTx(!resetTx);
-		}
-	}, [transactionState.type, transactionState.id, txId]);
 
 	const handleShowModal = (evt: React.MouseEvent<HTMLButtonElement>) => {
 		setShowModal({
@@ -162,6 +113,8 @@ export const PoolView = ({ market, constants }: {
 		} as ModalOpenning);
 
 		handleCloseModal();
+
+		return refreshTrigger && refreshTrigger();
 	};
 
 	if (market?.symbol === "DAI" || market?.symbol === "USDC") {
@@ -178,11 +131,11 @@ export const PoolView = ({ market, constants }: {
 	};
 
 	const handleClaim = () => {
-		if (sendTransaction) {
-			setAmountInTx(Number(stabilityDeposit.lqtyReward.toString(2)));
+		// if (sendTransaction) {
+		// 	setAmountInTx(Number(stabilityDeposit.lqtyReward.toString(2)));
 
-			return sendTransaction();
-		}
+		// 	return sendTransaction();
+		// }
 	};
 
 	return <>
@@ -216,7 +169,7 @@ export const PoolView = ({ market, constants }: {
 						</button>
 					</div>
 
-					<div className="label">{t("walletBalance") + " " + lusdBalance.toString(2) + " " + WEN.symbol}</div>
+					<div className="label">{t("walletBalance") + " " + formatAsset(formatAssetAmount(lusdBalance, WEN.decimals), WEN)}</div>
 				</div>
 
 				<div className="panel">
@@ -227,7 +180,7 @@ export const PoolView = ({ market, constants }: {
 							<div>
 								<span className="label">{t("shareOfPool")}&nbsp;&nbsp;</span>
 
-								<span>{stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool).toString(4) + "%"}</span>
+								<span>{formatPercent(stabilityDeposit.currentLUSD.dividedBy(lusdInStabilityPool).toNumber())}</span>
 							</div>
 						</div>
 
@@ -240,9 +193,9 @@ export const PoolView = ({ market, constants }: {
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{stabilityDeposit.currentLUSD.toString(2)}&nbsp;{globalContants.USD}</div>
+									<div>{formatCurrency(stakedDecimals)}</div>
 
-									<div className="label labelSmall">{stabilityDeposit.currentLUSD.toString(2)}&nbsp;{WEN.symbol}</div>
+									<div className="label labelSmall">{formatAsset(stakedDecimals, WEN)}</div>
 								</div>
 							</div>
 
@@ -275,7 +228,7 @@ export const PoolView = ({ market, constants }: {
 							<button
 								className="secondaryButton"
 								onClick={handleClaim}
-								disabled={stabilityDeposit.lqtyReward.isZero || transactionState.type !== "idle"}>
+								disabled={(stabilityDeposit as StabilityDeposit).lqtyReward.eq(0)}>
 								<img src="images/rewards.png" />
 
 								{t("claimRewards")}
@@ -297,7 +250,7 @@ export const PoolView = ({ market, constants }: {
 									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{rewardsFromCollateral.mul(price).toString(2)}&nbsp;{globalContants.USD}</div>
+									<div>{formatCurrency(rewardsFromCollateral * price)}</div>
 
 									<div className="label labelSmall">{rewardsFromCollateral.toString(2)}&nbsp;{IOTX.symbol}</div>
 								</div>
@@ -316,25 +269,25 @@ export const PoolView = ({ market, constants }: {
 					<div className="flex-row-space-between">
 						<div className="label">{t("totalValueLocked")}</div>
 
-						<div>{lusdInStabilityPool.toString(2) + " " + WEN.symbol}</div>
+						<div>{formatAsset(formatAssetAmount(lusdInStabilityPool, WEN.decimals), WEN)}</div>
 					</div>
 
 					<div className="flex-row-space-between">
 						<div className="label">{t("wenTotalSupply")}</div>
 
-						<div>{wenTotalSupply.toString(2) + " " + WEN.symbol}</div>
+						<div>{formatAsset(formatAssetAmount(wenTotalSupply, WEN.decimals), WEN)}</div>
 					</div>
 
 					<div className="flex-row-space-between">
 						<div className="label">{t("wenStakingRate")}</div>
 
-						<div style={{ color: "#F25454" }}>{(wenTotalSupply.gt(0) ? lusdInStabilityPool.div(wenTotalSupply).mul(100).toString(2) : 0) + "%"}</div>
+						<div style={{ color: "#F25454" }}>{formatPercent(lusdInStabilityPool.dividedBy(wenTotalSupply).toNumber())}</div>
 					</div>
 
 					<div className="flex-row-space-between">
 						<div className="label">{t("numberOfVaults")}</div>
 
-						<div>{numberOfTroves}</div>
+						<div>{vaultsCount}</div>
 					</div>
 				</div>
 
@@ -350,9 +303,9 @@ export const PoolView = ({ market, constants }: {
 					{txs.map(txItem => {
 						return <StabilityTransactionListItem
 							key={txItem.id}
-							data={txItem}
-							market={market}
-							price={price} />
+							// price={price} 
+							// market={market}
+							data={txItem} />
 					})}
 				</div>}
 			</div>
@@ -364,7 +317,6 @@ export const PoolView = ({ market, constants }: {
 			wenBalance={lusdBalance}
 			onDone={handleModalDone}
 			stabilityDeposit={stabilityDeposit}
-			validationContext={validationContext}
 			lusdInStabilityPool={lusdInStabilityPool} />}
 
 		{showTxResult?.action === ModalAction.Stake && showTxResult.isShow && <TxDone
@@ -383,9 +335,8 @@ export const PoolView = ({ market, constants }: {
 			isOpen={showModal.isShow}
 			onClose={handleCloseModal}
 			onDone={handleModalDone}
-			max={Decimal.min(netDebt, lusdBalance)}
-			price={price}
-			trove={trove} />}
+			max={BigNumber.min(netDebt, lusdBalance)}
+			price={price} />}
 
 		{showTxResult?.action === ModalAction.SwapWEN2IOTX && showTxResult.isShow && <TxDone
 			title={t("wenSwappedSuccessfully")}
@@ -402,10 +353,9 @@ export const PoolView = ({ market, constants }: {
 		{showModal?.action === ModalAction.Unstake && showModal.isShow && <UnstakeModal
 			isOpen={showModal.isShow}
 			onClose={handleCloseModal}
-			accountBalance={lusdBalance}
+			wenBalance={lusdBalance}
 			onDone={handleModalDone}
 			stabilityDeposit={stabilityDeposit}
-			validationContext={validationContext}
 			lusdInStabilityPool={lusdInStabilityPool} />}
 
 		{showTxResult?.action === ModalAction.Unstake && showTxResult.isShow && <TxDone

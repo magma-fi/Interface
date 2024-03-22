@@ -59,20 +59,20 @@ export const WithdrawModal = ({
 	const positiveWithdrawInput = withdrawInput > 0 ? withdrawInput : 0;
 	const withdrawAmount = BigNumber(positiveWithdrawInput).shiftedBy(market.decimals);
 	const maxSafe = 1 / liquidationPoint;
-	const vaultUtilizationRateNumber = globalContants.BIG_NUMBER_1.dividedBy(vault.collateralRatio(price)).toNumber();
+	const vaultUtilizationRateNumber = 1 / vault.collateralRatio(price);
 	const vaultUtilizationRateNumberPercent = vaultUtilizationRateNumber * 100;
 	const [sliderForcedValue, setSliderForcedValue] = useState(vaultUtilizationRateNumber);
 	const borrowingRate = fees.borrowingRate;
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage>();
 	const updatedCollateral = vault.collateral.minus(withdrawAmount);
-	const updatedUtilRate = globalContants.BIG_NUMBER_1.dividedBy(Vault.computeCollateralRatio(updatedCollateral, vault.debt, price, 1, market, WEN));
-	const newURPercentNumber = updatedUtilRate.toNumber() * 100;
+	const updatedUtilRate = 1 / Vault.computeCollateralRatio(updatedCollateral, vault.debt, price, 1, market, WEN);
+	const newURPercentNumber = updatedUtilRate * 100;
 	const urIsGood = vaultUtilizationRateNumberPercent > newURPercentNumber;
 	const updatedAvailableBorrow = Vault.calculateAvailableBorrow(updatedCollateral, vault.debt, price, market, WEN, liquidationPoint, borrowingRate, appMMROffset);
 	const [sending, setSending] = useState(false);
 
 	useEffect(() => {
-		setSliderForcedValue(Number(updatedUtilRate.toString()));
+		setSliderForcedValue(updatedUtilRate);
 	}, [updatedUtilRate])
 
 	const init = () => {

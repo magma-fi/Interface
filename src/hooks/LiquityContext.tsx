@@ -28,6 +28,7 @@ type LiquityContextValue = {
   publicClient?: PublicClient;
   urlSearch?: string;
   signer: ethers.Signer | undefined | JsonRpcSigner;
+  frontendTag: string;
 };
 
 const LiquityContext = createContext<LiquityContextValue | undefined>(undefined);
@@ -126,7 +127,8 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
         walletClient: connection.signer as unknown as WalletClient,
         publicClient,
         urlSearch,
-        signer: wagmiSinger
+        signer: wagmiSinger,
+        frontendTag
       }}>
       {children}
     </LiquityContext.Provider>

@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useState } from "react";
 import { Tab } from "../components/Tab";
 import { useLang } from "../hooks/useLang";
-import { Troves, WEN, globalContants } from "../libs/globalContants";
+import { Troves, globalContants } from "../libs/globalContants";
 import { Coin } from "../libs/types";
 import { PoolView } from "./PoolView";
 import { Record } from "../components/Bonds/Record";
-import { Decimal } from "lib-base";
 
-export const StakeView = ({ constants }: { constants: Record<string, Decimal> }) => {
+export const StakeView = ({ constants, refreshTrigger }: {
+	constants?: Record<string, any>;
+	refreshTrigger: () => void;
+}) => {
 	const { t } = useLang();
 	const [currentTrove, setCurrentTrove] = useState<Coin>(globalContants.COINS.IOTX);
 
@@ -32,6 +35,7 @@ export const StakeView = ({ constants }: { constants: Record<string, Decimal> })
 
 		<PoolView
 			market={currentTrove}
-			constants={constants} />
+			magmaData={constants}
+			refreshTrigger={refreshTrigger} />
 	</div>
 };

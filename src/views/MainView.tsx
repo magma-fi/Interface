@@ -207,7 +207,6 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			getData();
 		}
 	}, [account, chainId, signer, refresh]);
-	console.debug("xxx magmaData =", magmaData);
 
 	const handleConnectWallet = () => {
 		setShowConnectModal(true);
@@ -254,7 +253,9 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 
 					<Switch>
 						<Route path="/stake">
-							<StakeView constants={magmaData} />
+							<StakeView
+							constants={magmaData}
+							refreshTrigger={switchRefresh} />
 						</Route>
 
 						<Route path="/liquidations">

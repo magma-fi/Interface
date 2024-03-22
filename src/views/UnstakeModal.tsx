@@ -4,65 +4,54 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { ErrorMessage, ValidationContextForStabilityPool } from "../libs/types";
-import { WEN } from "../libs/globalContants";
+import { ErrorMessage, StabilityDeposit } from "../libs/types";
+import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState, useEffect, useMemo } from "react";
-import { Decimal, StabilityDeposit } from "lib-base";
+import React, { useState } from "react";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
-import { useMyTransactionState } from "../components/Transaction";
 import { TxLabel } from "../components/TxLabel";
-import { validateStabilityDepositChange } from "../components/Stability/validation/validateStabilityDepositChange";
-import { StabilityDepositAction } from "../components/Stability/StabilityDepositAction";
+import { formatAsset, formatAssetAmount } from "../utils";
+import BigNumber from "bignumber.js";
+import { magma } from "../libs/magma";
 
 let amountUnstaked = 0;
 
 export const UnstakeModal = ({
 	isOpen = false,
 	onClose = () => { },
-	accountBalance = Decimal.ZERO,
+	wenBalance = globalContants.BIG_NUMBER_0,
 	onDone = () => { },
 	stabilityDeposit,
-	validationContext,
 	lusdInStabilityPool
 }: {
 	isOpen: boolean;
 	onClose: () => void;
-	accountBalance: Decimal;
-	onDone: (tx: string, unstakeAmount: number) => void;
+	wenBalance: BigNumber;
+	onDone: (tx: string, unstakeInput: number) => void;
 	stabilityDeposit: StabilityDeposit;
-	validationContext: ValidationContextForStabilityPool;
-	lusdInStabilityPool: Decimal;
+	lusdInStabilityPool: BigNumber;
 }) => {
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
-	const [unstakeAmount, setUnstakeAmount] = useState(0);
-	const txId = useMemo(() => String(new Date().getTime()), []);
-	const transactionState = useMyTransactionState(txId, true);
-	const [useMax, setUseMax] = useState(false);
-
-	const [validChange, description] = validateStabilityDepositChange(
-		stabilityDeposit,
-		(stabilityDeposit.currentLUSD.lte(unstakeAmount) || useMax) ? Decimal.ZERO : stabilityDeposit.currentLUSD.sub(unstakeAmount),
-		validationContext
-	);
-	const [errorMessages, setErrorMessages] = useState<ErrorMessage | undefined>(description as ErrorMessage);
+	const [unstakeInput, setUnstakeInput] = useState(0);
+	const unstakeAmount = BigNumber(unstakeInput).shiftedBy(WEN.decimals);
+	const stakedDecimals = formatAssetAmount(stabilityDeposit.currentLUSD, WEN.decimals);
+	const [errorMessages, setErrorMessages] = useState<ErrorMessage>();
+	const [sending, setSending] = useState(false);
 
 	const handleMax = () => {
-		const val = Number(stabilityDeposit.currentLUSD);
+		const val = stakedDecimals;
 		setValueForced(val);
-		setUnstakeAmount(val);
+		setUnstakeInput(val);
 		amountUnstaked = val;
 		setErrorMessages(undefined);
-		setUseMax(true);
 	};
 
 	const handleInputUnstake = (val: number) => {
 		setValueForced(-1);
-		setUnstakeAmount(val);
+		setUnstakeInput(val);
 		amountUnstaked = val;
 		setErrorMessages(undefined);
-		setUseMax(false);
 	};
 
 	const handleCloseModal = () => {
@@ -70,16 +59,21 @@ export const UnstakeModal = ({
 		onClose();
 	};
 
-	useEffect(() => {
-		if (transactionState.type === "failed" || transactionState.type === "cancelled") {
-			setErrorMessages({ string: transactionState.error.reason || JSON.stringify(transactionState.error.message || transactionState.error).substring(0, 100) } as ErrorMessage);
-		}
+	const handleUnstake = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.preventDefault();
 
-		if (transactionState.type === "confirmed" && transactionState.tx?.rawSentTransaction && !transactionState.resolved) {
-			onDone(transactionState.tx.rawSentTransaction as unknown as string, amountUnstaked);
-			transactionState.resolved = true;
-		}
-	}, [transactionState.type])
+		setSending(true);
+
+		magma.unstake(
+			unstakeAmount,
+			undefined,
+			error => setErrorMessages({ string: error.message } as ErrorMessage),
+			tx => {
+				setSending(false);
+				return onDone && onDone(tx, amountUnstaked);
+			}
+		);
+	};
 
 	return isOpen ? <Modal
 		title={t("unstake") + " " + WEN.symbol}
@@ -94,28 +88,28 @@ export const UnstakeModal = ({
 			<TxLabel
 				title={t("currentlyStaked")}
 				logo="images/stake-orange.png"
-				amount={stabilityDeposit.currentLUSD.toString(2) + " " + WEN.symbol} />
+				amount={formatAsset(stakedDecimals, WEN)} />
 
 			<div className="flex-column-align-left">
 				<div
 					className="flex-row-space-between"
 					style={{ alignItems: "center" }}>
-					<div className="label fat">{t("unstakeAmount")}</div>
+					<div className="label fat">{t("unstakeInput")}</div>
 
 					<button
 						className="textButton smallTextButton"
 						onClick={handleMax}>
-						{t("max")}:&nbsp;{stabilityDeposit.currentLUSD.toString(2)}&nbsp;{WEN.symbol}
+						{t("max")}:&nbsp;{formatAsset(stakedDecimals, WEN)}
 					</button>
 				</div>
 
 				<AmountInput
 					coin={WEN}
-					price={Decimal.ONE}
+					price={1}
 					allowSwap={false}
 					valueForced={valueForced}
 					onInput={handleInputUnstake}
-					max={Number(accountBalance.toString())}
+					max={Number(wenBalance.toString())}
 					warning={undefined}
 					error={errorMessages && (errorMessages.string || t(errorMessages.key!, errorMessages.values))}
 					allowReduce={true}
@@ -130,53 +124,41 @@ export const UnstakeModal = ({
 					<div className="label">{t("staked")}</div>
 
 					<ChangedValueLabel
-						previousValue={Number(stabilityDeposit.currentLUSD)}
-						newValue={Number(stabilityDeposit.currentLUSD.gt(unstakeAmount) ? stabilityDeposit.currentLUSD.sub(unstakeAmount) : Decimal.ZERO)}
+						previousValue={stakedDecimals}
+						newValue={formatAssetAmount(stabilityDeposit.currentLUSD.minus(unstakeAmount), WEN.decimals)}
 						nextPostfix={WEN.symbol}
-						positive={unstakeAmount == 0} />
+						positive={unstakeInput == 0} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("walletBalance")}</div>
 
 					<ChangedValueLabel
-						previousValue={Number(accountBalance)}
-						newValue={Number(accountBalance.add(unstakeAmount))}
+						previousValue={formatAssetAmount(wenBalance, WEN.decimals)}
+						newValue={formatAssetAmount(wenBalance.plus(unstakeAmount), WEN.decimals)}
 						nextPostfix={WEN.symbol}
-						positive={unstakeAmount > 0} />
+						positive={unstakeInput > 0} />
 				</div>
 
 				<div className="flex-row-space-between">
 					<div className="label">{t("shareOfStabilityPool")}</div>
 
 					<ChangedValueLabel
-						previousValue={Number(stabilityDeposit.currentLUSD.mulDiv(100, lusdInStabilityPool))}
+						previousValue={stabilityDeposit.currentLUSD.dividedBy(lusdInStabilityPool).toNumber() * 100}
 						previousPostfix="%"
-						newValue={Number(
-							stabilityDeposit.currentLUSD.gt(unstakeAmount)
-								? stabilityDeposit.currentLUSD.sub(unstakeAmount).mulDiv(100, lusdInStabilityPool.add(unstakeAmount))
-								: Decimal.ZERO
-						)}
+						newValue={stabilityDeposit.currentLUSD.minus(unstakeAmount).dividedBy(lusdInStabilityPool.plus(unstakeAmount)).toNumber() * 100}
 						nextPostfix="%"
-						positive={unstakeAmount === 0} />
+						positive={unstakeInput === 0} />
 				</div>
 			</div>
 		</div>
 
-		{validChange && !transactionState.id && transactionState.type === "idle" ? <StabilityDepositAction
-			transactionId={txId}
-			change={validChange}>
-			<button
-				className="primaryButton bigButton"
-				style={{ width: "100%" }}
-				disabled={unstakeAmount === 0}>
-				{t("unstake") + " " + WEN.symbol}
-			</button>
-		</StabilityDepositAction> : <button
+		<button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			disabled>
-			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("unstaking") + "...") : (t("unstake") + " " + WEN.symbol)}
-		</button>}
+			disabled={unstakeInput === 0 || sending}
+			onClick={handleUnstake}>
+			{(sending ? (t("unstakeing") + "...") : t("unstake")) + " " + WEN.symbol}
+		</button>
 	</Modal> : <></>
 };

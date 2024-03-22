@@ -115,7 +115,7 @@ export const globalContants = {
 	ADDRESS_0: "0x0000000000000000000000000000000000000000",
 	LIQUIDATION_AT: 0.8,
 	BIG_NUMBER_0: BigNumber(0),
-	BIG_NUMBER_1: BigNumber(1),
+	BIG_NUMBER_1: BigNumber(1).shiftedBy(18),
 	TERMS_SHOWED: "termsShowed",
 	IOTX_DECIMALS: Math.pow(10, IOTX.decimals || 18),
 	WEN_DECIMALS: Math.pow(10, WEN.decimals || 18),

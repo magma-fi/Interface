@@ -50,7 +50,7 @@ export const MarketView = ({
 		collateral: magmaData.entireSystemColl,
 		debt: magmaData.entireSystemDebt
 	}
-	const numberOfTroves = magmaData.troveOwnersCount;
+	const vaultsCount = magmaData.vaultsCount;
 	const fees = { borrowingRate: magmaData.borrowingRateWithDecay };
 	const { walletClient, chainId, liquity, account } = useLiquity()
 	const [txHash, setTxHash] = useState("");
@@ -614,7 +614,7 @@ export const MarketView = ({
 					<div className="flex-row-space-between">
 						<div className="description">{t("numberOfVaults")}</div>
 
-						<div>{numberOfTroves}</div>
+						<div>{vaultsCount}</div>
 					</div>
 
 					<div className="flex-row-space-between">

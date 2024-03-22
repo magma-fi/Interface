@@ -124,7 +124,7 @@ export type callRequest = {
 	key?: string;
 	contractAddress: string;
 	call: string;
-	parseFunc: (args: string[]) => void;
+	parseFunc: (args: ArrayLike<number> | string) => void;
 }
 
 export enum StabilityDepositOperation {
@@ -158,4 +158,12 @@ export type LPScoreObject = {
 	points?: number;
 	link?: string;
 	pointsPerHour: number;
+}
+
+export type StabilityDeposit = {
+	collateralGain: BigNumber;
+	currentLUSD: BigNumber;
+	lqtyReward: BigNumber;
+	initialValue: BigNumber;
+	frontEndTag: string;
 }

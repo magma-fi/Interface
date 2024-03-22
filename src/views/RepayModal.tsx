@@ -69,8 +69,8 @@ export const RepayModal = ({
 		.toNumber();
 	const [errorInfo, setErrorInfo] = useState<ErrorMessage>();
 	const updatedVaultDebt = repayInput >= 0 ? vault.debt.minus(repayAmount) : vault.debt;
-	const utilRate = globalContants.BIG_NUMBER_1.dividedBy(Vault.computeCollateralRatio(vault.collateral, updatedVaultDebt, price, 1, market, WEN));
-	const newURPercentNumber = utilRate.multipliedBy(100).toNumber();
+	const utilRate = 1 / Vault.computeCollateralRatio(vault.collateral, updatedVaultDebt, price, 1, market, WEN);
+	const newURPercentNumber = utilRate * 100;
 	const urIsGood = vaultUtilizationRateNumberPercent > newURPercentNumber;
 	const [sliderForcedValue, setSliderForcedValue] = useState(vaultUtilizationRateNumber);
 	const maxNumber = formatAssetAmount(max, WEN.decimals);
@@ -79,7 +79,7 @@ export const RepayModal = ({
 	const debtDecimals = formatAssetAmount(vault.debt, WEN.decimals);
 
 	useEffect(() => {
-		setSliderForcedValue(Number(utilRate));
+		setSliderForcedValue(utilRate);
 	}, [utilRate])
 
 	const init = () => {
