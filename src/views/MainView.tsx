@@ -200,7 +200,8 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 				if (res) setMagmaData({
 					...res,
 					accountBalance,
-					vault: v
+					vault: v,
+					totalCollateralRatio: magma.getTotalCollateralRatio()
 				});
 			};
 
@@ -254,12 +255,14 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 					<Switch>
 						<Route path="/stake">
 							<StakeView
-							constants={magmaData}
-							refreshTrigger={switchRefresh} />
+								constants={magmaData}
+								refreshTrigger={switchRefresh} />
 						</Route>
 
 						<Route path="/liquidations">
-							<LiquidationsView constants={magmaData} />
+							<LiquidationsView
+								magmaData={magmaData}
+								refreshTrigger={switchRefresh} />
 						</Route>
 
 						<Route path="/referral">

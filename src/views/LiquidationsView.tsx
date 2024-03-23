@@ -3,7 +3,10 @@ import { useLang } from "../hooks/useLang";
 import { RiskyTroves } from "../components/RiskyTroves";
 import { Decimal } from "lib-base";
 
-export const LiquidationsView = ({ constants }: { constants: Record<string, Decimal> }) => {
+export const LiquidationsView = ({ magmaData, refreshTrigger }: {
+	magmaData?: Record<string, any>;
+	refreshTrigger: () => void;
+}) => {
 	const { t } = useLang();
 
 	return <div className="mainContainer">
@@ -17,6 +20,7 @@ export const LiquidationsView = ({ constants }: { constants: Record<string, Deci
 
 		<RiskyTroves
 			pageSize={7}
-			constants={constants} />
+			constants={magmaData}
+			refreshTrigger={refreshTrigger} />
 	</div>
 };

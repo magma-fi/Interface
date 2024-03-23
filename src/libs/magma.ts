@@ -51,8 +51,8 @@ export const magma: {
 	unstake: (amount: BigNumber, onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void) => void;
 	swap: (wenAmount: BigNumber, collateralPrice: number, onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void) => Promise<void>;
 	getRedemptionFeeWithDecay: (amount: BigNumber) => Promise<BigNumber>;
+	getTotalCollateralRatio: (collateralToken?: Coin) => number;
 	_readyContracts: () => void;
-	_getVaults: () => void;
 	_getMagmaDataStep1: () => Promise<void>;
 	_getMagmaDataStep2: () => Promise<void>;
 	_loadingData: boolean;
@@ -91,6 +91,8 @@ export const magma: {
 		if (this.vaults.length === 0 || forceReload) {
 			const query = graphqlAsker.requestVaults();
 			graphqlAsker.ask(this._currentChainId, query, (data: any) => {
+				console.debug("xxx 原始数据", data, query);
+
 				if (data?.troves) {
 					data.troves.forEach((vault: JsonObject) => {
 						this.vaults.push(
@@ -152,35 +154,6 @@ export const magma: {
 			hints[0],
 			hints[1]
 		);
-	},
-
-	_getVaults: function () {
-		// // _getVaults: function (params: TroveListingParams, overrides?: EthersCallOverrides): Promise<UserTrove[]> {
-		// // const { multiTroveGetter } = _getContracts(this.connection);
-		// const multiTroveGetter = new DappContract(this._magmaCfg.multiTroveGetter, MultiTroveGetterAbi);
-		// // expectPositiveInt(params, "first");
-		// // expectPositiveInt(params, "startingAt");
-		// // if (!validSortingOptions.includes(params.sortedBy)) {
-		// //   throw new Error(
-		// //     `sortedBy must be one of: ${validSortingOptions.map(x => `"${x}"`).join(", ")}`
-		// //   );
-		// // }
-		// // const [totalRedistributed, backendTroves] = await Promise.all([
-		// //   params.beforeRedistribution ? undefined : this.getTotalRedistributed({ ...overrides }),
-		// //   multiTroveGetter.getMultipleSortedTroves(
-		// //     params.sortedBy === "descendingCollateralRatio"
-		// //       ? params.startingAt ?? 0
-		// //       : -((params.startingAt ?? 0) + 1),
-		// //     params.first,
-		// //     { ...overrides }
-		// //   )
-		// // ]);
-		// // const troves = mapBackendTroves(backendTroves);
-		// // if (totalRedistributed) {
-		// //   return troves.map(trove => trove.applyRedistribution(totalRedistributed));
-		// // } else {
-		// //   return troves;
-		// // }
 	},
 
 	_readyContracts: function (): void {
@@ -528,5 +501,18 @@ export const magma: {
 	getRedemptionFeeWithDecay: async function (amount): Promise<BigNumber> {
 		const res = await this._troveManagerContract?.dappFunctions.getRedemptionFeeWithDecay.call(amount.toFixed());
 		return BigNumber(res._hex);
+	},
+
+	getTotalCollateralRatio: function (collateralToken = IOTX): number {
+		if (!this.magmaData.entireSystemColl || !this.magmaData.entireSystemDebt || !this.magmaData.price) return 0;
+
+		return Vault.computeCollateralRatio(
+			this.magmaData.entireSystemColl,
+			this.magmaData.entireSystemDebt,
+			this.magmaData.price,
+			1,
+			collateralToken,
+			WEN
+		);
 	}
 };

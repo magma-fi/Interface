@@ -76,7 +76,7 @@ export type TroveChangeData = {
 }
 
 // export type LiquidatableTrove = UserTrove & { liquidatable: boolean; }
-export type LiquidatableTrove = Vault & { liquidatable: boolean; }
+export type LiquidatableTrove = Vault & { liquidatable?: boolean; }
 
 export type JsonObject = { [key: string]: any };
 
