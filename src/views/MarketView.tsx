@@ -98,7 +98,7 @@ export const MarketView = ({
 	const recoveryMode = total.collateralRatioIsBelowCritical(price);
 	const CCR = constants?.CCR?.gt(0) ? constants?.CCR : CRITICAL_COLLATERAL_RATIO;
 	const appConfigConstants = (appConfig.constants as JsonObject)[String(chainId)];
-	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : appConfigConstants.MAGMA_MINIMUM_COLLATERAL_RATIO;
+	const MCR = constants?.MCR?.gt(0) ? constants?.MCR : Decimal.from(appConfigConstants.MAGMA_MINIMUM_COLLATERAL_RATIO);
 	const appMMROffset = appConfigConstants.appMMROffset;
 	const TVL = constants?.TVL || Decimal.ZERO;
 	const mcrPercent = Decimal.ONE.div(MCR)
@@ -115,7 +115,7 @@ export const MarketView = ({
 	// 	Decimal.ONE.div(line.gt(0) ? line : Decimal.ONE).mul(troveCollateralValue)
 	// );
 	const debtToLiquidate = trove.debt;
-	const liquidationPrice = trove.collateral.gt(0) ? debtToLiquidate.div(trove.collateral) : Decimal.ZERO;
+	const liquidationPrice = trove.collateral.gt(0) ? debtToLiquidate.mul(MCR).div(trove.collateral) : Decimal.ZERO;
 
 	const maxAvailableBorrow = troveCollateralValue.div(liquidationPoint).mul(appMMROffset);
 	const maxAvailableBorrowSubFee = maxAvailableBorrow.mul(Decimal.ONE.sub(borrowingRate));
@@ -806,7 +806,8 @@ export const MarketView = ({
 			availableWithdrawal={availableWithdrawal}
 			availableBorrow={availableBorrow}
 			recoveryMode={recoveryMode}
-			liquidationPoint={liquidationPoint} />}
+			liquidationPoint={liquidationPoint}
+			MCR={MCR} />}
 
 		{showDepositDoneModal && <TxDone
 			title={t("depositedSuccessfully")}
@@ -845,7 +846,8 @@ export const MarketView = ({
 			recoveryMode={recoveryMode}
 			// liquidationPoint={liquidationPoint}
 			liquidationPoint={appLiquidationPoint}
-			availableBorrow={availableBorrow} />}
+			availableBorrow={availableBorrow}
+			MCR={MCR} />}
 
 		{showBorrowDoneModal && <TxDone
 			title={t("borrowedSuccessfully")}
