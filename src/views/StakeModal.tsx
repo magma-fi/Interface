@@ -39,11 +39,10 @@ export const StakeModal = ({
 	const [depositAmount, setDepositAmount] = useState(0);
 	const txId = useMemo(() => String(new Date().getTime()), []);
 	const transactionState = useMyTransactionState(txId, true);
-	const [useMax, setUseMax] = useState(false);
 
 	const [validChange, description] = validateStabilityDepositChange(
 		stabilityDeposit,
-		useMax ? wenBalance : stabilityDeposit.currentLUSD.add(depositAmount),
+		stabilityDeposit.currentLUSD.add(depositAmount),
 		validationContext
 	);
 
@@ -54,7 +53,6 @@ export const StakeModal = ({
 		setValueForced(val);
 		setDepositAmount(val);
 		setErrorMessages(undefined);
-		setUseMax(true);
 
 		amountStaked = val;
 	};
@@ -63,7 +61,6 @@ export const StakeModal = ({
 		setValueForced(-1);
 		setDepositAmount(val);
 		setErrorMessages(undefined);
-		setUseMax(false);
 
 		amountStaked = val;
 	};
