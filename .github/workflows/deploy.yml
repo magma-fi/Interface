@@ -1,0 +1,40 @@
+name: Deploy Vite App
+
+on:
+  push:
+    branches:
+      - github
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.12.0'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build the project
+        run: npm run build:vite
+
+      - name: Deploy to branch
+        run: |
+          mv dist /tmp/dist
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git checkout --orphan deploy-branch
+          git rm -rf .
+          git clean -fdx
+          mv /tmp/dist/* .
+          
+          git add -A
+          git commit -m "Deploy React app to branch"
+          
+          git push -f origin deploy-branch
