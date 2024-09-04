@@ -1,4 +1,4 @@
-name: Deploy Vite App
+name: Deploy Magma App
 
 on:
   push:
