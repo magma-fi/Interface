@@ -3,7 +3,7 @@ name: Deploy Magma App
 on:
   push:
     branches:
-      - github
+      - dev
 
 jobs:
   build-and-deploy:
