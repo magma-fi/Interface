@@ -16,13 +16,18 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20.12.0'
+          node-version: '16.20.2'
+      
+      - name: Install Yarn
+        run: npm install -g yarn
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: yarn
+        # run: npm install --legacy-peer-deps
 
       - name: Build the project
-        run: npm run build:vite
+        run: npm run build
+        # run: npm run build:vite
 
       - name: Deploy to branch
         run: |
