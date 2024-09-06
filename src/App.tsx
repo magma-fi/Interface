@@ -6,7 +6,6 @@ import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { SafeConnector } from "wagmi/connectors/safe"
 import { LiquityProvider } from "./hooks/LiquityContext";
-import { LiquityFrontend } from "./LiquityFrontend";
 import { AppLoader } from "./components/AppLoader";
 import { appController } from "./libs/appController";
 import { MainView } from "./views/MainView";
@@ -22,8 +21,15 @@ const wagmiCfg = createConfig({
     new InjectedConnector({
       chains,
       options: {
-        name: window?.okxwallet ? "OKX Wallet" : "MetaMask",
-        getProvider: () => window?.okxwallet ?? window.ethereum,
+        name: "MetaMask",
+        getProvider: () => window.ethereum
+      }
+    }),
+    new InjectedConnector({
+      chains,
+      options: {
+        name: "OKX Wallet",
+        getProvider: () => window?.okxwallet
       }
     }),
     new WalletConnectConnector({
