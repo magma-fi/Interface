@@ -60,6 +60,12 @@ export const USDC: Coin = {
 	logo: "images/usdc.png"
 }
 
+export const USDT: Coin = {
+	symbol: "USDT",
+	logo: "images/usdt.png",
+	decimals: 6
+}
+
 export const LangOptions: OptionItem[] = [
 	{
 		title: Langs.English,

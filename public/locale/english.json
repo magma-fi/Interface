@@ -178,5 +178,6 @@
 	"borrowable": "Borrowable",
 	"manage": "Manage",
 	"back": "back",
-	"vault": "vault"
+	"vault": "vault",
+	"psm": "PSM"
 }

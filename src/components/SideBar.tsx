@@ -67,6 +67,15 @@ export const SideBar: React.FC = ({ children }) => {
         active={pathname === "/liquidations"}
         target="_self" />
 
+      <NavLink
+        label={t("psm")}
+        icon="images/liquidations.png"
+        url={"/psm" + urlSearch}
+        fullWidth={true}
+        showExternalLink={false}
+        active={pathname === "/psm"}
+        target="_self" />
+
       <div
         className="navLink mainMenuForMobile"
         onClick={handleShowMenuForMobile}>

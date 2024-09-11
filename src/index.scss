@@ -1278,6 +1278,29 @@ input {
   }
 }
 
+.centerBox {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: var(--flex-gap-big);
+  width: fit-content;
+  flex-direction: column;
+  border-radius: 1rem;
+  border: 1px solid var(--surface-card-stroke);
+  background: var(--surface-card);
+  box-shadow: 19px 24px 72px 0px rgba(5, 2, 7, 0.40);
+  padding: 1.5rem;
+
+  .titleBar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+    width: 100%;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   /*  */
 }

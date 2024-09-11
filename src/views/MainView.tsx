@@ -25,6 +25,7 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 import { Vault } from "../libs/Vault";
 import BigNumber from "bignumber.js";
 import { Dashboard } from "./Dashboard";
+import { PSM } from "./PSM";
 
 export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const { isConnected } = useAccount();
@@ -213,6 +214,10 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 								externalDataDone={externalDataDone}
 								magmaData={magmaData}
 								refreshTrigger={switchRefresh} />} />
+
+						<Route
+							path="/psm"
+							element={<PSM magmaData={magmaData} />} />
 
 						<Route
 							path="/"
