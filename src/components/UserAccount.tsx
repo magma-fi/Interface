@@ -70,7 +70,6 @@ export const UserAccount = ({
   const entryView = isConnected ? <div className="flex-row-align-left">
     <img
       src={"images/" + connector?.name + ".png"}
-      width="21px"
       height="18px" />
 
     <div

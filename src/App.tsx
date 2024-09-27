@@ -43,8 +43,22 @@ const wagmiCfg = createConfig({
     new InjectedConnector({
       chains,
       options: {
-        name: window?.okxwallet ? "OKX Wallet" : "MetaMask",
-        getProvider: () => window?.okxwallet ?? window.ethereum,
+        name: "MetaMask",
+        getProvider: () => window.ethereum,
+      }
+    }),
+    new InjectedConnector({
+      chains,
+      options: {
+        name: "OKX Wallet",
+        getProvider: () => window?.okxwallet,
+      }
+    }),
+    new InjectedConnector({
+      chains,
+      options: {
+        name: "Gate Wallet",
+        getProvider: () => window?.gatewallet,
       }
     }),
     new WalletConnectConnector({
