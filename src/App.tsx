@@ -32,39 +32,11 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
 
 const wagmiCfg = createConfig({
   connectors: [
-    new InjectedConnector({
-      chains,
-      options: {
-        name: "MetaMask",
-        getProvider: () => window.ethereum,
-      }
-    }),
-    new InjectedConnector({
-      chains,
-      options: {
-        name: "OKX Wallet",
-        getProvider: () => window?.okxwallet,
-      }
-    }),
-    new InjectedConnector({
-      chains,
-      options: {
-        name: "Gate Wallet",
-        getProvider: () => window?.gatewallet,
-      }
-    }),
     new WalletConnectConnector({
       chains,
       options: {
         projectId: "a1362d88b5470c1006e169ce345815ae",
         showQrModal: true
-      }
-    }),
-    new SafeConnector({
-      chains: [iotex],
-      options: {
-        allowedDomains: [/safe.iotex.io$/],
-        debug: false
       }
     })
   ],
@@ -79,6 +51,32 @@ const App = () => {
 
   useEffect(() => {
     appController.init();
+
+    if (window.Telegram?.WebApp) {
+      // window.Telegram.WebApp.showAlert("Welcome to Magma!");
+
+      window.open = url => {
+        try {
+          if (!url) {
+            return null;
+          }
+
+          if (typeof url !== "string") {
+            url = url.toString();
+          }
+
+          if (url.startsWith("metamask://")) {
+            url = url.replace("metamask://", "https://metamask.app.link/");
+          }
+
+          window.Telegram.WebApp.openLink(url);
+        } catch (error) {
+          console.error(`Failed to openLink ${url}`, error);
+        }
+
+        return null;
+      };
+    }
   }, []);
 
   return config.loaded ? <WagmiConfig config={wagmiCfg}>
