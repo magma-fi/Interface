@@ -51,7 +51,7 @@ export const appController: {
 	},
 
 	employWorkers: function (chainId, onDone?: () => void) {
-		this.worker = new Worker("/workers/get-history.js", {
+		this.worker = new Worker("./workers/get-history.js", {
 			type: "classic"
 		});
 

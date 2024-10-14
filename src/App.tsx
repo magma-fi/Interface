@@ -64,6 +64,8 @@ const App = () => {
 
   useEffect(() => {
     appController.init();
+
+    Telegram.WebApp.showAlert("Welcome to Magma!");
   }, []);
 
   return <WagmiConfig config={wagmiCfg}>
