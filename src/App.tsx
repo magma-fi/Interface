@@ -1,62 +1,34 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from "react";
-import { configureChains, WagmiConfig, createConfig } from "wagmi";
+import { createConfig, WagmiProvider, http } from "wagmi";
+import { walletConnect } from "wagmi/connectors";
 import { iotexTestnet, iotex } from "wagmi/chains";
-import { publicProvider } from "wagmi/providers/public";
-import { InjectedConnector } from "wagmi/connectors/injected";
-import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import { SafeConnector } from "wagmi/connectors/safe"
 import { LiquityProvider } from "./hooks/LiquityContext";
 import { AppLoader } from "./components/AppLoader";
 import { appController } from "./libs/appController";
 import { MainView } from "./views/MainView";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [iotex, iotexTestnet],
-  [publicProvider()],
-  { batch: { multicall: true } }
-);
+// Extend the Window interface to include Telegram
+declare global {
+  interface Window {
+    Telegram?: any;
+  }
+}
+
+const queryClient = new QueryClient()
 
 const wagmiCfg = createConfig({
+  chains: [iotex, iotexTestnet],
   connectors: [
-    new InjectedConnector({
-      chains,
-      options: {
-        name: "MetaMask",
-        getProvider: () => window.ethereum
-      }
-    }),
-    new InjectedConnector({
-      chains,
-      options: {
-        name: "OKX Wallet",
-        getProvider: () => window?.okxwallet
-      }
-    }),
-    new InjectedConnector({
-      chains,
-      options: {
-        name: "Gate Wallet",
-        getProvider: () => window?.gatewallet
-      }
-    }),
-    new WalletConnectConnector({
-      chains,
-      options: {
-        projectId: "a1362d88b5470c1006e169ce345815ae",
-        showQrModal: true
-      }
-    }),
-    new SafeConnector({
-      chains: [iotex],
-      options: {
-        allowedDomains: [/safe.iotex.io$/],
-        debug: false
-      }
+    walletConnect({
+      projectId: "a1362d88b5470c1006e169ce345815ae"
     })
   ],
-  autoConnect: true,
-  publicClient,
-  webSocketPublicClient
+  transports: {
+    [iotex.id]: http(),
+    [iotexTestnet.id]: http(),
+  },
 });
 
 const App = () => {
@@ -65,14 +37,40 @@ const App = () => {
   useEffect(() => {
     appController.init();
 
-    Telegram.WebApp.showAlert("Welcome to Magma!");
+    if (window.Telegram) {
+      window.Telegram?.WebApp.showAlert("Welcome to Magma!");
+
+      window.open = url => {
+        try {
+          if (!url) {
+            return null;
+          }
+
+          if (typeof url !== "string") {
+            url = url.toString();
+          }
+
+          if (url.startsWith("metamask://")) {
+            url = url.replace("metamask://", "https://metamask.app.link/");
+          }
+
+          window.Telegram.WebApp.openLink(url);
+        } catch (error) {
+          console.error(`Failed to openLink ${url}`, error);
+        }
+
+        return null;
+      };
+    }
   }, []);
 
-  return <WagmiConfig config={wagmiCfg}>
-    <LiquityProvider loader={loader}>
-      <MainView chains={chains} />
-    </LiquityProvider>
-  </WagmiConfig>
+  return <WagmiProvider config={wagmiCfg}>
+    <QueryClientProvider client={queryClient}>
+      <LiquityProvider loader={loader}>
+        <MainView chains={[iotex, iotexTestnet]} />
+      </LiquityProvider>
+    </QueryClientProvider>
+  </WagmiProvider>
 };
 
 export default App;

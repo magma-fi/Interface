@@ -20,8 +20,7 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 import { providers } from 'ethers';
 import { multicaller } from "./multicaller";
 import { formatAssetAmount, generateTrials, randomInteger } from "../utils";
-import { zeroAddress } from "viem";
-import { erc20ABI } from "wagmi";
+import { erc20Abi, zeroAddress } from "viem";
 
 export const magma: {
 	borrowerOperationsContract?: DappContract;
@@ -256,7 +255,7 @@ export const magma: {
 			const tokenCfg = token[1];
 
 			if (tokenCfg.address !== zeroAddress) {
-				this._tokenContract[key] = new DappContract(tokenCfg.address, erc20ABI, this._signer);
+				this._tokenContract[key] = new DappContract(tokenCfg.address, erc20Abi, this._signer);
 			}
 
 			if (tokenCfg.troveManager) {

@@ -10,12 +10,12 @@ import appConfig from "../appConfig.json";
 import { formatAssetAmount, formatCurrency, loadABI } from "../utils";
 import { useLiquity } from "../hooks/LiquityContext";
 import { IOTX, WEN, globalContants } from "../libs/globalContants";
-import { erc20ABI } from "wagmi";
 import swapAndCloseTool from "../abis/swapAndCloseTool.json";
 import { Vault } from "../libs/Vault";
 import BigNumber from "bignumber.js";
 import { DappContract } from "../libs/DappContract";
 import { magma } from "../libs/magma";
+import { erc20Abi } from "viem";
 
 export const CloseModal = ({
 	isOpen = false,
@@ -109,7 +109,7 @@ export const CloseModal = ({
 		// if (!publicClient) return;
 		setSwapping(true);
 
-		const theContract = new DappContract((appConfig.magma as JsonObject)[indexOfConfig].lusdToken, erc20ABI, signer);
+		const theContract = new DappContract((appConfig.magma as JsonObject)[indexOfConfig].lusdToken, erc20Abi, signer);
 		theContract.dappFunctions.approve.run(
 			undefined,
 			error => {

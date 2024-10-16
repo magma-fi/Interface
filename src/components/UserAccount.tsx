@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { formatNumber, shortenAddress } from "../utils";
 import { useLang } from "../hooks/useLang";
-import { Address, Chain, useAccount, useDisconnect, usePrepareSendTransaction, useSwitchNetwork } from "wagmi";
+import { Address, Chain, useAccount, useDisconnect, useSwitchChain } from "wagmi";
 import { DropdownMenu } from "./DropdownMenu";
 import { useEffect, useMemo } from "react";
 import { LPScoreObject, OptionItem } from "../libs/types";
@@ -11,7 +11,7 @@ import { useLiquity } from "../hooks/LiquityContext";
 import { parseEther } from "viem";
 import { globalContants } from "../libs/globalContants";
 import { Link } from "react-router-dom";
-import { switchNetwork } from '@wagmi/core';
+import appConfig from "../appConfig.json";
 
 export const UserAccount = ({
   onConnect = () => { },
@@ -35,23 +35,22 @@ export const UserAccount = ({
   const { isConnected, connector } = useAccount();
   const { disconnect } = useDisconnect();
   const chain = chains?.find(item => item.id === chainId);
+  const { switchChain } = useSwitchChain();
 
-  const { error } = usePrepareSendTransaction({
-    chainId,
-    to: account,
-    value: parseEther("0.0000000000001")
-  });
+  // const { error } = usePrepareSendTransaction({
+  //   chainId,
+  //   to: account,
+  //   value: parseEther("0.0000000000001")
+  // });
 
   useEffect(() => {
-    if (error?.name === "ChainMismatchError" && chainId > 0) {
+    // if (error?.name === "ChainMismatchError" && chainId > 0) {
+    if (!appConfig.networks.includes(chainId) && chainId > 0) {
       setTimeout(async () => {
-        const newChain = await switchNetwork({ chainId: globalContants.DEFAULT_NETWORK_ID });
-        if (newChain.id === chainId) {
-          window.location.reload();
-        }
+        await switchChain({ chainId: globalContants.DEFAULT_NETWORK_ID });
       }, 3000);
     }
-  }, [error, chainId]);
+  }, [chainId]);
 
   const chainOptions = useMemo(() => {
     return chains.map((item: Chain) => {

@@ -6,7 +6,7 @@ import { UserAccount } from "../components/UserAccount";
 import { Route, BrowserRouter, Routes } from "react-router-dom";
 import { BorrowView } from "./BorrowView";
 import { StakeView } from "./StakeView";
-import { Chain, useAccount, useBalance, useNetwork } from "wagmi";
+import { Chain, useAccount, useBalance } from "wagmi";
 import { LiquidationsView } from "./LiquidationsView";
 import { useLiquity } from "../hooks/LiquityContext";
 import { globalContants } from "../libs/globalContants";
@@ -30,7 +30,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const { isConnected } = useAccount();
 	const [showConnectModal, setShowConnectModal] = useState(false);
 	const [showTerms, setShowTerms] = useState(false);
-	const { chain } = useNetwork();
+	const { chain } = useAccount();
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
 	const { account, chainId, signer } = useLiquity();
 	const [referrer, setReferrer] = useState<string | undefined>(undefined);
