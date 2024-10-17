@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { useConnect } from "wagmi";
 import { useLang } from "../hooks/useLang";
-import { Modal } from "../components/Modal";
 
 export const ConnectWalletModal = ({
 	isOpen = false,

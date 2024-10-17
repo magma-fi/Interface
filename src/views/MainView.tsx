@@ -137,12 +137,6 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	}, [referrer, chainId]);
 
 	useEffect(() => {
-		if (!isConnected) {
-			setShowConnectModal(true);
-		}
-	}, [isConnected]);
-
-	useEffect(() => {
 		const getContants = async () => {
 			let totalSupply;
 			let minNetDebt;
