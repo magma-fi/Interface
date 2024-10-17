@@ -21,7 +21,13 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
   [
     publicProvider(),
     // jsonRpcProvider({
-    //   rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
+    //   rpc: chain => {
+    //     if (chain.id === 4689) {
+    //       return { http: "https://iotexnode.filda.io" }
+    //     } else {
+    //       return null;
+    //     }
+    //   }
     // })
   ],
   { batch: { multicall: true } }
@@ -41,6 +47,15 @@ const wagmiCfg = createConfig({
   publicClient,
   webSocketPublicClient
 });
+
+const rabbyKit = undefined;
+// const rabbyKit = createModal({
+//   chains,
+//   wagmi: wagmiCfg,
+//   projectId: "a1362d88b5470c1006e169ce345815ae",
+//   appName: "Magma Finance",
+//   showWalletConnect: true
+// });
 
 const App = () => {
   const config = useAsyncValue(getConfig);
@@ -82,7 +97,8 @@ const App = () => {
       <TransactionProvider>
         <LiquityFrontend
           chains={chains}
-          loader={loader} />
+          loader={loader}
+          rabbyKit={rabbyKit} />
       </TransactionProvider>
     </LiquityProvider>
   </WagmiConfig> : <></>

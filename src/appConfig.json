@@ -18,19 +18,22 @@
 					"link": "https://swap.mimo.exchange/add/0x6c0bf4b53696b5434a0d21c7d13aa3cbf754913e/0x8e33229206f726993e4a7bf7da2347f3743bf8b4",
 					"url": "https://graphnode.filda.io/subgraphs/name/mimo-WEN-GEODLP-staking-iotex",
 					"staking": true,
-					"pointsPerHour": 10
+					"pointsPerHour": 10,
+					"endsIn": "2024-4-24 2:59"
 				},
 				"WEN-XNET": {
 					"link": "https://swap.mimo.exchange/add/0x6c0bf4b53696b5434a0d21c7d13aa3cbf754913e/0x52df59be0be8abdabba9e3862c8c0f1f8b3fe9ca",
 					"url": "https://graphnode.filda.io/subgraphs/name/mimo-WEN-XNETLP-staking-iotex",
 					"staking": true,
-					"pointsPerHour": 5
+					"pointsPerHour": 5,
+					"endsIn": "2024-4-24 2:59"
 				},
 				"WEN-WIFI": {
 					"link": "https://mimo.exchange/add/0x6c0bf4b53696b5434a0d21c7d13aa3cbf754913e/0xcee948f1abbd247a5e41a88b28990db81ef00bdc",
 					"url": "https://graphnode.filda.io/subgraphs/name/mimo-WEN-WIFILP-staking-iotex",
 					"staking": true,
-					"pointsPerHour": 8
+					"pointsPerHour": 8,
+					"endsIn": "2024-4-24 2:59"
 				}
 			}
 		}
