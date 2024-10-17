@@ -14,6 +14,8 @@ export const ConnectWalletModal = ({
 		evt.stopPropagation();
 		evt.preventDefault();
 		connect({ connector: connectors[parseInt(evt.currentTarget.id)] });
+
+		onClose();
 	};
 
 	return isOpen ? <div className="modalOverlay">
