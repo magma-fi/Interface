@@ -1,11 +1,8 @@
 import { useEffect } from "react";
-import { configureChains, WagmiConfig, createConfig, WindowProvider } from "wagmi";
+import { configureChains, WagmiConfig, createConfig } from "wagmi";
 import { iotexTestnet, iotex } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
-import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
-import { MetaMaskConnector } from "wagmi/connectors/metaMask";
-import { SafeConnector } from "wagmi/connectors/safe"
 import { LiquityProvider } from "./hooks/LiquityContext";
 import { getConfig } from "./config";
 import { LiquityFrontend } from "./LiquityFrontend";
