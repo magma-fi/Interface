@@ -39,7 +39,7 @@ export const MAGMA: Coin = {
 }
 
 export const WEN: Coin = {
-	symbol: "WEN",
+	symbol: "ioUSD",
 	logo: "images/wen.png",
 	decimals: 18
 }
