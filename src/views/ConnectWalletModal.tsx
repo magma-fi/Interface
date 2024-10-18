@@ -18,7 +18,7 @@ export const ConnectWalletModal = ({
 	};
 
 	return isOpen ? <div className="modalOverlay">
-		<div className="txDoneModal">
+		<div className="txDoneModal connectWalletModal">
 			<button
 				className="iconButton"
 				style={{

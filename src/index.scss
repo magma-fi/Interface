@@ -537,6 +537,22 @@ h4 {
       height: 120px;
     }
   }
+
+  .connectWalletModal {
+    @media (max-width: 576px) {
+      width: calc(100% - 48px);
+      max-width: none;
+      position: fixed;
+      bottom: 0;
+      align-items: center;
+
+      .label {
+        width: 100%;
+        white-space: wrap;
+        text-align: center;
+      }
+    }
+  }
 }
 
 .mainContainer {
