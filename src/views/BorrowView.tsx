@@ -18,9 +18,11 @@ export const BorrowView = ({ externalDataDone, magmaData, refreshTrigger }: {
 	const tokens = Object.values(magma.tokens) || [];
 	const [magmaDataForSingleToken, setMagmaDataForSingleToken] = useState<Record<string, any>>();
 	const [currentMarket, setCurrentMarket] = useState<Coin>();
+	const [loadingForSingleToken, setLoadingForSingleToken] = useState(true);
 
 	const readyForOpenningMarket = (token: string) => {
 		setCurrentMarket(magma.tokens[token]);
+		setLoadingForSingleToken(false);
 
 		setMagmaDataForSingleToken({
 			...magmaData,
@@ -44,6 +46,11 @@ export const BorrowView = ({ externalDataDone, magmaData, refreshTrigger }: {
 		}
 
 		const targetToken = window.localStorage.getItem(globalContants.TARGET_TOKEN);
+
+		if (!targetToken) {
+			setLoadingForSingleToken(false);
+		}
+
 		if (magmaData && targetToken && tokens?.length > 0 && tokens.findIndex(item => item.symbol === targetToken) >= 0) {
 			readyForOpenningMarket(targetToken);
 			window.localStorage.removeItem(globalContants.TARGET_TOKEN);
@@ -69,7 +76,12 @@ export const BorrowView = ({ externalDataDone, magmaData, refreshTrigger }: {
 				<h1>{t("borrow")}&nbsp;{WEN.symbol}</h1>
 			</div>
 
-			<div className="vaultList">
+			<div
+				className="vaultList"
+				style={{
+					pointerEvents: loadingForSingleToken ? "none" : "all",
+					filter: loadingForSingleToken ? "opacity(0.8)" : "none"
+				}}>
 				{tokens.map(token => {
 					return <TokenCard
 						key={token.symbol}
