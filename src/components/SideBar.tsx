@@ -146,7 +146,22 @@ export const SideBar: React.FC = ({ children }) => {
             src="images/external-link.png" />
         </a>
 
-        <hr className="division" />
+        <a
+          className="navLink"
+          href="https://wen.magma.finance"
+          target="_blank">
+          <div className="icon">
+            <img src="images/exchange.svg" />
+          </div>
+
+          {t("exchange")}&nbsp;WEN
+
+          <img
+            id="externalLink"
+            src="images/external-link.png" />
+        </a>
+
+        {/* <hr className="division" />
 
         <div style={{
           marginLeft: "16px",
@@ -154,10 +169,10 @@ export const SideBar: React.FC = ({ children }) => {
           gap: "8px",
           flexDirection: "column"
         }}>
-          {/* <StyleModeSelect /> */}
+          <StyleModeSelect />
 
-          {/* <LangSelect /> */}
-        </div>
+          <LangSelect />
+        </div> */}
       </div>}
     </div>
   );
