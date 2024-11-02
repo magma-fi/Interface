@@ -125,7 +125,7 @@
 					"multiTroveGetter": "0xf672ee5017b6af9A7a747d5010dE6D8cb8949eb0"
 				},
 				"uniIOTX": {
-					"logo": "images/erc20.png",
+					"logo": "images/uniIOTX.svg",
 					"symbol": "uniIOTX",
 					"decimals": 18,
 					"address": "0x96045878Cc8996605b0fb1bC428d8C4401ddB138",
@@ -171,7 +171,7 @@
 					"priceFeed": "0x1Ec94b48F3756F0D6240Bc7820EA4B5D7855D00A"
 				},
 				"uniIOTX": {
-					"logo": "images/erc20.png",
+					"logo": "images/uniIOTX.svg",
 					"symbol": "uniIOTX",
 					"decimals": 18,
 					"address": "0x236f8c0a61dA474dB21B693fB2ea7AAB0c803894",

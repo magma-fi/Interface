@@ -114,12 +114,12 @@ export const Dashboard = ({ magmaData }: {
 						title={t("vault")}
 						showIcon={false} />
 
-					<TokenStakedCard
+					{/* <TokenStakedCard
 						token={token}
 						magmaData={magmaData}
 						onOpenPool={handleOpenPool}
 						title={t("stabilityPool")}
-						showIcon={false} />
+						showIcon={false} /> */}
 				</div>
 			})}
 		</div>
