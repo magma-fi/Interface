@@ -3,9 +3,12 @@ const graphQLFetch = {
 
 	init: function (chainId) {
 		if (chainId === 4690) {
+			// magma-iotex-testnet-demo-erc20
+			// magma-subgraph-iotex-testnet
 			this._subgraphURL = "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet";
 		} else {
-			this._subgraphURL = "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-v2"
+			// this._subgraphURL = "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-v2"
+			this._subgraphURL = "https://graphnode.filda.io/subgraphs/name/magma-iotex-v3"
 		}
 	},
 
