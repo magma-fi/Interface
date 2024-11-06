@@ -110,4 +110,5 @@ export type LPScoreObject = {
 	points?: number;
 	link?: string;
 	pointsPerHour: number;
+	endsIn: number;
 }
