@@ -337,7 +337,8 @@ export const BorrowModal = ({
 
 					<button
 						className="primaryButton bigButton"
-						style={{ width: "100%" }}>
+						style={{ width: "100%" }}
+						disabled>
 						<img src="images/borrow-dark.png" />
 
 						{t("borrow")}

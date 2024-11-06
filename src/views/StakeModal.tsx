@@ -168,7 +168,8 @@ export const StakeModal = ({
 			<button
 				className="primaryButton bigButton"
 				style={{ width: "100%" }}
-				disabled={depositAmount === 0}>
+				// disabled={depositAmount === 0}
+				disabled>
 
 				<img src="images/stake-dark.png" />
 
