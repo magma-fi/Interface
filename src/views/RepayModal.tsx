@@ -290,6 +290,8 @@ export const RepayModal = ({
 						positive={urIsGood} />
 				</div>
 			</div>
+
+			<p className="tips">{t("tips4Down")}</p>
 		</div>
 
 		{
