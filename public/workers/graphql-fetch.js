@@ -1,12 +1,18 @@
 const graphQLFetch = {
 	_subgraphURL: "",
-
-	init: function (chainId) {
-		if (chainId === 4690) {
-			this._subgraphURL = "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet";
-		} else {
-			this._subgraphURL = "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-v2"
+	_config: {
+		"4090": {
+			"IOTX": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet",
+			"uniIOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-testnet-demo-erc20"
+		},
+		"4689": {
+			"IOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-v3",
+			"uniIOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-erc20-v3"
 		}
+	},
+
+	init: function (chainId, token) {
+		this._subgraphURL = this._config[chainId][token];
 	},
 
 	requestSequenceNumbersWithDay: async function (beginTime, endTime) {

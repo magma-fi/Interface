@@ -1,13 +1,17 @@
 {
 	"subgraph": {
 		"4690": {
-			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet",
-			"graphql4Erc20": "",
+			"graphql": {
+				"IOTX": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet",
+				"uniIOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-testnet-demo-erc20"
+			},
 			"stabilityScore": ""
 		},
 		"4689": {
-			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-v2",
-			"graphql4Erc20": "",
+			"graphql": {
+				"IOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-v3",
+				"uniIOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-erc20-v3"
+			},
 			"stabilityScore": "https://graphnode.filda.io/subgraphs/name/magma-WEN-deposit-point-iotex",
 			"lpScore": {
 				"WEN-IOTX": {

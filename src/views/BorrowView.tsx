@@ -7,18 +7,26 @@ import { Coin } from "../libs/types";
 import { MarketView } from "./MarketView";
 import { magma } from "../libs/magma";
 import { TokenCard } from "./TokenCard";
+import { useLiquity } from "../hooks/LiquityContext";
+import { appController } from "../libs/appController";
 
-export const BorrowView = ({ externalDataDone, magmaData, refreshTrigger }: {
+export const BorrowView = ({
+	// externalDataDone,
+	magmaData,
+	refreshTrigger
+}: {
 	isReferrer: boolean;
-	externalDataDone?: boolean;
+	// externalDataDone?: boolean;
 	magmaData?: Record<string, any>;
 	refreshTrigger: () => void;
 }) => {
 	const { t } = useLang();
+	const { chainId } = useLiquity();
 	const tokens = Object.values(magma.tokens) || [];
 	const [magmaDataForSingleToken, setMagmaDataForSingleToken] = useState<Record<string, any>>();
 	const [currentMarket, setCurrentMarket] = useState<Coin>();
 	const [loadingForSingleToken, setLoadingForSingleToken] = useState(true);
+	const [externalDataDone, setExternalDataDone] = useState(false);
 
 	const readyForOpenningMarket = (token: string) => {
 		setCurrentMarket(magma.tokens[token]);
@@ -39,6 +47,14 @@ export const BorrowView = ({ externalDataDone, magmaData, refreshTrigger }: {
 			balance: magmaData?.balance[token]
 		});
 	};
+
+	useEffect(() => {
+		if (chainId === 0 || !currentMarket?.symbol) return;
+
+		appController.employWorkers(chainId, currentMarket.symbol, () => {
+			setExternalDataDone(true);
+		});
+	}, [chainId, currentMarket]);
 
 	useEffect(() => {
 		if (currentMarket && magmaDataForSingleToken && magmaData) {
