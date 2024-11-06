@@ -34,7 +34,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const isSupportedNetwork = chains.findIndex(item => item.id === chain?.id) >= 0;
 	const { account, chainId, signer } = useLiquity();
 	const [referrer, setReferrer] = useState<string | undefined>(undefined);
-	const [externalDataDone, setExternalDataDone] = useState(false);
+	// const [externalDataDone, setExternalDataDone] = useState(false);
 	const [magmaData, setMagmaData] = useState<Record<string, any>>();
 	const [points, setPoints] = useState(0);
 	const { data } = useBalance({ address: account as Address, chainId });
@@ -47,13 +47,13 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const haveDeposited: boolean = Object.values(vaults).findIndex(vault => (vault as unknown as Vault).collateral.gt(0)) >= 0;
 	const [refresh, setRefresh] = useState(false);
 
-	useEffect(() => {
-		if (chainId === 0) return;
+	// useEffect(() => {
+	// 	if (chainId === 0) return;
 
-		appController.employWorkers(chainId, () => {
-			setExternalDataDone(true);
-		});
-	}, [chainId]);
+	// 	appController.employWorkers(chainId, () => {
+	// 		setExternalDataDone(true);
+	// 	});
+	// }, [chainId]);
 
 	useEffect(() => {
 		if (!window.localStorage.getItem(globalContants.TERMS_SHOWED)) {
@@ -210,7 +210,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 							path="/borrow"
 							element={<BorrowView
 								isReferrer={isReferrer}
-								externalDataDone={externalDataDone}
+								// externalDataDone={externalDataDone}
 								magmaData={magmaData}
 								refreshTrigger={switchRefresh} />} />
 

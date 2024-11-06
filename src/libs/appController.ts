@@ -13,10 +13,10 @@ export const appController: {
 	detectLang: () => void;
 	changeLang: (lng: Langs) => void;
 	relaunch: () => void;
-	employWorkers: (chainId: number, onDone?: () => void) => void;
+	employWorkers: (chainId: number, tokenName: string, onDone?: () => void) => void;
 	_dbConnector: IDBOpenDBRequest;
 	_db: IDBDatabase | undefined;
-	openDB: (chainId: number, onDone: () => void) => void;
+	openDB: (chainId: number, tokenSymbol: string, onDone: () => void) => void;
 	readAll: (onDone: (arg?: IDBCursor) => void) => void;
 	getUserPoints: (chainId: number, user: string, referrer: string, onDone: (point: number, resObject: Record<string, any>) => void) => void;
 	_getUserWENScore: (chainId: number, user: string) => Promise<number>;
@@ -50,7 +50,7 @@ export const appController: {
 		window.location.reload();
 	},
 
-	employWorkers: function (chainId, onDone?: () => void) {
+	employWorkers: function (chainId, tokenName, onDone?: () => void) {
 		this.worker = new Worker("./workers/get-history.js", {
 			type: "classic"
 		});
@@ -70,12 +70,15 @@ export const appController: {
 
 		this.worker.postMessage({
 			cmd: "fetch",
-			params: chainId
+			params: {
+				chainId,
+				tokenName
+			}
 		});
 	},
 
-	openDB: function (chainId, onDone: () => void) {
-		this._dbConnector = window.indexedDB.open("magma-db-" + chainId, 1);
+	openDB: function (chainId, tokenSymbol, onDone: () => void) {
+		this._dbConnector = window.indexedDB.open("magma-db-" + chainId + "-" + tokenSymbol, 1);
 
 		this._dbConnector.onerror = event => {
 			console.error('数据库打开出错', event);

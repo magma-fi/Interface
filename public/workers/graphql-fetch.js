@@ -1,6 +1,6 @@
 const graphQLFetch = {
 	_subgraphURL: "",
-	_config={
+	_config: {
 		"4090": {
 			"IOTX": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet",
 			"uniIOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-testnet-demo-erc20"
@@ -11,7 +11,7 @@ const graphQLFetch = {
 		}
 	},
 
-	init: function (chainId, token = "IOTX") {
+	init: function (chainId, token) {
 		this._subgraphURL = this._config[chainId][token];
 	},
 
