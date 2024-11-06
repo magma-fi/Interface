@@ -20,7 +20,7 @@
 	"recoveryModeAt": "Recovery Mode at {recovery}",
 	"totalDeposits": "Total Deposits",
 	"numberOfVaults": "Number of Vaults",
-	"borrowFee": "Borrow Deposit Fee",
+	"borrowFee": "borrowing Fee",
 	"liquidationReserve": "Liquidation Reserve",
 	"loanToValue": "Loan to Value",
 	"yourVault": "your vault",
