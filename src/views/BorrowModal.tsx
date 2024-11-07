@@ -8,7 +8,7 @@ import { Coin, ErrorMessage, ValidationContext } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Decimal, Trove, Difference, LUSD_LIQUIDATION_RESERVE } from "lib-base";
+import { Decimal, Trove, Difference, LUSD_LIQUIDATION_RESERVE, UserTrove } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
@@ -40,7 +40,7 @@ export const BorrowModal = ({
 	onClose: () => void;
 	market: Coin;
 	price: Decimal;
-	trove: Trove;
+	trove: UserTrove;
 	fees: Fees;
 	validationContext: ValidationContext;
 	max: Decimal;
@@ -327,6 +327,9 @@ export const BorrowModal = ({
 				(
 					(!transactionState.id && transactionState.type === "idle")
 					|| transactionState.type === "cancelled"
+				) && (
+					trove.status === "open" ||
+					trove.status === "nonExistent"
 				)
 				? <TroveAction
 					transactionId={txId}
