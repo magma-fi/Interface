@@ -466,18 +466,9 @@ export const DepositeModal = ({
 					change={stableTroveChange}
 					maxBorrowingRate={borrowingRate.add(0.005)}
 					borrowingFeeDecayToleranceMinutes={60}>
-          
-					<p className="tips">{t("tips4Down")}</p>
+				<p className="tips">{t("tips4Down")}</p>
 
-					<button
-						className="primaryButton bigButton"
-						style={{ width: "100%" }}
-						disabled>
-						<img src="images/deposit.png" />
-
-						{depositAndBorrow ? t("depositAndBorrow") : t("deposit")}
-					</button>
-				</TroveAction> : <button
+				<button
 					className="primaryButton bigButton"
 					style={{ width: "100%" }}>
 					<img src="images/deposit.png" />
