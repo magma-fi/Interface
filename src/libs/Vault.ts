@@ -49,7 +49,13 @@ export class Vault {
 		}
 
 		if (vault.status) this.status = vault.status;
-		if ((this.status === VaultStatus4Subgraph.closedByRedemption || this.status === VaultStatus4Contract.closedByRedemption) && this.collateral.gt(0)) {
+		if ((
+			this.status === VaultStatus4Subgraph.closedByRedemption ||
+			this.status === VaultStatus4Contract.closedByRedemption ||
+			this.status === VaultStatus4Subgraph.closedByLiquidation ||
+			this.status === VaultStatus4Contract.closedByLiquidation
+		) &&
+			this.collateral.gt(0)) {
 			this.status = VaultStatusWithinMagma.limitedByRedemption;
 		}
 
