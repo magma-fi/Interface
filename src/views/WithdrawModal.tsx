@@ -125,7 +125,7 @@ export const WithdrawModal = ({
 			false,
 			globalContants.BIG_NUMBER_0,
 			updatedCollateral,
-			vault.debt,
+			vault.netDebt,
 			undefined,
 			error => {
 				setErrorMessages({ string: error.message } as ErrorMessage);
