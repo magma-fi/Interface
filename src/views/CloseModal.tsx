@@ -6,7 +6,7 @@ import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
 import { ErrorMessage, ValidationContext } from "../libs/types";
 import React, { useEffect, useMemo, useState } from "react";
-import { Decimal, Trove } from "lib-base";
+import { Decimal, Trove, UserTrove } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
@@ -19,6 +19,7 @@ import { IOTX, WEN, globalContants } from "../libs/globalContants";
 import { erc20ABI } from "wagmi";
 import { Address, parseEther } from "viem";
 import swapAndCloseTool from "../abis/swapAndCloseTool.json";
+import borrowerOperationsABI from "lib-ethers/abi/BorrowerOperations.json";
 
 export const CloseModal = ({
 	isOpen = false,
@@ -28,16 +29,18 @@ export const CloseModal = ({
 	validationContext,
 	chainId,
 	balance,
-	price
+	price,
+	collateralFromCollSurplusPool
 }: {
 	isOpen: boolean;
 	onClose: () => void;
-	trove: Trove;
+	trove: UserTrove;
 	fees: Fees;
 	validationContext: ValidationContext;
 	chainId: number;
 	balance: Decimal;
 	price: Decimal;
+	collateralFromCollSurplusPool?: Decimal;
 }) => {
 	const { provider, walletClient, publicClient, liquity, account } = useLiquity();
 	const { t } = useLang();
@@ -170,6 +173,16 @@ export const CloseModal = ({
 		return listenHash(txHash);
 	};
 
+	const handleClaimCollateral = async () => {
+		await walletClient!.writeContract({
+			account: account as Address,
+			address: liquity.connection.addresses.borrowerOperations as Address,
+			abi: borrowerOperationsABI,
+			functionName: "claimCollateral",
+			args: []
+		});
+	};
+
 	return isOpen ? <Modal
 		title={t("closeVault")}
 		onClose={handleCloseModal}>
@@ -226,19 +239,31 @@ export const CloseModal = ({
 
 				{t("closeVault")}
 			</button>
-		</TroveAction> : (agree && !swapping ? <button
+		</TroveAction> : ((
+			(trove.status === "closedByLiquidation" || trove.status === "closedByRedemption") &&
+			collateralFromCollSurplusPool?.gt(0)
+		) ? <button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			onClick={handleSwap}>
-			<img src="images/repay-dark.png" />
-			{t("closeVault")}
-		</button> : <button
-			className="primaryButton bigButton"
-			style={{ width: "100%" }}
-			disabled>
+			onClick={handleClaimCollateral}>
 			<img src="images/repay-dark.png" />
 
-			{(transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" || swapping) ? (t("closing") + "...") : t("closeVault")}
-		</button>)}
+			{t("closeVault")}
+		</button> : (
+			agree && !swapping ? <button
+				className="primaryButton bigButton"
+				style={{ width: "100%" }}
+				onClick={handleSwap}>
+				<img src="images/repay-dark.png" />
+				{t("closeVault")}
+			</button> : <button
+				className="primaryButton bigButton"
+				style={{ width: "100%" }}
+				disabled>
+				<img src="images/repay-dark.png" />
+
+				{(transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" || swapping) ? (t("closing") + "...") : t("closeVault")}
+			</button>
+		))}
 	</Modal> : <></>
 };
