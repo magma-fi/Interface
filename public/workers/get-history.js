@@ -65,12 +65,12 @@ const getHistoryByDate = async (day, isToday = false) => {
 	await getHistoryByDate(new Date(day - 86400000));
 };
 
-const main = async (chainId) => {
-	db = await dbManager.open("magma-db-" + chainId, 1);
+const main = async (chainId, token) => {
+	db = await dbManager.open("magma-db-" + chainId + "-" + token, 1);
 	if (db) {
 		this.postMessage("openned");
 
-		graphQLFetch.init(chainId);
+		graphQLFetch.init(chainId, token);
 
 		await getHistoryByDate(new Date(), true);
 		db.close();
@@ -79,7 +79,12 @@ const main = async (chainId) => {
 
 this.addEventListener('message', async e => {
 	if (e.data.cmd === "fetch") {
-		await main(e.data.params);
+		// params: {
+		// 	chainId,
+		// 	tokenName
+		// }
+		const params = e.data.params;
+		await main(params.chainId, params.tokenName);
 
 		this.postMessage("fetched");
 		this.close();

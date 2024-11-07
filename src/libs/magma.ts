@@ -10,6 +10,7 @@ import { BigNumber } from "bignumber.js";
 import multicallAbi from "../abis/multicall.json";
 import troveManagerAbi from "../abis/TroveManager.json";
 import priceFeedAbi from "../abis/PriceFeed.json";
+import collTokenPriceFeedAbi from "../abis/CollTokenPriceFeed.json";
 import lusdTokenAbi from "../abis/LUSDToken.json";
 import sysConfigAbi from "../abis/SysConfig.json";
 import borrowerOperationsAbi from "../abis/BorrowerOperations.json";
@@ -41,7 +42,7 @@ export const magma: {
 	_troveManagerContract: Record<string, DappContract>;
 	_tokenContract: Record<string, DappContract>;
 	tokenContract: Record<string, DappContract>;
-	_priceFeedContract?: DappContract;
+	_priceFeedContract?: DappContract | Record<string, DappContract>;
 	_stabilityPoolContract: Record<string, DappContract>;
 	_signer?: providers.JsonRpcSigner;
 	_borrowingRate: Record<string, number>;
@@ -133,7 +134,6 @@ export const magma: {
 	getVaults: function (forceReload = false, fromIndex = 0, doneCallback) {
 		if (this.vaults.length === 0 || forceReload) {
 			const query = graphqlAsker.requestVaults(fromIndex);
-			console.debug("xxx query =", query);
 
 			graphqlAsker.ask(this._currentChainId, query, (data: any) => {
 				if (data?.troves) {
@@ -237,6 +237,8 @@ export const magma: {
 
 		if (this._magmaCfg.priceFeed) {
 			this._priceFeedContract = new DappContract(this._magmaCfg.priceFeed, priceFeedAbi, this._signer);
+		} else {
+			this._priceFeedContract = {};
 		}
 
 		if (this._magmaCfg.lusdToken) {
@@ -274,10 +276,32 @@ export const magma: {
 			if (tokenCfg.stabilityPool) {
 				this._stabilityPoolContract[key] = new DappContract(tokenCfg.stabilityPool, stabilityPoolAbi, this._signer);
 			}
+
+			if (tokenCfg.priceFeed) {
+				let abi;
+				if (tokenCfg.address === zeroAddress) {
+					abi = priceFeedAbi;
+				} else {
+					abi = collTokenPriceFeedAbi
+				}
+				(this._priceFeedContract as Record<string, DappContract>)[key] = new DappContract(tokenCfg.priceFeed, abi, this._signer);
+			}
 		});
 	},
 
 	_getMagmaDataStep1: async function (): Promise<void> {
+		const getItsPriceFeedContract = (key: string): DappContract => {
+			let itsPriceFeedContract: DappContract;
+
+			if (this._priceFeedContract instanceof DappContract && !this._priceFeedContract[key]) {
+				itsPriceFeedContract = this._priceFeedContract;
+			} else {
+				itsPriceFeedContract = this._priceFeedContract?.[key];
+			}
+
+			return itsPriceFeedContract;
+		};
+
 		multicaller.addCall({
 			contractAddress: this._lusdTokenContract?.address,
 			call: this._lusdTokenContract?.dappFunctions.balanceOf.encode(this._account),
@@ -332,11 +356,12 @@ export const magma: {
 			const tokenCfg: any = items[1];
 			const theTroveManagerContract = this._troveManagerContract[key];
 			const theStabilityPoolContract = this._stabilityPoolContract[key];
+			const itsPriceFeedContract = getItsPriceFeedContract(key);
 
 			if (tokenCfg.address === zeroAddress) {
 				multicaller.addCall({
-					contractAddress: this._priceFeedContract?.address,
-					call: this._priceFeedContract?.dappFunctions.fetchPrice.encode(),
+					contractAddress: itsPriceFeedContract?.address,
+					call: itsPriceFeedContract?.dappFunctions.fetchPrice.encode(),
 					parseFunc: args => {
 						this.magmaData.price[key] = BigNumber(args as string).shiftedBy(-18).toNumber();
 					}
@@ -369,13 +394,23 @@ export const magma: {
 					} as callRequest);
 				}
 
-				multicaller.addCall({
-					contractAddress: this._sysConfigContract?.address,
-					call: this._sysConfigContract?.dappFunctions.fetchPrice.encode(tokenCfg.address),
-					parseFunc: args => {
-						this.magmaData.price[key] = BigNumber(args as string).shiftedBy(-18).toNumber();
-					}
-				} as callRequest);
+				if (tokenCfg.priceFeed) {
+					multicaller.addCall({
+						contractAddress: itsPriceFeedContract.address,
+						call: itsPriceFeedContract.dappFunctions.fetchPrice.encode(tokenCfg.address),
+						parseFunc: args => {
+							this.magmaData.price[key] = BigNumber(args as string).shiftedBy(-18).toNumber();
+						}
+					} as callRequest);
+				} else {
+					multicaller.addCall({
+						contractAddress: this._sysConfigContract?.address,
+						call: this._sysConfigContract?.dappFunctions.fetchPrice.encode(tokenCfg.address),
+						parseFunc: args => {
+							this.magmaData.price[key] = BigNumber(args as string).shiftedBy(-18).toNumber();
+						}
+					} as callRequest);
+				}
 
 				multicaller.addCall({
 					contractAddress: this._sysConfigContract?.address,

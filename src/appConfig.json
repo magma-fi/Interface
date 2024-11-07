@@ -1,13 +1,17 @@
 {
 	"subgraph": {
 		"4690": {
-			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet",
-			"graphql4Erc20": "",
+			"graphql": {
+				"IOTX": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet",
+				"uniIOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-testnet-demo-erc20"
+			},
 			"stabilityScore": ""
 		},
 		"4689": {
-			"graphql": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-v2",
-			"graphql4Erc20": "",
+			"graphql": {
+				"IOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-v3",
+				"uniIOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-erc20-v3"
+			},
 			"stabilityScore": "https://graphnode.filda.io/subgraphs/name/magma-WEN-deposit-point-iotex",
 			"lpScore": {
 				"WEN-IOTX": {
@@ -97,76 +101,93 @@
 		"4690": {
 			"version": 2,
 			"multicaller": "0x7B0338afA9b19973592e26E7ACcf077C556aaAC9",
-			"borrowerOperations": "0xb4Ff74085e4f9bC46384f15f7058B703695c1884",
-			"communityIssuance": "0xA40b9B827b6616230ef8C7F8CCb1dc2E2D1B224E",
-			"gasPool": "0x421aA994d8C80dcBe3Aa33f6478E7D410a4C8A50",
-			"lusdToken": "0x659dd68Ad9CCDA1fC4Dda42BdCe56642356eaf44",
+			"borrowerOperations": "0x9D41b817CF1A75EAC24fa703C1c32997478037f7",
+			"communityIssuance": "0x0000000000000000000000000000000000000000",
+			"gasPool": "0x5034c2c8dd9717Ef8e55Bc3115cB3f4d6a024257",
+			"lusdToken": "0xE2cf294484EE81f0298EcF42a446CDF47608d858",
 			"unipool": "",
 			"uniToken": "",
 			"lockupContractFactory": "",
 			"lqtyStaking": "",
 			"lqtyToken": "0xf9b0057843adc1bfc7279b4a5249114b407083ef",
-			"sysConfig": "0x51a3806E0b026CB09e67d899e24eAc0EB58c1919",
+			"sysConfig": "0xDa9108896E3982f42010499c8E3Ca08e23026986",
 			"proxiedCollTokenCommunityIssuance": "0x0000000000000000000000000000000000000000",
-			"priceFeed": "0xA81e1Ded2A53C66D7d4c0aD325543B8Ce48f9149",
+			"priceFeed": "0x8d7f9bd45DF8F5d5479fd1c2B38834504B6884C2",
 			"tokens": {
 				"IOTX": {
 					"logo": "images/iotx.png",
 					"symbol": "IOTX",
 					"decimals": 18,
 					"address": "0x0000000000000000000000000000000000000000",
-					"hintHelpers": "0xeFa62d299D56BAc515E2D1F9aDC115b5A0984c25",
-					"collSurplusPool": "0x2f2CE37f128A0C9a32388265341906293b5a0480",
-					"activePool": "0xc635eB021C46931f8854C134EB7dfc0D0FB8F2ad",
-					"defaultPool": "0xF8C78fF37fA80FA381031B2C4657041F20FA530E",
-					"stabilityPool": "0xBe1E20c246A6224c2E50Dd2263e309a7ab9Efd4d",
-					"troveManager": "0x1668782e96D766ade93Cd9e0609D33f7d63499B0",
-					"sortedTroves": "0xFa72c71D97F9d2E15A57CbB5c32f6A9E73B8141F",
+					"hintHelpers": "0xF1E76Bb3dC85fAb44C2dCD1E8Ed522e45c45ac52",
+					"collSurplusPool": "0xBB519884EEeaBd378C4F82a4C414db822E866Df8",
+					"activePool": "0x8E405969DE58438f92238D53900672322338f31b",
+					"defaultPool": "0x6374E80A68167EE4052D56B95B3A086e768e0123",
+					"stabilityPool": "0x19DFB22eeF5D6dC8459c926bE78fa5efB5A1AB36",
+					"troveManager": "0x99dBb9f1c10d7b52BC56cCe9d9430c63ff2180b9",
+					"sortedTroves": "0x5fc18B51B87d25D8E1534a02A93a5718BfAd0Eb8",
 					"multiTroveGetter": "0xf672ee5017b6af9A7a747d5010dE6D8cb8949eb0"
 				},
 				"uniIOTX": {
-					"logo": "images/erc20.png",
+					"logo": "images/uniIOTX.svg",
 					"symbol": "uniIOTX",
 					"decimals": 18,
 					"address": "0x96045878Cc8996605b0fb1bC428d8C4401ddB138",
-					"hintHelpers": "0xb8D2665b690548436E8c25CCD087c741D1781592",
-					"collSurplusPool": "0x931516334afe50e11eb6df69f0ac2a788501Ff49",
-					"activePool": "0x631808D83A16421F4354d986F5f9b5108Aa3d514",
-					"defaultPool": "0x1f2A7b49A1FeF622A8D90A8A8CaE814992e3BA7f",
-					"stabilityPool": "0xdD7d401788Aa3aDc6ebDf6570DB0e125f4B8651c",
-					"troveManager": "0x56d70cbA252ab4dBf1341ECac2957bC9f3643A86",
-					"sortedTroves": "0xa1FbA1A7C0e6079b89949dD9593B9Ff95c82db35",
-					"multiTroveGetter": "0x987FB84D5229315bC1F292dAD7B6f81056b345c6"
+					"hintHelpers": "0x81BBCc00b18692e69AE0952fe36174f7eC4520dF",
+					"collSurplusPool": "0xDFF627fFaFD5CF7001a9203Ae8A676e0d0748B27",
+					"activePool": "0x3FfE65E820eCfA388a3a3bece05D6e033F5399A6",
+					"defaultPool": "0x90CD10e09475192b38Aa7BD2a52ac7464897ec68",
+					"stabilityPool": "0xFC465b55c60D96fbCD5b43B166db08868BC3c69A",
+					"troveManager": "0x75e4a4e9242360beFa53937ec69422Eab262b880",
+					"sortedTroves": "0xB7Ef7b2FD95115b3161fe72671DD037ca4701196",
+					"multiTroveGetter": "0xD3F8e3a92f2B2DA2aCD7848534c684d3bC8C7b8b"
 				}
 			}
 		},
 		"4689": {
-			"version": 1,
-			"borrowerOperations": "0x4C579289b99a8b1741745BD557c754B30b0B81fa",
-			"communityIssuance": "0x4529E0775ABba89E3d9E160856d565944e147c6F",
+			"version": 2,
+			"multicaller": "0x63ccc9bd0dc151a2537aaf93375edb700c883f6a",
+			"borrowerOperations": "0x564CC0E0fF15B0414b5Db1b804f67d07C231fcE5",
+			"communityIssuance": "0x0000000000000000000000000000000000000000",
+			"gasPool": "0x88Efb69335366D35d914A1271351B1aE636D1f86",
+			"lusdToken": "0xa1A1531f6aE90192edCc32e9F38E98F303708144",
+			"unipool": "",
+			"uniToken": "",
 			"lockupContractFactory": "",
 			"lqtyStaking": "",
-			"priceFeed": "0x1Ec94b48F3756F0D6240Bc7820EA4B5D7855D00A",
-			"gasPool": "0x39E027020adc59De764B4E2F93ACa4e1C7b08B98",
-			"lusdToken": "0x6C0bf4b53696b5434A0D21C7D13Aa3cbF754913E",
-			"unipool": "",
 			"lqtyToken": "",
-			"uniToken": "",
-			"multicaller": "0x63ccc9bd0dc151a2537aaf93375edb700c883f6a",
+			"sysConfig": "0x81c76ed31384588FbDD3d0610E0b2C4d1b5CE664",
+			"proxiedCollTokenCommunityIssuance": "0x0000000000000000000000000000000000000000",
 			"tokens": {
 				"IOTX": {
 					"logo": "images/iotx.png",
 					"symbol": "IOTX",
 					"decimals": 18,
 					"address": "0x0000000000000000000000000000000000000000",
-					"hintHelpers": "0x52f6e5060527Cd77E101790E804Dde190AD3AA5c",
-					"collSurplusPool": "0xF00Bc206644BAe3d73D55e36AC2A86B62B457deB",
-					"activePool": "0x0B926bAafE0EbCc7843ef4752d9d843b5D4E39cF",
-					"defaultPool": "0x90180Ad5E286e7B640267cd38a030fAf1997613D",
-					"stabilityPool": "0x037a2e9a464fbA409D0E55600836864B410d6Dd8",
-					"troveManager": "0x21d81DABF6985587CE64C2E8EB12F69DF2178fe2",
-					"sortedTroves": "0xE34669c9f20102749783b89ca9D57b219d9fc29d",
-					"multiTroveGetter": "0x2d71d7e791798E2987c23629d6F05935Ed13ad14"
+					"hintHelpers": "0xA20d8a85A3981c6bDBd7F296af4c8230Ac0F510D",
+					"collSurplusPool": "0x35a24A60EE77A078d1F9784d270a607bfb53C492",
+					"activePool": "0xE31321999da2222b81CF7aF61C631C8F2c97eD17",
+					"defaultPool": "0x5e3B19E356c08c4BFc5d9bFe59a550c72af4Ea6d",
+					"stabilityPool": "0x265a1e0b70f5dfc9Bd3fCFc98Fb33D833515BAb7",
+					"troveManager": "0x4315BcE6076953571caf1903d15D682727FBD935",
+					"sortedTroves": "0x75BA333C6b2f03C31dA83aF396f54ABCf10383A4",
+					"multiTroveGetter": "0xEFD6c83Ee4ddD3996FE261d554F2531AE4Cd02B7",
+					"priceFeed": "0x1Ec94b48F3756F0D6240Bc7820EA4B5D7855D00A"
+				},
+				"uniIOTX": {
+					"logo": "images/uniIOTX.svg",
+					"symbol": "uniIOTX",
+					"decimals": 18,
+					"address": "0x236f8c0a61dA474dB21B693fB2ea7AAB0c803894",
+					"hintHelpers": "0x001449241d0dE17030e336642Bdb5dB6E74E365a",
+					"collSurplusPool": "0x86adaec6660C7fbEc4D0C9256A213e3730794776",
+					"activePool": "0x15E33E5A71Df438f303627Be411f95D63eA257F6",
+					"defaultPool": "0x92735CB2993B2D050c9889440fE9C2aca693242F",
+					"stabilityPool": "0x97A842Ff661280190E18bF11d38fB7Fda539c03c",
+					"troveManager": "0xFF5F4bA96586EDae7E7D838D8770dFB3376Ec245",
+					"sortedTroves": "0x2eB355F1d9021DD834477d7BEB1C02b9c5BAb020",
+					"priceFeed": "0xeE3b9C85a225d45f2Ca40c7297E862547dDb855a",
+					"multiTroveGetter": "0xE394bD3316bE48D184B148290Aa2aCDb487bdAeA"
 				}
 			}
 		}

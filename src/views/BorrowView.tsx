@@ -7,20 +7,30 @@ import { Coin } from "../libs/types";
 import { MarketView } from "./MarketView";
 import { magma } from "../libs/magma";
 import { TokenCard } from "./TokenCard";
+import { useLiquity } from "../hooks/LiquityContext";
+import { appController } from "../libs/appController";
 
-export const BorrowView = ({ externalDataDone, magmaData, refreshTrigger }: {
+export const BorrowView = ({
+	// externalDataDone,
+	magmaData,
+	refreshTrigger
+}: {
 	isReferrer: boolean;
-	externalDataDone?: boolean;
+	// externalDataDone?: boolean;
 	magmaData?: Record<string, any>;
 	refreshTrigger: () => void;
 }) => {
 	const { t } = useLang();
+	const { chainId } = useLiquity();
 	const tokens = Object.values(magma.tokens) || [];
 	const [magmaDataForSingleToken, setMagmaDataForSingleToken] = useState<Record<string, any>>();
 	const [currentMarket, setCurrentMarket] = useState<Coin>();
+	const [loadingForSingleToken, setLoadingForSingleToken] = useState(true);
+	const [externalDataDone, setExternalDataDone] = useState(false);
 
 	const readyForOpenningMarket = (token: string) => {
 		setCurrentMarket(magma.tokens[token]);
+		setLoadingForSingleToken(false);
 
 		setMagmaDataForSingleToken({
 			...magmaData,
@@ -39,11 +49,24 @@ export const BorrowView = ({ externalDataDone, magmaData, refreshTrigger }: {
 	};
 
 	useEffect(() => {
+		if (chainId === 0 || !currentMarket?.symbol) return;
+
+		appController.employWorkers(chainId, currentMarket.symbol, () => {
+			setExternalDataDone(true);
+		});
+	}, [chainId, currentMarket]);
+
+	useEffect(() => {
 		if (currentMarket && magmaDataForSingleToken && magmaData) {
 			return readyForOpenningMarket(currentMarket.symbol);
 		}
 
 		const targetToken = window.localStorage.getItem(globalContants.TARGET_TOKEN);
+
+		if (!targetToken) {
+			setLoadingForSingleToken(false);
+		}
+
 		if (magmaData && targetToken && tokens?.length > 0 && tokens.findIndex(item => item.symbol === targetToken) >= 0) {
 			readyForOpenningMarket(targetToken);
 			window.localStorage.removeItem(globalContants.TARGET_TOKEN);
@@ -69,7 +92,12 @@ export const BorrowView = ({ externalDataDone, magmaData, refreshTrigger }: {
 				<h1>{t("borrow")}&nbsp;{WEN.symbol}</h1>
 			</div>
 
-			<div className="vaultList">
+			<div
+				className="vaultList"
+				style={{
+					pointerEvents: loadingForSingleToken ? "none" : "all",
+					filter: loadingForSingleToken ? "opacity(0.8)" : "none"
+				}}>
 				{tokens.map(token => {
 					return <TokenCard
 						key={token.symbol}

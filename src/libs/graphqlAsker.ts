@@ -5,8 +5,7 @@ import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 
 export const graphqlAsker = {
 	ask: function (chainId: number, query: string, doneCallback: (data: unknown) => void, graphURL?: string, token: Coin = IOTX) {
-		const uri = graphURL ?? this._getGraph(chainId, token.symbol === IOTX.symbol);
-
+		const uri = graphURL ?? this._getGraph(chainId, token.symbol);
 		if (!uri) {
 			return doneCallback(null);
 		}
@@ -302,8 +301,8 @@ export const graphqlAsker = {
 		`;
 	},
 
-	_getGraph: function (chainId: number, isCurrency = true) {
-		const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
-		return isCurrency ? cfg?.graphql : cfg?.graphql4Erc20;
+	_getGraph: function (chainId: number, tokenSymbol = "IOTX") {
+		const cfg = (appConfig.subgraph as JsonObject)[String(chainId)].graphql;
+		return cfg[tokenSymbol];
 	}
 };
