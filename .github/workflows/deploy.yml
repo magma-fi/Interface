@@ -3,7 +3,7 @@ name: Deploy Magma App
 on:
   push:
     branches:
-      - main-v2
+      - dev
 
 jobs:
   build-and-deploy:
@@ -34,7 +34,7 @@ jobs:
           mv dist /tmp/dist
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git checkout --orphan deploy-branch-v2
+          git checkout --orphan deploy-branch
           git rm -rf .
           git clean -fdx
           mv /tmp/dist/* .
@@ -42,4 +42,4 @@ jobs:
           git add -A
           git commit -m "Deploy React app to branch"
           
-          git push -f origin deploy-branch-v2
+          git push -f origin deploy-branch
