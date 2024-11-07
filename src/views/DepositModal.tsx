@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, JsonObject } from "../libs/types";
+import { Coin, ErrorMessage, JsonObject, VaultStatusWithinMagma } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import React, { useState, useEffect } from "react";
@@ -407,6 +407,7 @@ export const DepositeModal = ({
 				|| (depositAndBorrow && (depositValue === 0 || borrowValue === 0))
 				|| (!depositAndBorrow && (depositValue === 0))
 				|| updatedVaultDebt.lt(constants?.MIN_NET_DEBT)
+				|| vault.status === VaultStatusWithinMagma.limitedByRedemption
 			}
 			onClick={handleDeposit}>
 			<img src="images/deposit.png" />

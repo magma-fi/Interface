@@ -105,10 +105,14 @@ export enum VaultStatus4Subgraph {
 	open = 1,
 	closedByOwner = 2,
 	closedByLiquidation = 3,
-	closedByRedemption = 4
+	closedByRedemption = 4,
 }
 
-export type VaultStatus = VaultStatus4Contract | VaultStatus4Contract
+export enum VaultStatusWithinMagma {
+	limitedByRedemption = 5
+}
+
+export type VaultStatus = VaultStatus4Contract | VaultStatus4Subgraph | VaultStatusWithinMagma;
 
 export type Vaultish = {
 	id: string;

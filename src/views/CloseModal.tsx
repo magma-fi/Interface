@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, JsonObject } from "../libs/types";
+import { Coin, ErrorMessage, JsonObject, VaultStatusWithinMagma } from "../libs/types";
 import React, { useEffect, useState } from "react";
 import appConfig from "../appConfig.json";
 import { formatAssetAmount, formatCurrency, loadABI } from "../utils";
@@ -129,18 +129,32 @@ export const CloseModal = ({
 
 		setSending(true);
 
-		magma.closeVault(
-			market,
-			undefined,
-			error => {
-				setErrorMessages({ string: error.message } as ErrorMessage);
-				setSending(false);
-			},
-			tx => {
-				setSending(false);
-				return onClose();
-			}
-		);
+		if (vault.status === VaultStatusWithinMagma.limitedByRedemption) {
+			vault.claimCollateral(
+				undefined,
+				error => {
+					setErrorMessages({ string: error.message } as ErrorMessage);
+					setSending(false);
+				},
+				tx => {
+					setSending(false);
+					return onClose();
+				}
+			);
+		} else {
+			magma.closeVault(
+				market,
+				undefined,
+				error => {
+					setErrorMessages({ string: error.message } as ErrorMessage);
+					setSending(false);
+				},
+				tx => {
+					setSending(false);
+					return onClose();
+				}
+			);
+		}
 	};
 
 	return isOpen ? <Modal
@@ -193,11 +207,11 @@ export const CloseModal = ({
 		<button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			disabled={
+			disabled={vault.status !== VaultStatusWithinMagma.limitedByRedemption && (
 				(needSwap && (!agree || swapping))
 				|| (!needSwap && sending)
-			}
-			onClick={needSwap ? handleSwap : handleClose}>
+			)}
+			onClick={vault.status === VaultStatusWithinMagma.limitedByRedemption ? handleClose : (needSwap ? handleSwap : handleClose)}>
 			<img src="images/repay-dark.png" />
 
 			{t("closeVault")}
