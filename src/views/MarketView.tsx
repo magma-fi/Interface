@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 import { useLang } from "../hooks/useLang";
-import { Coin, JsonObject, TroveChangeData, TroveChangeTx, VaultStatus4Contract, VaultStatus4Subgraph } from "../libs/types";
+import { Coin, JsonObject, TroveChangeData, TroveChangeTx, VaultStatus4Contract, VaultStatus4Subgraph, VaultStatusWithinMagma } from "../libs/types";
 import { useEffect, useMemo, useState } from "react";
 import { IOTX, TroveOptions, WEN, globalContants } from "../libs/globalContants";
 import { IconButton } from "../components/IconButton";
@@ -324,280 +324,286 @@ export const MarketView = ({
 			className="marketView marketViewLayout">
 
 			<div style={{ width: "100%" }}>
-				{vault.status !== VaultStatus4Contract.active && vault.status !== VaultStatus4Subgraph.open && <div className="card">
-					<img className="illustration" src="images/1wen=1usd.png" />
+				{vault.status !== VaultStatus4Contract.active &&
+					vault.status !== VaultStatus4Subgraph.open &&
+					vault.status !== VaultStatusWithinMagma.limitedByRedemption && <div className="card">
+						<img className="illustration" src="images/1wen=1usd.png" />
 
-					<div>
-						<h3>{t("letsGetStarted")}</h3>
+						<div>
+							<h3>{t("letsGetStarted")}</h3>
 
-						<p className="description">{t("letsGetStartedDEscription", {
-							interest: "0%",
-							percent: feePct.toFixed(2)
-						})}</p>
-					</div>
+							<p className="description">{t("letsGetStartedDEscription", {
+								interest: "0%",
+								percent: feePct.toFixed(2)
+							})}</p>
+						</div>
 
-					<button
-						id="0"
-						className="primaryButton bigButton"
-						style={{ width: "100%" }}
-						onClick={handleDeposit}
-						disabled={bal.eq(0)}>
-						<img src="images/deposit.png" />
+						<button
+							id="0"
+							className="primaryButton bigButton"
+							style={{ width: "100%" }}
+							onClick={handleDeposit}
+							disabled={bal.eq(0)}>
+							<img src="images/deposit.png" />
 
-						{t("deposit") + " " + market?.symbol}
-					</button>
+							{t("deposit") + " " + market?.symbol}
+						</button>
 
-					<div
-						className="description"
-						style={{
-							width: "100%",
-							textAlign: "center"
-						}}>{t("walletBalance")}&nbsp;{formatAsset(formatAssetAmount(bal), market)}</div>
-				</div>}
+						<div
+							className="description"
+							style={{
+								width: "100%",
+								textAlign: "center"
+							}}>{t("walletBalance")}&nbsp;{formatAsset(formatAssetAmount(bal), market)}</div>
+					</div>}
 
-				{(vault.status === VaultStatus4Contract.active || vault.status === VaultStatus4Subgraph.open) && <div
+				{(
+					vault.status === VaultStatus4Contract.active ||
+					vault.status === VaultStatus4Subgraph.open ||
+					vault.status === VaultStatusWithinMagma.limitedByRedemption
+				) && <div
 					className="card"
 					style={{ paddingTop: "0.5rem" }}>
-					<div
-						className="flex-row-space-between"
-						style={{ alignItems: "center" }}>
-						<h3>{t("yourVault")}</h3>
-
-						<DropdownMenu
-							options={TroveOptions}
-							onChange={handleTroveAction}>
-							<IconButton icon="images/dots.png" />
-						</DropdownMenu>
-					</div>
-
-					<div className="charts">
 						<div
-							className="subCard"
-							style={{ minHeight: "190px" }}>
-							<div className="flex-row-space-between">
-								<div className="label">{t("liquidation")}</div>
+							className="flex-row-space-between"
+							style={{ alignItems: "center" }}>
+							<h3>{t("yourVault")}</h3>
 
-								<img
-									src="images/liquidations.png"
-									width="20px" />
-							</div>
-
-							<div className="flex-column-align-left">
-								<div>{formatPercent(price > liquidationPrice ? (price - liquidationPrice) / price : 0)}</div>
-								<div className="label labelSmall">{t("belowCurrentPrice")}</div>
-							</div>
-
-							<div className="flex-column-align-left">
-								<div>{formatCurrency(liquidationPrice)}</div>
-
-								<div className="label labelSmall">{t("liquidationPrice")}</div>
-							</div>
-
-							<div className="label labelSmall">{t("currentPrice")}:&nbsp;{formatCurrency(price)}</div>
+							<DropdownMenu
+								options={TroveOptions}
+								onChange={handleTroveAction}>
+								<IconButton icon="images/dots.png" />
+							</DropdownMenu>
 						</div>
 
-						<div
-							className="subCard"
-							style={{ minHeight: "190px" }}>
-							<div className="label">{t("utilizationRate")}</div>
+						<div className="charts">
+							<div
+								className="subCard"
+								style={{ minHeight: "190px" }}>
+								<div className="flex-row-space-between">
+									<div className="label">{t("liquidation")}</div>
 
-							<div className="chartContainer">
-								<PieChart width={108} height={108}>
-									<Pie
-										data={chartData}
-										cx="50%"
-										cy="50%"
-										innerRadius={40}
-										outerRadius={54}
-										stroke="rgba(255, 255, 255, 0.1)"
-										paddingAngle={0}
-										dataKey="value"
-										startAngle={0}
-										endAngle={360}>
-										{chartData.map((entry, index) => {
-											return <Cell
-												key={entry.id}
-												fill={COLORS[index % COLORS.length]} />
-										})}
-									</Pie>
-
-									{needle(mcrPercent * 360, 50, 50, '#F25454')}
-								</PieChart>
-
-								<div className="label">{formatPercent(troveUtilizationRate)}</div>
-							</div>
-
-							<div className="flex-column">
-								<div className="flex-row-align-left label labelSmall">
-									<div className="label labelSmall">{t("liquidationAt")}</div>
-
-									<div style={{ color: "#F25454" }}>{formatPercent(mcrPercent)}</div>
+									<img
+										src="images/liquidations.png"
+										width="20px" />
 								</div>
-							</div>
-						</div>
-					</div>
-
-					<div
-						className="flex-row-space-between"
-						style={{ alignItems: "flex-end" }}>
-						<div className="flex-column-align-left">
-							<div className="label">{t("deposited")}</div>
-
-							<div className="flex-row-align-left">
-								<img
-									src={market.logo}
-									width="40px" />
 
 								<div className="flex-column-align-left">
-									<div>{formatCurrency(troveCollateralValue.toNumber())}</div>
-
-									<div className="label labelSmall">{formatAsset(troveCollatera, market)}</div>
+									<div>{formatPercent(price > liquidationPrice ? (price - liquidationPrice) / price : 0)}</div>
+									<div className="label labelSmall">{t("belowCurrentPrice")}</div>
 								</div>
+
+								<div className="flex-column-align-left">
+									<div>{formatCurrency(liquidationPrice)}</div>
+
+									<div className="label labelSmall">{t("liquidationPrice")}</div>
+								</div>
+
+								<div className="label labelSmall">{t("currentPrice")}:&nbsp;{formatCurrency(price)}</div>
 							</div>
-						</div>
-
-						<div
-							// style={{ flex: "1 1" }}
-							className="flex-column-align-right"
-							style={{ gap: "5px" }}>
-							<button
-								id="1"
-								className="secondaryButton"
-								onClick={handleDeposit}>
-								<img src="images/deposit-light.png" />
-
-								{t("deposit") + " " + market.symbol}
-							</button>
 
 							<div
-								className="label labelSmall"
-								style={{
-									textAlign: "center",
-									width: "100%"
-								}}>{t("balance")}&nbsp;{formatAsset(formatAssetAmount(bal, market.decimals), market)}</div>
-						</div>
-					</div>
+								className="subCard"
+								style={{ minHeight: "190px" }}>
+								<div className="label">{t("utilizationRate")}</div>
 
-					<div
-						className="flex-row-space-between"
-						style={{ alignItems: "flex-end" }}>
-						<div className="flex-column-align-left">
-							<div className="label">{t("available2Borrow")}</div>
+								<div className="chartContainer">
+									<PieChart width={108} height={108}>
+										<Pie
+											data={chartData}
+											cx="50%"
+											cy="50%"
+											innerRadius={40}
+											outerRadius={54}
+											stroke="rgba(255, 255, 255, 0.1)"
+											paddingAngle={0}
+											dataKey="value"
+											startAngle={0}
+											endAngle={360}>
+											{chartData.map((entry, index) => {
+												return <Cell
+													key={entry.id}
+													fill={COLORS[index % COLORS.length]} />
+											})}
+										</Pie>
 
-							<div className="flex-row-align-left">
-								<img
-									src={WEN.logo}
-									width="40px" />
+										{needle(mcrPercent * 360, 50, 50, '#F25454')}
+									</PieChart>
 
-								<div className="flex-column-align-left">
-									<div>{formatCurrency(availableBorrowDecimals)}</div>
+									<div className="label">{formatPercent(troveUtilizationRate)}</div>
+								</div>
 
-									<div className="label labelSmall">{formatAsset(availableBorrowDecimals, WEN)}</div>
+								<div className="flex-column">
+									<div className="flex-row-align-left label labelSmall">
+										<div className="label labelSmall">{t("liquidationAt")}</div>
+
+										<div style={{ color: "#F25454" }}>{formatPercent(mcrPercent)}</div>
+									</div>
 								</div>
 							</div>
 						</div>
 
 						<div
-							className="flex-column-align-right"
-							style={{ gap: "5px" }}>
-							<button
-								className="secondaryButton"
-								onClick={handleBorrow}
-								disabled={availableBorrow.lt(0.01)}>
-								<img src="images/borrow-dark.png" />
+							className="flex-row-space-between"
+							style={{ alignItems: "flex-end" }}>
+							<div className="flex-column-align-left">
+								<div className="label">{t("deposited")}</div>
 
-								{t("borrow") + " " + WEN.symbol}
-							</button>
+								<div className="flex-row-align-left">
+									<img
+										src={market.logo}
+										width="40px" />
+
+									<div className="flex-column-align-left">
+										<div>{formatCurrency(troveCollateralValue.toNumber())}</div>
+
+										<div className="label labelSmall">{formatAsset(troveCollatera, market)}</div>
+									</div>
+								</div>
+							</div>
 
 							<div
-								className="label labelSmall"
-								style={{
-									textAlign: "center",
-									width: "100%"
-								}}>{t("currentFee")}&nbsp;{formatPercent(feePct)}</div>
-						</div>
-					</div>
+								// style={{ flex: "1 1" }}
+								className="flex-column-align-right"
+								style={{ gap: "5px" }}>
+								<button
+									id="1"
+									className="secondaryButton"
+									onClick={handleDeposit}>
+									<img src="images/deposit-light.png" />
 
-					<div
-						className="flex-row-space-between"
-						style={{ alignItems: "flex-end" }}>
-						<div className="flex-column-align-left">
-							<div className="label">{t("debt")}</div>
+									{t("deposit") + " " + market.symbol}
+								</button>
 
-							<div className="flex-row-align-left">
-								<img
-									src={WEN.logo}
-									width="40px" />
-
-								<div className="flex-column-align-left">
-									<div>{formatCurrency(vaultDebtValuneNumber)}</div>
-
-									<div className="label labelSmall">{formatAsset(vaultDebtValuneNumber, WEN)}</div>
-								</div>
+								<div
+									className="label labelSmall"
+									style={{
+										textAlign: "center",
+										width: "100%"
+									}}>{t("balance")}&nbsp;{formatAsset(formatAssetAmount(bal, market.decimals), market)}</div>
 							</div>
 						</div>
 
 						<div
-							className="flex-column-align-right"
-							style={{ gap: "5px" }}>
-							<button
-								className="secondaryButton"
-								onClick={handleRepay}
-								disabled={maxAvailableRepay.lt(0.01) || lusdBalance.eq(0)}>
-								<img src="images/repay.png" />
+							className="flex-row-space-between"
+							style={{ alignItems: "flex-end" }}>
+							<div className="flex-column-align-left">
+								<div className="label">{t("available2Borrow")}</div>
 
-								{t("repay") + " " + WEN.symbol}
-							</button>
+								<div className="flex-row-align-left">
+									<img
+										src={WEN.logo}
+										width="40px" />
 
-							{(maxAvailableRepay.lt(0.01) || lusdBalance.eq(0)) && <div
-								className="label labelSmall"
-								style={{
-									textAlign: "center",
-									width: "100%"
-								}}>
-								{maxAvailableRepay.lt(0.01)
-									? t("available2Repay") + ": " + maxAvailableRepay.toFixed(2)
-									: (lusdBalance.eq(0) && " " + WEN.symbol + " " + t("balance") + ": 0")}
-							</div>}
-						</div>
-					</div>
+									<div className="flex-column-align-left">
+										<div>{formatCurrency(availableBorrowDecimals)}</div>
 
-					<div
-						className="flex-row-space-between"
-						style={{
-							alignItems: "flex-end",
-							gap: "none"
-						}}>
-						<div className="flex-column-align-left">
-							<div className="label">{t("available2Withdraw")}</div>
-
-							<div className="flex-row-align-left">
-								<img
-									src={market.logo}
-									width="40px" />
-
-								<div className="flex-column-align-left">
-									<div>{formatCurrency(availableWithdrawalFiat)}</div>
-
-									<div className="label labelSmall">{formatAsset(availableWithdrawalDecimals, market)}</div>
+										<div className="label labelSmall">{formatAsset(availableBorrowDecimals, WEN)}</div>
+									</div>
 								</div>
+							</div>
+
+							<div
+								className="flex-column-align-right"
+								style={{ gap: "5px" }}>
+								<button
+									className="secondaryButton"
+									onClick={handleBorrow}
+									disabled={availableBorrow.lt(0.01)}>
+									<img src="images/borrow-dark.png" />
+
+									{t("borrow") + " " + WEN.symbol}
+								</button>
+
+								<div
+									className="label labelSmall"
+									style={{
+										textAlign: "center",
+										width: "100%"
+									}}>{t("currentFee")}&nbsp;{formatPercent(feePct)}</div>
 							</div>
 						</div>
 
 						<div
-							className="flex-column-align-right"
-							style={{ gap: "5px" }}>
-							<button
-								className="secondaryButton"
-								onClick={handleWithdraw}
-								disabled={availableWithdrawal.lt(0.01)}>
-								<img src="images/withdraw.png" />
+							className="flex-row-space-between"
+							style={{ alignItems: "flex-end" }}>
+							<div className="flex-column-align-left">
+								<div className="label">{t("debt")}</div>
 
-								{t("withdraw") + " " + market.symbol}
-							</button>
+								<div className="flex-row-align-left">
+									<img
+										src={WEN.logo}
+										width="40px" />
+
+									<div className="flex-column-align-left">
+										<div>{formatCurrency(vaultDebtValuneNumber)}</div>
+
+										<div className="label labelSmall">{formatAsset(vaultDebtValuneNumber, WEN)}</div>
+									</div>
+								</div>
+							</div>
+
+							<div
+								className="flex-column-align-right"
+								style={{ gap: "5px" }}>
+								<button
+									className="secondaryButton"
+									onClick={handleRepay}
+									disabled={maxAvailableRepay.lt(0.01) || lusdBalance.eq(0)}>
+									<img src="images/repay.png" />
+
+									{t("repay") + " " + WEN.symbol}
+								</button>
+
+								{(maxAvailableRepay.lt(0.01) || lusdBalance.eq(0)) && <div
+									className="label labelSmall"
+									style={{
+										textAlign: "center",
+										width: "100%"
+									}}>
+									{maxAvailableRepay.lt(0.01)
+										? t("available2Repay") + ": " + maxAvailableRepay.toFixed(2)
+										: (lusdBalance.eq(0) && " " + WEN.symbol + " " + t("balance") + ": 0")}
+								</div>}
+							</div>
 						</div>
-					</div>
-				</div>}
+
+						<div
+							className="flex-row-space-between"
+							style={{
+								alignItems: "flex-end",
+								gap: "none"
+							}}>
+							<div className="flex-column-align-left">
+								<div className="label">{t("available2Withdraw")}</div>
+
+								<div className="flex-row-align-left">
+									<img
+										src={market.logo}
+										width="40px" />
+
+									<div className="flex-column-align-left">
+										<div>{formatCurrency(availableWithdrawalFiat)}</div>
+
+										<div className="label labelSmall">{formatAsset(availableWithdrawalDecimals, market)}</div>
+									</div>
+								</div>
+							</div>
+
+							<div
+								className="flex-column-align-right"
+								style={{ gap: "5px" }}>
+								<button
+									className="secondaryButton"
+									onClick={handleWithdraw}
+									disabled={availableWithdrawal.lt(0.01)}>
+									<img src="images/withdraw.png" />
+
+									{t("withdraw") + " " + market.symbol}
+								</button>
+							</div>
+						</div>
+					</div>}
 			</div>
 
 			<div

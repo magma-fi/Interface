@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IOTX, WEN, globalContants } from "./globalContants";
-import { Coin, JsonObject, VaultStatus, Vaultish } from "./types";
+import { Coin, JsonObject, VaultStatus, VaultStatus4Contract, VaultStatus4Subgraph, VaultStatusWithinMagma, Vaultish } from "./types";
 import { BigNumber } from "bignumber.js";
 import appConfig from "../appConfig.json"
 import { magma } from "./magma";
@@ -34,7 +34,7 @@ export class Vault {
 		this.id = vault.id;
 		this.owner = vault.id;
 		this._chainId = chainId;
-		if (vault.status) this.status = vault.status;
+
 		if (gasCompensation) this._gasCompensation = gasCompensation;
 		if (borrowingRate) this._borrowingRate = borrowingRate;
 
@@ -48,6 +48,10 @@ export class Vault {
 			this.debtDecimals = this.debt.shiftedBy(-this._loanToken.decimals).toNumber();
 		}
 
+		if (vault.status) this.status = vault.status;
+		if ((this.status === VaultStatus4Subgraph.closedByRedemption || this.status === VaultStatus4Contract.closedByRedemption) && this.collateral.gt(0)) {
+			this.status = VaultStatusWithinMagma.limitedByRedemption;
+		}
 
 		this._computeNetDebt();
 	}
@@ -189,6 +193,18 @@ export class Vault {
 				hints[0],
 				hints[1]
 			);
+		}
+	}
+
+	public claimCollateral(
+		onWait?: (tx: string) => void,
+		onFail?: (error: Error | any) => void,
+		onDone?: (tx: string) => void
+	) {
+		if (this.collateralToken.address === zeroAddress) {
+			magma.borrowerOperationsContract?.dappFunctions["claimCollateral()"].run(onWait, onFail, onDone, undefined);
+		} else {
+			magma.borrowerOperationsContract?.dappFunctions["claimCollateral(address)"].run(onWait, onFail, onDone, undefined, this.collateralToken.address);
 		}
 	}
 

@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, JsonObject } from "../libs/types";
+import { Coin, ErrorMessage, JsonObject, VaultStatusWithinMagma } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect } from "react";
@@ -291,7 +291,7 @@ export const BorrowModal = ({
 		<button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			disabled={borrowAmount.lte(0) || sending || borrowAmount.gt(availableBorrow) || recoveryMode}
+			disabled={borrowAmount.lte(0) || sending || borrowAmount.gt(availableBorrow) || recoveryMode || vault.status === VaultStatusWithinMagma.limitedByRedemption}
 			onClick={handleBorrow}>
 			<img src="images/borrow-dark.png" />
 
