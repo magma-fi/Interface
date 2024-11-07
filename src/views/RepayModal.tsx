@@ -68,7 +68,7 @@ export const RepayModal = ({
 		.dividedBy(vault.collateral.shiftedBy(-market.decimals).multipliedBy(price))
 		.toNumber();
 	const [errorInfo, setErrorInfo] = useState<ErrorMessage>();
-	const updatedVaultDebt = repayInput >= 0 ? vault.debt.minus(repayAmount) : vault.debt;
+	const updatedVaultDebt = repayInput >= 0 ? vault.netDebt.minus(repayAmount) : vault.netDebt;
 	const utilRate = 1 / Vault.computeCollateralRatio(vault.collateral, updatedVaultDebt, price, 1, market, WEN);
 	const newURPercentNumber = utilRate * 100;
 	const urIsGood = vaultUtilizationRateNumberPercent > newURPercentNumber;
