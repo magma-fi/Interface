@@ -336,9 +336,12 @@ export const BorrowModal = ({
 					change={stableTroveChange}
 					maxBorrowingRate={borrowingRate.add(0.005)}
 					borrowingFeeDecayToleranceMinutes={60}>
+					<p className="tips">{t("tips4Down")}</p>
+
 					<button
 						className="primaryButton bigButton"
-						style={{ width: "100%" }}>
+						style={{ width: "100%" }}
+						disabled>
 						<img src="images/borrow-dark.png" />
 
 						{t("borrow")}

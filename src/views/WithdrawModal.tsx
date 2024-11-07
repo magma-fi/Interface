@@ -283,6 +283,8 @@ export const WithdrawModal = ({
 					</div>
 				</div>
 			</div>
+
+			<p className="tips">{t("tips4Down")}</p>
 		</div>
 
 		{stableTroveChange && (

@@ -158,6 +158,8 @@ export const StakeModal = ({
 						positive={depositAmount > 0} />
 				</div>
 			</div>
+
+			<p className="tips">{t("tips4Down")}</p>
 		</div>
 
 		{validChange && !transactionState.id && transactionState.type === "idle" ? <StabilityDepositAction
@@ -166,7 +168,9 @@ export const StakeModal = ({
 			<button
 				className="primaryButton bigButton"
 				style={{ width: "100%" }}
-				disabled={depositAmount === 0}>
+				// disabled={depositAmount === 0}
+				disabled>
+
 				<img src="images/stake-dark.png" />
 
 				{t("stake") + " " + WEN.symbol}

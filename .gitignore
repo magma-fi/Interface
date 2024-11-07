@@ -4,3 +4,4 @@
 /dist
 .history
 tsconfig.node.tsbuildinfo
+yarn-error.log
