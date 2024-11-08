@@ -19,7 +19,8 @@ export default defineConfig({
             include: ["**.cjs", "**.js"]
         },
         rollupOptions: {
-            plugins: [RollupPluginPolyfillNode()]
+            plugins: [RollupPluginPolyfillNode()],
+            external: ["lib-ethers"]
         }
     },
     resolve: {
