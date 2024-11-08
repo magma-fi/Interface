@@ -117,6 +117,7 @@ export const appController: {
 			const query = graphqlAsker.requestUsersWithReferrer(referrer);
 			graphqlAsker.ask(chainId, query, (result: any) => {
 				if (result?.users?.length > 0) {
+					const deadline = new Date("2024-10-30 23:59").getTime();
 					const myUsers = result.users.map((item: { id: string; }) => '"' + item.id + '"');
 
 					if (myUsers.length > 0) {
@@ -133,10 +134,12 @@ export const appController: {
 										const p = Number(element.point.point);
 										if (!isNaN(p)) myUsersPoints += p;
 
-										// const d = Number(element.stabilityDeposit.depositedAmount);
-										// if (!isNaN(d)) myUsersPoints += d
-										// 	* 10
-										// 	* Math.floor((Date.now() - element.point.timestamp * 1000) / 3600000);
+										if (deadline > element.point.timestamp * 1000) {
+											const d = Number(element.stabilityDeposit.depositedAmount);
+											if (!isNaN(d)) myUsersPoints += d
+												* 10
+												* Math.floor((deadline - element.point.timestamp * 1000) / 3600000);
+										}
 									});
 								}
 
@@ -149,12 +152,14 @@ export const appController: {
 
 									if (lpScoreRes?.users) {
 										lpScoreRes.users.forEach((element: any) => {
-											myUsersPoints += (
-												Number(element.point.point)
-												// + ((Number(element.balance.balance) + Number(element.staking?.amount || 0)) / 10 ** 18)
-												// * lpConfig.pointsPerHour
-												// * Math.floor((Date.now() - element.point.timestamp * 1000) / 3600000)
-											);
+											if (deadline > element.point.timestamp * 1000) {
+												myUsersPoints += (
+													Number(element.point.point)
+													+ ((Number(element.balance.balance) + Number(element.staking?.amount || 0)) / 10 ** 18)
+													* lpConfig.pointsPerHour
+													* Math.floor((deadline - element.point.timestamp * 1000) / 3600000)
+												);
+											}
 										});
 									}
 								}
@@ -198,6 +203,7 @@ export const appController: {
 			const stabilityScoreGraph = cfg?.stabilityScore;
 			let stabilityScore = 0;
 			if (stabilityScoreGraph) {
+				const deadline = new Date("2024-10-30 23:59").getTime();
 				const query = graphqlAsker.requestUserWENScore(user);
 				graphqlAsker.ask(
 					chainId,
@@ -209,10 +215,12 @@ export const appController: {
 							const p = Number(data.user.point.point);
 							if (!isNaN(p)) stabilityScore = p;
 
-							// const d = Number(data.user.stabilityDeposit.depositedAmount);
-							// if (!isNaN(d)) stabilityScore += d
-							// 	* 10
-							// 	* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
+							if (deadline > data.user.point.timestamp * 1000) {
+								const d = Number(data.user.stabilityDeposit.depositedAmount);
+								if (!isNaN(d)) stabilityScore += d
+									* 10
+									* Math.floor((deadline - data.user.point.timestamp * 1000) / 3600000);
+							}
 						}
 
 						resolve(stabilityScore);
@@ -232,6 +240,8 @@ export const appController: {
 			const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
 			const lpScoreGraphs = Object.entries(cfg?.lpScore);
 			if (lpScoreGraphs) {
+				const deadline = new Date("2024-10-30 23:59").getTime();
+
 				for (let i = 0; i < lpScoreGraphs.length; i++) {
 					const tmp: any = lpScoreGraphs[i][1];
 					const lpScoreGraph = {
@@ -248,13 +258,14 @@ export const appController: {
 						const data = await graphqlAsker.askAsync(chainId, query, lpScoreGraph.url);
 
 						if (
-							data?.user
-							&& (lpScoreGraph.endsIn === 0 || lpScoreGraph.endsIn < Number(data?.user?.point.timestamp))
+							data?.user &&
+							(lpScoreGraph.endsIn === 0 || lpScoreGraph.endsIn < Number(data?.user?.point.timestamp)) &&
+							deadline > data.user.point.timestamp * 1000
 						) {
-							lpScoreGraph.points = Number(data.user.point.point);
-							// + ((Number(data.user.balance.balance) + Number(data.user.staking?.amount || 0)) / 10 ** 18)
-							// * lpScoreGraph.pointsPerHour
-							// * Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
+							lpScoreGraph.points = Number(data.user.point.point)
+								+ ((Number(data.user.balance.balance) + Number(data.user.staking?.amount || 0)) / 10 ** 18)
+								* lpScoreGraph.pointsPerHour
+								* Math.floor((deadline - data.user.point.timestamp * 1000) / 3600000);
 							totalLPScores += lpScoreGraph.points;
 						}
 
