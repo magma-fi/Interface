@@ -169,5 +169,6 @@
 	"referralsPoints": "Referrals",
 	"minimumLoanReached": "Minimum WEN loan reached",
 	"minimumLoanReachedSo": "Minimum WEN loan reached. Increase loan amount or close the vault completely.",
-	"tips4Down": "Notice: WEN minting suspended. Please repay debt, close positions, and switch to our new stablecoin ioUSD."
+	"tips4Down": "Notice: WEN minting suspended. Please repay debt, close positions, and switch to our new stablecoin ioUSD.",
+	"claimCollateral": "Claim Collateral"
 }
