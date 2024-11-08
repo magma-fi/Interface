@@ -239,12 +239,12 @@ export const UserAccount = ({
       </div>}
 
       {isConnected && account && <div className="userAccountBox">
-        <PopupView
+        {/* <PopupView
           forcedClass="selectionTrigger"
           entryView={pointsView}
           showArrows={true}
           alignTop={true}
-          popupView={pointsListView} />
+          popupView={pointsListView} /> */}
 
         <div className="flex-row-align-left">
           <DropdownMenu
