@@ -26,7 +26,7 @@ import appConfig from "../appConfig.json";
 import { useLiquity } from "../hooks/LiquityContext";
 import React from "react";
 import { appController } from "../libs/appController";
-import collSurplusPoolABI from "lib-ethers/abi/collSurplusPool.json";
+import collSurplusPoolABI from "../abis/collSurplusPool.json";
 
 export const MarketView = ({
 	market,
