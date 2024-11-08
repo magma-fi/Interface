@@ -133,10 +133,10 @@ export const appController: {
 										const p = Number(element.point.point);
 										if (!isNaN(p)) myUsersPoints += p;
 
-										const d = Number(element.stabilityDeposit.depositedAmount);
-										if (!isNaN(d)) myUsersPoints += d
-											* 10
-											* Math.floor((Date.now() - element.point.timestamp * 1000) / 3600000);
+										// const d = Number(element.stabilityDeposit.depositedAmount);
+										// if (!isNaN(d)) myUsersPoints += d
+										// 	* 10
+										// 	* Math.floor((Date.now() - element.point.timestamp * 1000) / 3600000);
 									});
 								}
 
@@ -151,9 +151,9 @@ export const appController: {
 										lpScoreRes.users.forEach((element: any) => {
 											myUsersPoints += (
 												Number(element.point.point)
-												+ ((Number(element.balance.balance) + Number(element.staking?.amount || 0)) / 10 ** 18)
-												* lpConfig.pointsPerHour
-												* Math.floor((Date.now() - element.point.timestamp * 1000) / 3600000)
+												// + ((Number(element.balance.balance) + Number(element.staking?.amount || 0)) / 10 ** 18)
+												// * lpConfig.pointsPerHour
+												// * Math.floor((Date.now() - element.point.timestamp * 1000) / 3600000)
 											);
 										});
 									}
@@ -209,10 +209,10 @@ export const appController: {
 							const p = Number(data.user.point.point);
 							if (!isNaN(p)) stabilityScore = p;
 
-							const d = Number(data.user.stabilityDeposit.depositedAmount);
-							if (!isNaN(d)) stabilityScore += d
-								* 10
-								* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
+							// const d = Number(data.user.stabilityDeposit.depositedAmount);
+							// if (!isNaN(d)) stabilityScore += d
+							// 	* 10
+							// 	* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
 						}
 
 						resolve(stabilityScore);
@@ -251,10 +251,10 @@ export const appController: {
 							data?.user
 							&& (lpScoreGraph.endsIn === 0 || lpScoreGraph.endsIn < Number(data?.user?.point.timestamp))
 						) {
-							lpScoreGraph.points = Number(data.user.point.point)
-								+ ((Number(data.user.balance.balance) + Number(data.user.staking?.amount || 0)) / 10 ** 18)
-								* lpScoreGraph.pointsPerHour
-								* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
+							lpScoreGraph.points = Number(data.user.point.point);
+							// + ((Number(data.user.balance.balance) + Number(data.user.staking?.amount || 0)) / 10 ** 18)
+							// * lpScoreGraph.pointsPerHour
+							// * Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
 							totalLPScores += lpScoreGraph.points;
 						}
 
