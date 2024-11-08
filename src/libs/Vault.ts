@@ -49,14 +49,14 @@ export class Vault {
 		}
 
 		if (vault.status) this.status = vault.status;
-		if ((
+		if (
 			this.status === VaultStatus4Subgraph.closedByRedemption ||
 			this.status === VaultStatus4Contract.closedByRedemption ||
 			this.status === VaultStatus4Subgraph.closedByLiquidation ||
 			this.status === VaultStatus4Contract.closedByLiquidation
-		) &&
-			this.collateral.gt(0)) {
+		) {
 			this.status = VaultStatusWithinMagma.limitedByRedemption;
+			this.updateCollateralWithCollSurplusPool();
 		}
 
 		this._computeNetDebt();
@@ -100,6 +100,12 @@ export class Vault {
 		} else {
 			return collateral.multipliedBy(100).dividedBy(debt).toNumber();
 		}
+	}
+
+	public async updateCollateralWithCollSurplusPool() {
+		const res = await magma.getCollSurplusPoolContract(this.collateralToken.symbol).getCollateral(this.owner);
+		this.collateral = BigNumber(res._hex);
+		this.collateralDecimals = this.collateral.shiftedBy(-this._collateralToken.decimals).toNumber();
 	}
 
 	public nominalCollateralRatio(): number {
