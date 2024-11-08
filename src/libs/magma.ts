@@ -17,6 +17,7 @@ import borrowerOperationsAbi from "../abis/BorrowerOperations.json";
 import sortedTrovesAbi from "../abis/SortedTroves.json";
 import hintHelpersAbi from "../abis/HintHelpers.json";
 import stabilityPoolAbi from "../abis/StabilityPool.json";
+import collSurplusPoolABI from "../abis/CollSurplusPool.json";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { providers } from 'ethers';
 import { multicaller } from "./multicaller";
@@ -44,10 +45,12 @@ export const magma: {
 	tokenContract: Record<string, DappContract>;
 	_priceFeedContract?: DappContract | Record<string, DappContract>;
 	_stabilityPoolContract: Record<string, DappContract>;
+	_collSurplusPoolContract: Record<string, DappContract>;
 	_signer?: providers.JsonRpcSigner;
 	_borrowingRate: Record<string, number>;
 	_wenGasCompensation: BigNumber;
 	init: (chainId: number, signer: JsonRpcSigner, account?: string) => void;
+	getCollSurplusPoolContract: (token: string) => DappContract;
 	getVaults: (forceReload: boolean, fromIndex: number, doneCallback?: (vs: Vault[]) => void) => void;
 	getMagmaData: () => Promise<Record<string, any> | undefined>;
 	getVaultByOwner: (owner: string) => Promise<Vault | undefined>;
@@ -102,6 +105,8 @@ export const magma: {
 	_hintHelpersContract: {},
 	_stabilityPoolContract: {},
 
+	_collSurplusPoolContract: {},
+
 	_tokenContract: {},
 	get tokenContract() {
 		return this._tokenContract;
@@ -118,6 +123,10 @@ export const magma: {
 
 		this._readyTokens();
 		this._readyContracts();
+	},
+
+	getCollSurplusPoolContract(token: string): DappContract {
+		return this._collSurplusPoolContract[token];
 	},
 
 	getMagmaData: async function (): Promise<Record<string, any> | undefined> {
@@ -275,6 +284,10 @@ export const magma: {
 
 			if (tokenCfg.stabilityPool) {
 				this._stabilityPoolContract[key] = new DappContract(tokenCfg.stabilityPool, stabilityPoolAbi, this._signer);
+			}
+
+			if (tokenCfg.collSurplusPool) {
+				this._collSurplusPoolContract[key] = new DappContract(tokenCfg.collSurplusPool, collSurplusPoolABI, this._signer);
 			}
 
 			if (tokenCfg.priceFeed) {

@@ -326,7 +326,8 @@ export const MarketView = ({
 			<div style={{ width: "100%" }}>
 				{vault.status !== VaultStatus4Contract.active &&
 					vault.status !== VaultStatus4Subgraph.open &&
-					vault.status !== VaultStatusWithinMagma.limitedByRedemption && <div className="card">
+					vault.status !== VaultStatusWithinMagma.limitedByRedemption &&
+					vault.collateral.eq(0) && <div className="card">
 						<img className="illustration" src="images/1wen=1usd.png" />
 
 						<div>
@@ -360,7 +361,7 @@ export const MarketView = ({
 				{(
 					vault.status === VaultStatus4Contract.active ||
 					vault.status === VaultStatus4Subgraph.open ||
-					vault.status === VaultStatusWithinMagma.limitedByRedemption
+					(vault.status === VaultStatusWithinMagma.limitedByRedemption && vault.collateral.gt(0))
 				) && <div
 					className="card"
 					style={{ paddingTop: "0.5rem" }}>
@@ -469,7 +470,8 @@ export const MarketView = ({
 								<button
 									id="1"
 									className="secondaryButton"
-									onClick={handleDeposit}>
+									onClick={handleDeposit}
+									disabled={vault.status === VaultStatusWithinMagma.limitedByRedemption}>
 									<img src="images/deposit-light.png" />
 
 									{t("deposit") + " " + market.symbol}
@@ -509,7 +511,7 @@ export const MarketView = ({
 								<button
 									className="secondaryButton"
 									onClick={handleBorrow}
-									disabled={availableBorrow.lt(0.01)}>
+									disabled={availableBorrow.lt(0.01) || vault.status === VaultStatusWithinMagma.limitedByRedemption}>
 									<img src="images/borrow-dark.png" />
 
 									{t("borrow") + " " + WEN.symbol}
@@ -549,7 +551,7 @@ export const MarketView = ({
 								<button
 									className="secondaryButton"
 									onClick={handleRepay}
-									disabled={maxAvailableRepay.lt(0.01) || lusdBalance.eq(0)}>
+									disabled={maxAvailableRepay.lt(0.01) || lusdBalance.eq(0) || vault.status === VaultStatusWithinMagma.limitedByRedemption}>
 									<img src="images/repay.png" />
 
 									{t("repay") + " " + WEN.symbol}
@@ -596,7 +598,7 @@ export const MarketView = ({
 								<button
 									className="secondaryButton"
 									onClick={handleWithdraw}
-									disabled={availableWithdrawal.lt(0.01)}>
+									disabled={availableWithdrawal.lt(0.01) && vault.status !== VaultStatusWithinMagma.limitedByRedemption}>
 									<img src="images/withdraw.png" />
 
 									{t("withdraw") + " " + market.symbol}
