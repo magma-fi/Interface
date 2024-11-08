@@ -107,7 +107,9 @@ export const MarketView = ({
 	const liquidationPoint = recoveryMode ? CCR : MCR;
 	const appLiquidationPoint = recoveryMode ? CCR : appConfigConstants.appMCR;
 	const borrowingFeePct = new Percent(borrowingRate);
+	const [collateralFromCollSurplusPool, setCollateralFromCollSurplusPool] = useState(Decimal.ZERO);
 	const troveCollateralValue = trove.collateral.mul(price);
+	const collateralFromCollSurplusPoolValue = collateralFromCollSurplusPool.mul(price);
 
 	// const troveCollateralRatio = trove.debt.eq(0) ? Decimal.ZERO : trove.collateralRatio(price);
 	// const line = Decimal.min(liquidationPoint, troveCollateralRatio);
@@ -155,7 +157,6 @@ export const MarketView = ({
 	const [txs, setTxs] = useState<TroveChangeTx[]>([]);
 	const [changes, setChanges] = useState<TroveChangeData[]>([]);
 	const [chartBoxWidth, setChartBoxWidth] = useState(700)
-	const [collateralFromCollSurplusPool, setCollateralFromCollSurplusPool] = useState(Decimal.ZERO);
 
 	useEffect(() => {
 		const func = async () => {
@@ -167,7 +168,7 @@ export const MarketView = ({
 					args: [account]
 				}) as bigint;
 
-				setCollateralFromCollSurplusPool(Decimal.from(res.toString()));
+				setCollateralFromCollSurplusPool(Decimal.from((res / 10n ** 18n).toString()));
 			}
 		};
 
@@ -382,7 +383,7 @@ export const MarketView = ({
 				{(
 					trove.status === "nonExistent" ||
 					trove.status === "closedByOwner" ||
-					trove.status === "closedByLiquidation" ||
+					(trove.status === "closedByLiquidation" && collateralFromCollSurplusPool.eq(0)) ||
 					(trove.status === "closedByRedemption" && collateralFromCollSurplusPool.eq(0))
 				) && <div className="card">
 						<img className="illustration" src="images/1wen=1usd.png" />
@@ -512,9 +513,9 @@ export const MarketView = ({
 										width="40px" />
 
 									<div className="flex-column-align-left">
-										<div>{troveCollateralValue.toString(2)}&nbsp;{globalContants.USD}</div>
+										<div>{((trove.status === "closedByLiquidation" || trove.status === "closedByRedemption") ? collateralFromCollSurplusPoolValue : troveCollateralValue).toString(2)}&nbsp;{globalContants.USD}</div>
 
-										<div className="label labelSmall">{trove.collateral.toString(2)}&nbsp;{IOTX.symbol}</div>
+										<div className="label labelSmall">{((trove.status === "closedByLiquidation" || trove.status === "closedByRedemption") ? collateralFromCollSurplusPool : trove.collateral).toString(2)}&nbsp;{IOTX.symbol}</div>
 									</div>
 								</div>
 							</div>
@@ -642,9 +643,9 @@ export const MarketView = ({
 										width="40px" />
 
 									<div className="flex-column-align-left">
-										<div>{availableWithdrawalFiat.gt(0) ? availableWithdrawalFiat.toString(2) : "0"}&nbsp;{globalContants.USD}</div>
+										<div>{(trove.status === "closedByLiquidation" || trove.status === "closedByRedemption") ? collateralFromCollSurplusPoolValue.toString(2) : (availableWithdrawalFiat.gt(0) ? availableWithdrawalFiat.toString(2) : "0")}&nbsp;{globalContants.USD}</div>
 
-										<div className="label labelSmall">{availableWithdrawal.gt(0) ? availableWithdrawal.toString(2) : "0"}&nbsp;{IOTX.symbol}</div>
+										<div className="label labelSmall">{(trove.status === "closedByLiquidation" || trove.status === "closedByRedemption") ? collateralFromCollSurplusPool.toString(2) : (availableWithdrawal.gt(0) ? availableWithdrawal.toString(2) : "0")}&nbsp;{IOTX.symbol}</div>
 									</div>
 								</div>
 							</div>

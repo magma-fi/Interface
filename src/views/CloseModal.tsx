@@ -181,6 +181,7 @@ export const CloseModal = ({
 			functionName: "claimCollateral",
 			args: []
 		});
+		window.location.reload();
 	};
 
 	return isOpen ? <Modal

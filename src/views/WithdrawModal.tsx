@@ -180,12 +180,13 @@ export const WithdrawModal = ({
 			functionName: "claimCollateral",
 			args: []
 		});
+		window.location.reload();
 	};
 
 	return isOpen ? <Modal
 		title={t("withdraw") + " " + market.symbol}
 		onClose={handleCloseModal}>
-		<div className="withdrawModal">
+		{trove.status !== "closedByLiquidation" && trove.status !== "closedByRedemption" && <div className="withdrawModal">
 			<div className="flex-column">
 				<div className="flex-column-align-left">
 					<div
@@ -285,7 +286,7 @@ export const WithdrawModal = ({
 			</div>
 
 			<p className="tips">{t("tips4Down")}</p>
-		</div>
+		</div>}
 
 		{stableTroveChange && (
 			(!transactionState.id && transactionState.type === "idle")
@@ -314,7 +315,7 @@ export const WithdrawModal = ({
 			onClick={handleClaimCollateral}>
 			<img src="images/repay-dark.png" />
 
-			{t("withdraw")}
+			{t("claimCollateral") + " " + collateralFromCollSurplusPool.toString(2) + " " + market.symbol}
 		</button> : <button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
