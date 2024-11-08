@@ -30,7 +30,10 @@ import { zeroAddress } from "viem";
 
 const select = ({ trove }: LiquityStoreState) => ({ trove });
 
-export const MainView = ({ chains }: { chains: Chain[] }) => {
+export const MainView = ({ chains, rabbyKit }: {
+	chains: Chain[];
+	rabbyKit?: unknown;
+}) => {
 	const { isConnected } = useAccount();
 	const [showConnectModal, setShowConnectModal] = useState(false);
 	const [showTerms, setShowTerms] = useState(false);
@@ -139,6 +142,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	useEffect(() => {
 		if (!isConnected) {
 			setShowConnectModal(true);
+			// return rabbyKit && rabbyKit.open();
 		}
 	}, [isConnected]);
 
@@ -182,6 +186,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 
 	const handleConnectWallet = () => {
 		setShowConnectModal(true);
+		// return rabbyKit && rabbyKit.open();
 	};
 
 	const handleCloseConnectModal = () => {

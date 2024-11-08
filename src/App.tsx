@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { configureChains, WagmiConfig, createConfig, WindowProvider } from "wagmi";
 import { iotexTestnet, iotex } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
+import { jsonRpcProvider } from "wagmi/providers/jsonRpc";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { WalletConnectConnector } from "wagmi/connectors/walletConnect";
 import { MetaMaskConnector } from "wagmi/connectors/metaMask";
@@ -13,6 +14,7 @@ import { AppLoader } from "./components/AppLoader";
 import { useAsyncValue } from "./hooks/AsyncValue";
 import { appController } from "./libs/appController";
 import { TransactionProvider } from "./components/Transaction";
+import { createModal } from "@rabby-wallet/rabbykit";
 
 // Start pre-fetching the config
 getConfig().then(config => {
@@ -24,7 +26,13 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
   [
     publicProvider(),
     // jsonRpcProvider({
-    //   rpc: (chain) => ({ http: appConfig.rpc[String(chain.id)].http })
+    //   rpc: chain => {
+    //     if (chain.id === 4689) {
+    //       return { http: "https://iotexnode.filda.io" }
+    //     } else {
+    //       return null;
+    //     }
+    //   }
     // })
   ],
   { batch: { multicall: true } }
@@ -73,6 +81,15 @@ const wagmiCfg = createConfig({
   webSocketPublicClient
 });
 
+const rabbyKit = undefined;
+// const rabbyKit = createModal({
+//   chains,
+//   wagmi: wagmiCfg,
+//   projectId: "a1362d88b5470c1006e169ce345815ae",
+//   appName: "Magma Finance",
+//   showWalletConnect: true
+// });
+
 const App = () => {
   const config = useAsyncValue(getConfig);
   const loader = <AppLoader />;
@@ -87,7 +104,8 @@ const App = () => {
       <TransactionProvider>
         <LiquityFrontend
           chains={chains}
-          loader={loader} />
+          loader={loader}
+          rabbyKit={rabbyKit} />
       </TransactionProvider>
     </LiquityProvider>
   </WagmiConfig> : <></>
