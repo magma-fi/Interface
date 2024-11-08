@@ -82,18 +82,18 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 		}
 	}, [account, chainId, signer]);
 
-	useEffect(() => {
-		if (!chainId || !account || referrer === undefined) return;
+	// useEffect(() => {
+	// 	if (!chainId || !account || referrer === undefined) return;
 
-		appController.getUserPoints(
-			chainId,
-			account.toLowerCase(),
-			referrer,
-			(res, resObject) => {
-				setPoints(res);
-				setPointObject(resObject);
-			});
-	}, [chainId, account, referrer]);
+	// 	appController.getUserPoints(
+	// 		chainId,
+	// 		account.toLowerCase(),
+	// 		referrer,
+	// 		(res, resObject) => {
+	// 			setPoints(res);
+	// 			setPointObject(resObject);
+	// 		});
+	// }, [chainId, account, referrer]);
 
 	useEffect(() => {
 		if (!referrer || chainId === 0) return;
