@@ -150,7 +150,7 @@ export const MarketView = ({
 		const tempArr: TroveChangeData[] = [];
 		let howMany = 0
 
-		appController.openDB(chainId, () => {
+		appController.openDB(chainId, market.symbol, () => {
 			appController.readAll((cursor?: IDBCursor) => {
 				if (!cursor) return;
 
@@ -692,7 +692,6 @@ export const MarketView = ({
 			</div>
 		</div>
 
-		{/* 暂时只有IOTX有历史记录。 */}
 		{market.symbol === IOTX.symbol && changes?.length > 0 && <div
 			className="flex-column-align-left"
 			style={{ gap: "24px" }}>
