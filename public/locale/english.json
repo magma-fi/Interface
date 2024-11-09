@@ -1,6 +1,6 @@
 {
-	"borrow": "borrow",
-	"stake": "stake",
+	"borrow": "Borrow",
+	"stake": "Stake",
 	"governance": "governance",
 	"liquidations": "Liquidations",
 	"docs": "docs",

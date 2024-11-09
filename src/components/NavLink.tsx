@@ -8,6 +8,7 @@ type NavLinkProps = {
 	showExternalLink: boolean;
 	active: boolean;
 	target: string;
+	textTransform?: "capitalize" | "lowercase" | "uppercase" | "none";
 };
 
 export function NavLink({
@@ -17,12 +18,14 @@ export function NavLink({
 	fullWidth = true,
 	showExternalLink = true,
 	active = false,
-	target = "_self"
+	target = "_self",
+	textTransform = "capitalize"
 }: NavLinkProps) {
 	return <Link
 		className={"navLink" + (active ? " active" : "") + (fullWidth ? " navLink-fullWidth" : "")}
 		to={url}
-		target={target}>
+		target={target}
+		style={{ textTransform }}>
 		{icon && <div className="icon">
 			<img src={icon} />
 		</div>}
