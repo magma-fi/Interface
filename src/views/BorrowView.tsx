@@ -89,7 +89,7 @@ export const BorrowView = ({
 					className="viewIcon"
 					src="images/borrow.png" />
 
-				<h1>{t("borrow")}&nbsp;{WEN.symbol}</h1>
+				<h1 style={{ textTransform: "none" }}>{t("borrow")}&nbsp;{WEN.symbol}</h1>
 			</div>
 
 			<div
