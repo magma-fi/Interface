@@ -35,7 +35,8 @@ export const DepositeModal = ({
 	availableBorrow,
 	appMMROffset = 1,
 	recoveryMode,
-	ccr
+	ccr,
+	total
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -54,6 +55,7 @@ export const DepositeModal = ({
 	appMMROffset: number;
 	recoveryMode: boolean;
 	ccr: number;
+	total?: Record<string, any>;
 }) => {
 	const { chainId } = useLiquity();
 	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
@@ -196,7 +198,14 @@ export const DepositeModal = ({
 	const handleDeposit = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 
-		if (magma.wouldBeRecoveryMode(updatedVaultCollateral, updatedVaultDebt, price, 1, market, WEN)) {
+		if (total && magma.wouldBeRecoveryMode(
+			total.collateral.plus(updatedVaultCollateral),
+			total.debt.plus(updatedVaultDebt),
+			price,
+			1,
+			market,
+			WEN
+		)) {
 			return setErrorInfo({
 				key: "noOpenningToFall",
 				values: { ccr }

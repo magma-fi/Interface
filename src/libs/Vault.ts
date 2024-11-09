@@ -84,9 +84,9 @@ export class Vault {
 			return globalContants.BIG_NUMBER_0;
 	}
 
-	public static calculateAvailableBorrow(collateral: BigNumber, debt: BigNumber, collateralPrice: number, collateralToken: Coin, loanToken: Coin, collateralRatio: number, feeRate = 0, offset = 1) {
+	public static calculateAvailableBorrow(collateral: BigNumber, debt: BigNumber, collateralPrice: number, collateralToken: Coin, loanToken: Coin, collateralRatio: number, feeRate = 0, offset = 1, CCR = 1) {
 		const collateralValue = collateral.shiftedBy(-collateralToken.decimals).multipliedBy(collateralPrice);
-		const debtLine = collateralValue.dividedBy(collateralRatio).multipliedBy(offset);
+		const debtLine = collateralValue.dividedBy(CCR > 1 ? CCR : collateralRatio).multipliedBy(offset);
 		const debtValue = debt.shiftedBy(-loanToken.decimals);
 		if (debtLine.gt(debtValue)) {
 			return debtLine.minus(debtValue).shiftedBy(loanToken.decimals).multipliedBy(1 - feeRate);
@@ -120,7 +120,8 @@ export class Vault {
 		collateralPrice: number,
 		collateralRatio = (appConfig.constants as JsonObject)[String(this._chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO,
 		feeRate = 0,
-		offset = 1
+		offset = 1,
+		CCR = 1
 	) {
 		return Vault.calculateAvailableBorrow(
 			this.collateral,
@@ -130,7 +131,8 @@ export class Vault {
 			this._loanToken,
 			collateralRatio,
 			feeRate,
-			offset
+			offset,
+			CCR
 		);
 	}
 
