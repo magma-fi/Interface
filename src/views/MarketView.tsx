@@ -134,7 +134,7 @@ export const MarketView = ({
 				chainId,
 				query,
 				(data: any) => {
-					if (data.troveChanges) {
+					if (data?.troveChanges) {
 						setTxs(data.troveChanges);
 					}
 				},
@@ -774,7 +774,8 @@ export const MarketView = ({
 			liquidationPoint={liquidationPoint}
 			appMMROffset={appMMROffset}
 			recoveryMode={recoveryMode}
-			ccr={CCR} />}
+			ccr={CCR}
+			total={total} />}
 
 		{showDepositDoneModal && <TxDone
 			title={t("depositedSuccessfully")}
@@ -812,7 +813,8 @@ export const MarketView = ({
 			recoveryMode={recoveryMode}
 			liquidationPoint={appLiquidationPoint}
 			availableBorrow={availableBorrow}
-			ccr={CCR} />}
+			ccr={CCR}
+			total={total} />}
 
 		{showBorrowDoneModal && <TxDone
 			title={t("borrowedSuccessfully")}
