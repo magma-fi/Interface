@@ -36,7 +36,7 @@ export const CloseModal = ({
 	wenBalance: BigNumber;
 	market: Coin;
 }) => {
-	const { liquity, account, signer } = useLiquity();
+	const { account, signer } = useLiquity();
 	const { t } = useLang();
 	const indexOfConfig = String(chainId);
 	const [agree, setAgree] = useState(false);
@@ -45,8 +45,9 @@ export const CloseModal = ({
 	const howMuchWEN = needSwap ? vault.netDebt.minus(wenBalance) : globalContants.BIG_NUMBER_0; // errorMessages?.values?.amount ? Decimal.from(errorMessages.values!.amount).mul(wenDec) : Decimal.ZERO;
 	const [howMuchIOTX, setHowMuchIOTX] = useState(globalContants.BIG_NUMBER_0);
 	const howMuchIOTXDecimal = formatAssetAmount(howMuchIOTX, market.decimals);
-	const theCfg = (appConfig.swap as JsonObject)[indexOfConfig];
-	const address = theCfg?.liquidity?.address;
+	const theSwapCfg = (appConfig.swap as JsonObject)[indexOfConfig];
+	const theMagmaCfg = (appConfig.magma as JsonObject)[indexOfConfig];
+	const address = theSwapCfg?.liquidity?.address;
 	const [swapping, setSwapping] = useState(false);
 	const [sending, setSending] = useState(false);
 
@@ -54,7 +55,7 @@ export const CloseModal = ({
 		if (!needSwap) return;
 
 		const getContract = async () => {
-			const abi = await loadABI(theCfg.liquidity.abi);
+			const abi = await loadABI(theSwapCfg.liquidity.abi);
 			if (address && abi) {
 				const theContract = new DappContract(address, abi, signer);
 
@@ -63,7 +64,7 @@ export const CloseModal = ({
 						howMuchWEN.toFixed(),
 						[
 							(appConfig.tokens.wrappedNativeCurrency as JsonObject)[indexOfConfig].address,
-							liquity.connection.addresses.lusdToken
+							theMagmaCfg.lusdToken
 						]
 					);
 
@@ -84,7 +85,7 @@ export const CloseModal = ({
 	};
 
 	const swap = async () => {
-		const theContract = new DappContract(theCfg.swapAndCloseTool.address, swapAndCloseTool, signer);
+		const theContract = new DappContract(theSwapCfg.swapAndCloseTool.address, swapAndCloseTool, signer);
 		theContract.dappFunctions.swapAndCloseTrove.run(
 			undefined,
 			error => {
@@ -109,7 +110,7 @@ export const CloseModal = ({
 		// if (!publicClient) return;
 		setSwapping(true);
 
-		const theContract = new DappContract((appConfig.magma as JsonObject)[indexOfConfig].lusdToken, erc20ABI, signer);
+		const theContract = new DappContract(theMagmaCfg.lusdToken, erc20ABI, signer);
 		theContract.dappFunctions.approve.run(
 			undefined,
 			error => {
@@ -119,7 +120,7 @@ export const CloseModal = ({
 				return swap();
 			},
 			{ from: account },
-			theCfg.swapAndCloseTool.address,
+			theSwapCfg.swapAndCloseTool.address,
 			vault.netDebt.toFixed()
 		);
 	};
