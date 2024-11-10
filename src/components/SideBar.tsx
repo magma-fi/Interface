@@ -156,7 +156,7 @@ export const SideBar: React.FC = ({ children }) => {
             <img src="images/exchange.svg" />
           </div>
 
-          {t("exchange")}&nbsp;WEN
+          {t("migrate")}&nbsp;WEN
 
           <img
             id="externalLink"

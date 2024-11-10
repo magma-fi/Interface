@@ -179,5 +179,6 @@
 	"manage": "Manage",
 	"back": "back",
 	"vault": "vault",
-	"exchange": "Exchange"
+	"exchange": "Exchange",
+	"migrate": "Migrate"
 }
