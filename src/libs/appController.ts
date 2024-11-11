@@ -234,7 +234,6 @@ export const appController: {
 			const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
 			const lpScoreGraphs = Object.entries(cfg?.lpScore);
 			if (lpScoreGraphs) {
-
 				const deadline = new Date("2024-10-30 23:59").getTime();
 
 				for (let i = 0; i < lpScoreGraphs.length; i++) {
