@@ -117,6 +117,7 @@ export const appController: {
 			const query = graphqlAsker.requestUsersWithReferrer(referrer);
 			graphqlAsker.ask(chainId, query, (result: any) => {
 				if (result?.users?.length > 0) {
+					const deadline = new Date("2024-10-30 23:59").getTime();
 					const myUsers = result.users.map((item: { id: string; }) => '"' + item.id + '"');
 
 					if (myUsers.length > 0) {
@@ -136,7 +137,7 @@ export const appController: {
 										const d = Number(element.stabilityDeposit.depositedAmount);
 										if (!isNaN(d)) myUsersPoints += d
 											* 10
-											* Math.floor((Date.now() - element.point.timestamp * 1000) / 3600000);
+											* Math.floor((deadline - element.point.timestamp * 1000) / 3600000);
 									});
 								}
 
@@ -153,7 +154,7 @@ export const appController: {
 												Number(element.point.point)
 												+ ((Number(element.balance.balance) + Number(element.staking?.amount || 0)) / 10 ** 18)
 												* lpConfig.pointsPerHour
-												* Math.floor((Date.now() - element.point.timestamp * 1000) / 3600000)
+												* Math.floor((deadline - element.point.timestamp * 1000) / 3600000)
 											);
 										});
 									}
@@ -232,6 +233,8 @@ export const appController: {
 			const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
 			const lpScoreGraphs = Object.entries(cfg?.lpScore);
 			if (lpScoreGraphs) {
+				const deadline = new Date("2024-10-30 23:59").getTime();
+
 				for (let i = 0; i < lpScoreGraphs.length; i++) {
 					const tmp: any = lpScoreGraphs[i][1];
 					const lpScoreGraph = {
@@ -250,7 +253,7 @@ export const appController: {
 							lpScoreGraph.points = Number(data.user.point.point)
 								+ ((Number(data.user.balance.balance) + Number(data.user.staking?.amount || 0)) / 10 ** 18)
 								* lpScoreGraph.pointsPerHour
-								* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
+								* Math.floor((deadline - data.user.point.timestamp * 1000) / 3600000);
 							totalLPScores += lpScoreGraph.points;
 						}
 
