@@ -252,11 +252,7 @@ export const appController: {
 						const query = graphqlAsker.requestUserLPScore(user, lpScoreGraph.staking);
 						const data = await graphqlAsker.askAsync(chainId, query, lpScoreGraph.url);
 
-						if (
-							data?.user &&
-							(lpScoreGraph.endsIn === 0 || lpScoreGraph.endsIn < Number(data?.user?.point.timestamp))
-						) {
-
+						if (data?.user) {
 							lpScoreGraph.points = Number(data.user.point.point)
 								+ ((Number(data.user.balance.balance) + Number(data.user.staking?.amount || 0)) / 10 ** 18)
 								* lpScoreGraph.pointsPerHour
