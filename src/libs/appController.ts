@@ -134,12 +134,10 @@ export const appController: {
 										const p = Number(element.point.point);
 										if (!isNaN(p)) myUsersPoints += p;
 
-										if (deadline > element.point.timestamp * 1000) {
-											const d = Number(element.stabilityDeposit.depositedAmount);
-											if (!isNaN(d)) myUsersPoints += d
-												* 10
-												* Math.floor((deadline - element.point.timestamp * 1000) / 3600000);
-										}
+										const d = Number(element.stabilityDeposit.depositedAmount);
+										if (!isNaN(d)) myUsersPoints += d
+											* 10
+											* Math.floor((deadline - element.point.timestamp * 1000) / 3600000);
 									});
 								}
 
@@ -152,14 +150,12 @@ export const appController: {
 
 									if (lpScoreRes?.users) {
 										lpScoreRes.users.forEach((element: any) => {
-											if (deadline > element.point.timestamp * 1000) {
-												myUsersPoints += (
-													Number(element.point.point)
-													+ ((Number(element.balance.balance) + Number(element.staking?.amount || 0)) / 10 ** 18)
-													* lpConfig.pointsPerHour
-													* Math.floor((deadline - element.point.timestamp * 1000) / 3600000)
-												);
-											}
+											myUsersPoints += (
+												Number(element.point.point)
+												+ ((Number(element.balance.balance) + Number(element.staking?.amount || 0)) / 10 ** 18)
+												* lpConfig.pointsPerHour
+												* Math.floor((deadline - element.point.timestamp * 1000) / 3600000)
+											);
 										});
 									}
 								}
@@ -215,12 +211,10 @@ export const appController: {
 							const p = Number(data.user.point.point);
 							if (!isNaN(p)) stabilityScore = p;
 
-							if (deadline > data.user.point.timestamp * 1000) {
-								const d = Number(data.user.stabilityDeposit.depositedAmount);
-								if (!isNaN(d)) stabilityScore += d
-									* 10
-									* Math.floor((deadline - data.user.point.timestamp * 1000) / 3600000);
-							}
+							const d = Number(data.user.stabilityDeposit.depositedAmount);
+							if (!isNaN(d)) stabilityScore += d
+								* 10
+								* Math.floor((deadline - data.user.point.timestamp * 1000) / 3600000);
 						}
 
 						resolve(stabilityScore);
@@ -240,6 +234,7 @@ export const appController: {
 			const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
 			const lpScoreGraphs = Object.entries(cfg?.lpScore);
 			if (lpScoreGraphs) {
+
 				const deadline = new Date("2024-10-30 23:59").getTime();
 
 				for (let i = 0; i < lpScoreGraphs.length; i++) {
@@ -259,9 +254,9 @@ export const appController: {
 
 						if (
 							data?.user &&
-							(lpScoreGraph.endsIn === 0 || lpScoreGraph.endsIn < Number(data?.user?.point.timestamp)) &&
-							deadline > data.user.point.timestamp * 1000
+							(lpScoreGraph.endsIn === 0 || lpScoreGraph.endsIn < Number(data?.user?.point.timestamp))
 						) {
+
 							lpScoreGraph.points = Number(data.user.point.point)
 								+ ((Number(data.user.balance.balance) + Number(data.user.staking?.amount || 0)) / 10 ** 18)
 								* lpScoreGraph.pointsPerHour
