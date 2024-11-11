@@ -9,7 +9,7 @@ import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { ExpandableView } from "./ExpandableView";
-import { Decimal, Trove, Difference, LUSD_LIQUIDATION_RESERVE } from "lib-base";
+import { Decimal, Trove, Difference, LUSD_LIQUIDATION_RESERVE, UserTrove } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
@@ -44,7 +44,7 @@ export const DepositeModal = ({
 	market: Coin;
 	accountBalance: Decimal;
 	price: Decimal;
-	trove: Trove;
+	trove: UserTrove;
 	fees: Fees;
 	validationContext: ValidationContext;
 	onDone: (tx: string) => void;
@@ -458,26 +458,30 @@ export const DepositeModal = ({
 				(
 					(!transactionState.id && transactionState.type === "idle")
 					|| transactionState.type === "cancelled"
-				)
-				? <TroveAction
+				) && (
+					trove.status === "open" ||
+					trove.status === "nonExistent"
+				) ? <TroveAction
 					transactionId={txId}
 					change={stableTroveChange}
 					maxBorrowingRate={borrowingRate.add(0.005)}
 					borrowingFeeDecayToleranceMinutes={60}>
-					<button
-						className="primaryButton bigButton"
-						style={{ width: "100%" }}>
-						<img src="images/deposit.png" />
+				<p className="tips">{t("tips4Down")}</p>
 
-						{depositAndBorrow ? t("depositAndBorrow") : t("deposit")}
-					</button>
-				</TroveAction> : <button
+				<button
 					className="primaryButton bigButton"
-					style={{ width: "100%" }}
-					disabled>
+					style={{ width: "100%" }}>
 					<img src="images/deposit.png" />
 
-					{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t(depositAndBorrow ? "sending" : "depositing") + "...") : t(depositAndBorrow ? "depositAndBorrow" : "deposit")}
-				</button>}
+					{depositAndBorrow ? t("depositAndBorrow") : t("deposit")}
+				</button>
+			</TroveAction> : <button
+				className="primaryButton bigButton"
+				style={{ width: "100%" }}
+				disabled>
+				<img src="images/deposit.png" />
+
+				{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t(depositAndBorrow ? "sending" : "depositing") + "...") : t(depositAndBorrow ? "depositAndBorrow" : "deposit")}
+			</button>}
 	</Modal> : <></>
 };

@@ -51,7 +51,7 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   const wagmiSinger = useEthersSigner();
   const publicClient = usePublicClient({ chainId });
   const url = new URL(window.location.href);
-  const urlSearch = url.search || "";
+  const [urlSearch, setUrlSearch] = useState(url.search || "");
   const refParam = url.searchParams.get("ref");
   const testAccount = url.searchParams.get("testacc"); // 用参数中的其它地址进行测试。
   const addr = isConnected ? (testAccount ?? address) : globalContants.ADDRESS_PLACEHOLDER;
@@ -79,9 +79,27 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
         const ref = data?.frontends[0].owner.id;
         setFrontendTag(ref);
         config.frontendTag = ref;
+
+        window.localStorage.setItem(globalContants.FRONTEND_TAG, ref);
+        window.localStorage.setItem(globalContants.REFERRER_CODE, refParam);
       }
     });
   }, [refParam, chainId, config]);
+
+  useEffect(() => {
+    if (!config) return;
+
+    const addr = window.localStorage.getItem(globalContants.FRONTEND_TAG);
+    if (addr) {
+      setFrontendTag(addr as typeof zeroAddress);
+      config.frontendTag = addr;
+    }
+
+    const c = window.localStorage.getItem(globalContants.REFERRER_CODE);
+    if (c) {
+      setUrlSearch("?ref=" + c);
+    }
+  }, [config]);
 
   const connection = useMemo(() => {
     if (config && provider && signerData && addr && frontendTag) {

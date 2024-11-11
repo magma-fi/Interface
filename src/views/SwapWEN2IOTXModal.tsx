@@ -248,7 +248,10 @@ export const SwapWEN2IOTXModal = ({
 						style={{ color: "#F6F6F7" }}>{receive.toString(2)}&nbsp;{IOTX.symbol}</div>
 				</div>
 			</div>
+
+			<p className="tips">{t("tips4Down")}</p>
 		</div>
+
 
 		<button
 			className="primaryButton bigButton"

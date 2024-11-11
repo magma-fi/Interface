@@ -199,6 +199,7 @@ export const appController: {
 			const stabilityScoreGraph = cfg?.stabilityScore;
 			let stabilityScore = 0;
 			if (stabilityScoreGraph) {
+				const deadline = new Date("2024-10-30 23:59").getTime();
 				const query = graphqlAsker.requestUserWENScore(user);
 				graphqlAsker.ask(
 					chainId,
@@ -213,7 +214,7 @@ export const appController: {
 							const d = Number(data.user.stabilityDeposit.depositedAmount);
 							if (!isNaN(d)) stabilityScore += d
 								* 10
-								* Math.floor((Date.now() - data.user.point.timestamp * 1000) / 3600000);
+								* Math.floor((deadline - data.user.point.timestamp * 1000) / 3600000);
 						}
 
 						resolve(stabilityScore);
@@ -242,7 +243,8 @@ export const appController: {
 						staking: tmp?.staking,
 						url: tmp?.url,
 						link: tmp?.link,
-						pointsPerHour: tmp?.pointsPerHour
+						pointsPerHour: tmp?.pointsPerHour,
+						endsIn: tmp?.endsIn ? new Date(tmp?.endsIn).getTime() / 1000 : 0
 					} as LPScoreObject;
 
 					if (lpScoreGraph.url) {

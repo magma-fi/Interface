@@ -162,6 +162,8 @@ export const UnstakeModal = ({
 						positive={unstakeAmount === 0} />
 				</div>
 			</div>
+
+			<p className="tips">{t("tips4Down")}</p>
 		</div>
 
 		{validChange && !transactionState.id && transactionState.type === "idle" ? <StabilityDepositAction
