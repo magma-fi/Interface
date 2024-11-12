@@ -106,12 +106,12 @@ export const StakeModal = ({
 				gap: "1rem",
 				maxWidth: "372px"
 			}}>
-			<div className="description">{t("withdrawAnytime")}</div>
+			{/* <div className="description">{t("withdrawAnytime")}</div> */}
 
-			<TxLabel
+			{/* <TxLabel
 				title={t("currentInterest") + " (APY)"}
 				logo="images/chart.png"
-				amount={"0"} />
+				amount={"0"} /> */}
 
 			<div className="flex-column-align-left">
 				<div
