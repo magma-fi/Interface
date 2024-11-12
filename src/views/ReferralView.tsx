@@ -34,7 +34,7 @@ export const ReferralView = ({
 	points: number;
 }) => {
 	const { t } = useLang();
-	const { liquity, chainId, provider, signer, publicClient, account } = useLiquity();
+	const { chainId, signer, publicClient, account } = useLiquity();
 	// const txId = useMemo(() => String(Date.now()), []);
 	// const transactionState = useMyTransactionState(txId, true);
 	const [loading, setLoading] = useState(false);
@@ -69,7 +69,7 @@ export const ReferralView = ({
 	// }, [account, stabilityPoolDefault, stabilityPoolStatus]);
 
 	const handleRegisterFrontend = async () => {
-		if (!chainId || !provider || kickbackRate?.eq(0) || !signer || !refererFactoryAddress) return;
+		if (!chainId || kickbackRate?.eq(0) || !signer || !refererFactoryAddress) return;
 
 		setLoading(true);
 
@@ -93,7 +93,8 @@ export const ReferralView = ({
 					window.location.reload();
 				}, 1000);
 			},
-			kickbackRate.mul(globalContants.IOTX_DECIMALS).toString()
+			undefined,
+			kickbackRate.multipliedBy(globalContants.IOTX_DECIMALS).toFixed()
 		);
 	};
 

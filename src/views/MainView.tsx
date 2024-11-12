@@ -81,6 +81,7 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 			getReferer();
 		}
 	}, [account, chainId, signer]);
+	console.debug("xxx Referrer: ", referrer, isReferrer);
 
 	// useEffect(() => {
 	// 	if (!chainId || !account || referrer === undefined) return;
