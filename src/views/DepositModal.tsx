@@ -148,6 +148,13 @@ export const DepositeModal = ({
 	const handleInputBorrow = (val: number) => {
 		setDefaultBorrowAmount(-1);
 		setBorrowValue(val);
+
+		if (val < 100) {
+			return setErrorInfo({
+				key: "mustBorrowAtLeast",
+				values: { amount: constants?.MIN_NET_DEBT.shiftedBy(-WEN.decimals).toFixed() }
+			} as unknown as ErrorMessage);
+		}
 	}
 
 	const handleMaxBorrow = () => {
