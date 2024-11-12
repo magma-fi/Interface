@@ -159,18 +159,6 @@ export const BorrowModal = ({
 		);
 	};
 
-	console.debug(
-		"xxx 不可借",
-		borrowAmount.lte(0) || sending || borrowAmount.gt(availableBorrow) || recoveryMode || vault.status === VaultStatusWithinMagma.limitedByRedemption,
-		borrowAmount.toFixed(),
-		availableBorrow.toFixed(),
-		borrowAmount.lte(0),
-		sending,
-		borrowAmount.gt(availableBorrow),
-		recoveryMode,
-		vault.status === VaultStatusWithinMagma.limitedByRedemption
-	);
-
 	return isOpen ? <Modal
 		title={t("borrow") + " " + WEN.symbol}
 		onClose={handleCloseModal}>
