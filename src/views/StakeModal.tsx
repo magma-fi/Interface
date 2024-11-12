@@ -7,7 +7,7 @@ import { useLang } from "../hooks/useLang";
 import { Coin, ErrorMessage, StabilityDeposit } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { TxLabel } from "../components/TxLabel";
 import BigNumber from "bignumber.js";
@@ -38,16 +38,28 @@ export const StakeModal = ({
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
 	const [depositInput, setDepositInput] = useState(0);
-	const depositAmount = BigNumber(depositInput).shiftedBy(WEN.decimals);
+	const [depositAmount, setDepositAmount] = useState(globalContants.BIG_NUMBER_0);
 	const wenBalanceDecimals = formatAssetAmount(wenBalance, WEN.decimals);
 	const stakedDecimals = formatAssetAmount(stabilityDeposit.currentLUSD, WEN.decimals);
 	const [sending, setSending] = useState(false);
 	const [errorMessages, setErrorMessages] = useState<ErrorMessage>();
+	const [isMax, setIsMax] = useState(false);
+
+	useEffect(() => {
+		if (isMax) {
+			setDepositAmount(wenBalance);
+		} else {
+			if (!isNaN(depositInput)) {
+				setDepositAmount(BigNumber(depositInput).shiftedBy(WEN.decimals))
+			}
+		}
+	}, [depositInput, isMax]);
 
 	const handleMax = () => {
 		const val = wenBalanceDecimals;
 		setValueForced(val);
 		setDepositInput(val);
+		setIsMax(true);
 		setErrorMessages(undefined);
 
 		amountStaked = val;
@@ -56,6 +68,7 @@ export const StakeModal = ({
 	const handleInputDeposit = (val: number) => {
 		setValueForced(-1);
 		setDepositInput(val);
+		setIsMax(false);
 		setErrorMessages(undefined);
 
 		amountStaked = val;
