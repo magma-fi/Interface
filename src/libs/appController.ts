@@ -14,11 +14,12 @@ export const appController: {
 	changeLang: (lng: Langs) => void;
 	relaunch: () => void;
 	employWorkers: (chainId: number, tokenName: string, onDone?: () => void) => void;
-	_dbConnector: IDBOpenDBRequest;
+	_dbConnector?: IDBOpenDBRequest;
 	_db: IDBDatabase | undefined;
 	openDB: (chainId: number, tokenSymbol: string, onDone: () => void) => void;
 	readAll: (onDone: (arg?: IDBCursor) => void) => void;
 	getUserPoints: (chainId: number, user: string, referrer: string, onDone: (point: number, resObject: Record<string, any>) => void) => void;
+	replaceStrsForContracts: (str: string) => string;
 	_getUserWENScore: (chainId: number, user: string) => Promise<number>;
 	_getLPScore: (chainId: number, user: string) => Promise<{ totalLPScores: number, lpScores: LPScoreObject[] }>;
 	_getUserStabilityAndLpScore: (chainId: number, user: string, onDone: (res: Record<string, any>) => void) => void;
@@ -26,6 +27,7 @@ export const appController: {
 	// _dbConnector: undefined,
 	_db: undefined,
 	lang: Langs.English,
+	_dbConnector: undefined,
 
 	init: function () {
 		this.detectLang();
@@ -231,7 +233,7 @@ export const appController: {
 	},
 
 	_getLPScore: function (chainId, user) {
-		return new Promise(async resolve => {
+		return new Promise(async (resolve) => {
 			const lpScores: LPScoreObject[] = [];
 			let totalLPScores = 0;
 			const cfg = (appConfig.subgraph as JsonObject)[String(chainId)];
@@ -267,5 +269,9 @@ export const appController: {
 			}
 
 		});
+	},
+
+	replaceStrsForContracts: function (str: string): string {
+		return str.replace("LUSD", "ioUSD");
 	}
 };

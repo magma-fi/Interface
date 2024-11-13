@@ -998,13 +998,13 @@ h5 {
     }
   }
 
-  .errorText {
-    color: var(--error-color);
-  }
-
   .warnText {
     color: var(--warn-color);
   }
+}
+
+.errorText {
+  color: var(--error-color);
 }
 
 .collapsedView {
