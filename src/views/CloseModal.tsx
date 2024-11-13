@@ -200,7 +200,7 @@ export const CloseModal = ({
 
 			{errorMessages && <div
 				className="errorText"
-				style={{ color: "#F25454" }}>
+				style={{ maxWidth: "16.6875rem" }}>
 				{errorMessages.string || t(errorMessages.key!, errorMessages.values)}
 			</div>}
 		</div>
