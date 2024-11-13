@@ -28,15 +28,15 @@ const wagmiCfg = createConfig({
     new InjectedConnector({
       chains,
       options: {
-        name: "OKX Wallet",
-        getProvider: () => window?.okxwallet
+        name: "Gate Wallet",
+        getProvider: () => window?.gatewallet
       }
     }),
     new InjectedConnector({
       chains,
       options: {
-        name: "Gate Wallet",
-        getProvider: () => window?.gatewallet
+        name: "OKX Wallet",
+        getProvider: () => window?.okxwallet,
       }
     }),
     new WalletConnectConnector({
