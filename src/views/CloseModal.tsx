@@ -16,6 +16,7 @@ import { Vault } from "../libs/Vault";
 import BigNumber from "bignumber.js";
 import { DappContract } from "../libs/DappContract";
 import { magma } from "../libs/magma";
+import { appController } from "../libs/appController";
 
 export const CloseModal = ({
 	isOpen = false,
@@ -201,7 +202,7 @@ export const CloseModal = ({
 			{errorMessages && <div
 				className="errorText"
 				style={{ maxWidth: "16.6875rem" }}>
-				{errorMessages.string || t(errorMessages.key!, errorMessages.values)}
+				{appController.replaceStrsForContracts(errorMessages.string || t(errorMessages.key!, errorMessages.values))}
 			</div>}
 		</div>
 
