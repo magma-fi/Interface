@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, JsonObject } from "../libs/types";
+import { Coin, ErrorMessage, JsonObject, VaultStatusWithinMagma } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import React, { useState, useEffect } from "react";
@@ -35,7 +35,8 @@ export const DepositeModal = ({
 	availableBorrow,
 	appMMROffset = 1,
 	recoveryMode,
-	ccr
+	ccr,
+	total
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -54,6 +55,7 @@ export const DepositeModal = ({
 	appMMROffset: number;
 	recoveryMode: boolean;
 	ccr: number;
+	total?: Record<string, any>;
 }) => {
 	const { chainId } = useLiquity();
 	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
@@ -86,6 +88,7 @@ export const DepositeModal = ({
 	const newLiquidationPrice = updatedVaultCollateral.gt(0) ? updatedVaultDebt.dividedBy(updatedVaultCollateral).toNumber() : 0;
 	const newURPercentNumber = newCollateralRatio > 0 ? 1 / newCollateralRatio * 100 : 0;
 	const urIsGood = vaultUtilizationRateNumber > newURPercentNumber;
+	const debtLimit = constants?.MIN_NET_DEBT.shiftedBy(-WEN.decimals).toNumber();
 
 	const init = () => {
 		setValueForced(-1);
@@ -143,15 +146,30 @@ export const DepositeModal = ({
 		</button>
 	</div>
 
+	const checkDebtLimit = (val: number) => {
+		if (val < debtLimit) {
+			setErrorInfo({
+				key: "mustBorrowAtLeast",
+				values: { amount: debtLimit }
+			} as unknown as ErrorMessage);
+		} else {
+			setErrorInfo(undefined)
+		}
+	};
+
 	const handleInputBorrow = (val: number) => {
 		setDefaultBorrowAmount(-1);
 		setBorrowValue(val);
+
+		checkDebtLimit(val);
 	}
 
 	const handleMaxBorrow = () => {
 		const val = newAvailableBorrow?.minus(vault.debt).shiftedBy(-WEN.decimals).toNumber();
 		setDefaultBorrowAmount(val);
 		setBorrowValue(val);
+
+		checkDebtLimit(val);
 	};
 
 	const borrowView = <div
@@ -196,7 +214,14 @@ export const DepositeModal = ({
 	const handleDeposit = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 
-		if (magma.wouldBeRecoveryMode(updatedVaultCollateral, updatedVaultDebt, price, 1, market, WEN)) {
+		if (total && magma.wouldBeRecoveryMode(
+			total.collateral.plus(updatedVaultCollateral),
+			total.debt.plus(updatedVaultDebt),
+			price,
+			1,
+			market,
+			WEN
+		)) {
 			return setErrorInfo({
 				key: "noOpenningToFall",
 				values: { ccr }
@@ -407,6 +432,7 @@ export const DepositeModal = ({
 				|| (depositAndBorrow && (depositValue === 0 || borrowValue === 0))
 				|| (!depositAndBorrow && (depositValue === 0))
 				|| updatedVaultDebt.lt(constants?.MIN_NET_DEBT)
+				|| vault.status === VaultStatusWithinMagma.limitedByRedemption
 			}
 			onClick={handleDeposit}>
 			<img src="images/deposit.png" />

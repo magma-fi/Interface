@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, JsonObject } from "../libs/types";
+import { Coin, ErrorMessage, JsonObject, VaultStatusWithinMagma } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect } from "react";
@@ -109,33 +109,47 @@ export const WithdrawModal = ({
 	const handleWithdraw = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 
-		if (magma.wouldBeRecoveryMode(updatedCollateral, vault.debt, price, 1, market, WEN)) {
-			return setErrorMessages({
-				key: "noOpenningToFall",
-				values: { ccr }
-			} as unknown as ErrorMessage);
-		}
-
 		setSending(true);
 
-		vault.adjust(
-			borrowingRate + cfg.feePercentSlippage,
-			withdrawAmount,
-			globalContants.BIG_NUMBER_0,
-			false,
-			globalContants.BIG_NUMBER_0,
-			updatedCollateral,
-			vault.netDebt,
-			undefined,
-			error => {
-				setErrorMessages({ string: error.message } as ErrorMessage);
-				setSending(false);
-			},
-			tx => {
-				setSending(false);
-				return onDone && onDone(tx, amountWithdrawn);
+		if (vault.status === VaultStatusWithinMagma.limitedByRedemption) {
+			vault.claimCollateral(
+				undefined,
+				error => {
+					setErrorMessages({ string: error.message } as ErrorMessage);
+					setSending(false);
+				},
+				tx => {
+					setSending(false);
+					return onDone && onDone(tx, amountWithdrawn);
+				}
+			);
+		} else {
+			if (magma.wouldBeRecoveryMode(updatedCollateral, vault.debt, price, 1, market, WEN)) {
+				return setErrorMessages({
+					key: "noOpenningToFall",
+					values: { ccr }
+				} as unknown as ErrorMessage);
 			}
-		)
+
+			vault.adjust(
+				borrowingRate + cfg.feePercentSlippage,
+				withdrawAmount,
+				globalContants.BIG_NUMBER_0,
+				false,
+				globalContants.BIG_NUMBER_0,
+				updatedCollateral,
+				vault.netDebt,
+				undefined,
+				error => {
+					setErrorMessages({ string: error.message } as ErrorMessage);
+					setSending(false);
+				},
+				tx => {
+					setSending(false);
+					return onDone && onDone(tx, amountWithdrawn);
+				}
+			)
+		}
 	};
 
 	return isOpen ? <Modal

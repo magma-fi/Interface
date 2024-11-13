@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, JsonObject, ValidationContext } from "../libs/types";
+import { Coin, ErrorMessage, JsonObject, ValidationContext, VaultStatusWithinMagma } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect } from "react";
@@ -254,7 +254,7 @@ export const RepayModal = ({
 		<button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			disabled={repayAmount.lte(0) || sending || repayAmount.gt(constants?.lusdBalance)}
+			disabled={repayAmount.lte(0) || sending || repayAmount.gt(constants?.lusdBalance) || vault.status === VaultStatusWithinMagma.limitedByRedemption}
 			onClick={handleRepay}>
 			<img src="images/repay-dark.png" />
 

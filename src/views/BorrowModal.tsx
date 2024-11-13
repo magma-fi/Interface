@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
 import { useLang } from "../hooks/useLang";
-import { Coin, ErrorMessage, JsonObject } from "../libs/types";
+import { Coin, ErrorMessage, JsonObject, VaultStatusWithinMagma } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect } from "react";
@@ -34,6 +34,7 @@ export const BorrowModal = ({
 	availableWithdrawal,
 	availableBorrow,
 	ccr,
+	total
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -50,6 +51,7 @@ export const BorrowModal = ({
 	availableWithdrawal: BigNumber;
 	availableBorrow: BigNumber;
 	ccr: number;
+	total?: Record<string, any>;
 }) => {
 	const { chainId } = useLiquity();
 	const cfg = (appConfig.constants as JsonObject)[String(chainId)];
@@ -74,7 +76,7 @@ export const BorrowModal = ({
 	const [tx, setTx] = useState("");
 	const [errorMsg, setErrorMsg] = useState<ErrorMessage>();
 	const newLiquidationPrice = updatedVaultDebt.dividedBy(vault.collateral).toNumber();
-	const availableBorrowDecimals = formatAssetAmount(availableBorrow, WEN.decimals);
+	const availableBorrowDecimals = formatAssetAmount(availableBorrow, WEN.decimals) * 0.9999;
 
 	useEffect(() => {
 		setForcedSlideValue(newUR);
@@ -118,7 +120,14 @@ export const BorrowModal = ({
 	const handleBorrow = (e: React.MouseEvent<HTMLButtonElement>) => {
 		e.preventDefault();
 
-		if (magma.wouldBeRecoveryMode(vault.collateral, updatedVaultDebt, price, 1, market, WEN)) {
+		if (total && magma.wouldBeRecoveryMode(
+			total.collateral,
+			total.debt.plus(borrowAmount),
+			price,
+			1,
+			market,
+			WEN
+		)) {
 			return setErrorMsg({
 				key: "noOpenningToFall",
 				values: { ccr }
@@ -291,7 +300,7 @@ export const BorrowModal = ({
 		<button
 			className="primaryButton bigButton"
 			style={{ width: "100%" }}
-			disabled={borrowAmount.lte(0) || sending || borrowAmount.gt(availableBorrow) || recoveryMode}
+			disabled={borrowAmount.lte(0) || sending || borrowAmount.gt(availableBorrow) || recoveryMode || vault.status === VaultStatusWithinMagma.limitedByRedemption}
 			onClick={handleBorrow}>
 			<img src="images/borrow-dark.png" />
 

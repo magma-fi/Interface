@@ -1,6 +1,6 @@
 {
-	"borrow": "borrow",
-	"stake": "stake",
+	"borrow": "Borrow",
+	"stake": "Stake",
 	"governance": "governance",
 	"liquidations": "Liquidations",
 	"docs": "docs",
@@ -16,9 +16,9 @@
 	"letsGetStartedDEscription": "Secure a {interest} interest ioUSD loan for just {percent} deposit fee.",
 	"walletBalance": "Wallet Balance",
 	"marketOverview": "market overview",
-	"totalUtilizationRate": "Total Utilization Rate",
+	"totalUtilizationRate": "Magma Utilization Rate",
 	"recoveryModeAt": "Recovery Mode at {recovery}",
-	"totalDeposits": "Total Deposits",
+	"totalDeposits": "Magma Deposits",
 	"numberOfVaults": "Number of Vaults",
 	"borrowFee": "borrowing Fee",
 	"liquidationReserve": "Liquidation Reserve",
@@ -96,7 +96,7 @@
 	"depositAndBorrow": "Deposit and Borrow",
 	"menu": "menu",
 	"noLiquidatableTrove": "No vaults are currently at risk of liquidation.",
-	"notAllowedToUnstake": "You're not allowed to withdraw LUSD from your Stability Deposit when there are undercollateralized Troves. Please liquidate those Troves or try again later.",
+	"notAllowedToUnstake": "You're not allowed to withdraw ioUSD from your Stability Deposit when there are undercollateralized Troves. Please liquidate those Troves or try again later.",
 	"price": "Price",
 	"latestTransactions": "Latest Transactions",
 	"limit1M": "The borrowing amount exceeds the temporary limit of the total supply of 1 million ioUSD.",
@@ -179,5 +179,6 @@
 	"manage": "Manage",
 	"back": "back",
 	"vault": "vault",
-	"exchange": "Exchange"
+	"exchange": "Exchange",
+	"migrate": "Migrate"
 }

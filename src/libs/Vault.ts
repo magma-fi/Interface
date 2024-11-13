@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { IOTX, WEN, globalContants } from "./globalContants";
-import { Coin, JsonObject, VaultStatus, Vaultish } from "./types";
+import { Coin, JsonObject, VaultStatus, VaultStatus4Contract, VaultStatus4Subgraph, VaultStatusWithinMagma, Vaultish } from "./types";
 import { BigNumber } from "bignumber.js";
 import appConfig from "../appConfig.json"
 import { magma } from "./magma";
@@ -34,7 +34,7 @@ export class Vault {
 		this.id = vault.id;
 		this.owner = vault.id;
 		this._chainId = chainId;
-		if (vault.status) this.status = vault.status;
+
 		if (gasCompensation) this._gasCompensation = gasCompensation;
 		if (borrowingRate) this._borrowingRate = borrowingRate;
 
@@ -48,6 +48,16 @@ export class Vault {
 			this.debtDecimals = this.debt.shiftedBy(-this._loanToken.decimals).toNumber();
 		}
 
+		if (vault.status) this.status = vault.status;
+		if (
+			this.status === VaultStatus4Subgraph.closedByRedemption ||
+			this.status === VaultStatus4Contract.closedByRedemption ||
+			this.status === VaultStatus4Subgraph.closedByLiquidation ||
+			this.status === VaultStatus4Contract.closedByLiquidation
+		) {
+			this.status = VaultStatusWithinMagma.limitedByRedemption;
+			this.updateCollateralWithCollSurplusPool();
+		}
 
 		this._computeNetDebt();
 	}
@@ -74,9 +84,9 @@ export class Vault {
 			return globalContants.BIG_NUMBER_0;
 	}
 
-	public static calculateAvailableBorrow(collateral: BigNumber, debt: BigNumber, collateralPrice: number, collateralToken: Coin, loanToken: Coin, collateralRatio: number, feeRate = 0, offset = 1) {
+	public static calculateAvailableBorrow(collateral: BigNumber, debt: BigNumber, collateralPrice: number, collateralToken: Coin, loanToken: Coin, collateralRatio: number, feeRate = 0, offset = 1, CCR = 1) {
 		const collateralValue = collateral.shiftedBy(-collateralToken.decimals).multipliedBy(collateralPrice);
-		const debtLine = collateralValue.dividedBy(collateralRatio).multipliedBy(offset);
+		const debtLine = collateralValue.dividedBy(CCR > 1 ? CCR : collateralRatio).multipliedBy(offset);
 		const debtValue = debt.shiftedBy(-loanToken.decimals);
 		if (debtLine.gt(debtValue)) {
 			return debtLine.minus(debtValue).shiftedBy(loanToken.decimals).multipliedBy(1 - feeRate);
@@ -92,6 +102,12 @@ export class Vault {
 		}
 	}
 
+	public async updateCollateralWithCollSurplusPool() {
+		const res = await magma.getCollSurplusPoolContract(this.collateralToken.symbol).getCollateral(this.owner);
+		this.collateral = BigNumber(res._hex);
+		this.collateralDecimals = this.collateral.shiftedBy(-this._collateralToken.decimals).toNumber();
+	}
+
 	public nominalCollateralRatio(): number {
 		return Vault.calculateNominalCollateralRatio(this.collateral, this.debt);
 	}
@@ -104,7 +120,8 @@ export class Vault {
 		collateralPrice: number,
 		collateralRatio = (appConfig.constants as JsonObject)[String(this._chainId)].MAGMA_CRITICAL_COLLATERAL_RATIO,
 		feeRate = 0,
-		offset = 1
+		offset = 1,
+		CCR = 1
 	) {
 		return Vault.calculateAvailableBorrow(
 			this.collateral,
@@ -114,7 +131,8 @@ export class Vault {
 			this._loanToken,
 			collateralRatio,
 			feeRate,
-			offset
+			offset,
+			CCR
 		);
 	}
 
@@ -189,6 +207,18 @@ export class Vault {
 				hints[0],
 				hints[1]
 			);
+		}
+	}
+
+	public claimCollateral(
+		onWait?: (tx: string) => void,
+		onFail?: (error: Error | any) => void,
+		onDone?: (tx: string) => void
+	) {
+		if (this.collateralToken.address === zeroAddress) {
+			magma.borrowerOperationsContract?.dappFunctions["claimCollateral()"].run(onWait, onFail, onDone, undefined);
+		} else {
+			magma.borrowerOperationsContract?.dappFunctions["claimCollateral(address)"].run(onWait, onFail, onDone, undefined, this.collateralToken.address);
 		}
 	}
 

@@ -39,7 +39,8 @@ export const SideBar: React.FC = ({ children }) => {
         fullWidth={true}
         showExternalLink={false}
         active={pathname === "/borrow"}
-        target="_self" />
+        target="_self"
+        textTransform="none" />
 
       <NavLink
         label={t("stake") + " " + WEN.symbol}
@@ -48,7 +49,8 @@ export const SideBar: React.FC = ({ children }) => {
         fullWidth={true}
         showExternalLink={false}
         active={pathname === "/stake"}
-        target="_self" />
+        target="_self"
+        textTransform="none" />
 
       {/* <NavLink
         label={t("governance")}
@@ -154,7 +156,7 @@ export const SideBar: React.FC = ({ children }) => {
             <img src="images/exchange.svg" />
           </div>
 
-          {t("exchange")}&nbsp;WEN
+          {t("migrate")}&nbsp;WEN
 
           <img
             id="externalLink"
