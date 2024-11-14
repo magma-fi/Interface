@@ -3,7 +3,7 @@ name: Deploy Magma App
 on:
   push:
     branches:
-      - dev-v3
+      - main-v3
 
 jobs:
   build-and-deploy:
@@ -34,7 +34,7 @@ jobs:
           mv dist /tmp/dist_v3
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git checkout --orphan deploy-branch-v3
+          git checkout --orphan deploy-branch-main-v3
           git rm -rf .
           git clean -fdx
           mv /tmp/dist_v3/* .
@@ -42,4 +42,4 @@ jobs:
           git add -A
           git commit -m "Deploy the branch named features_upgrade"
           
-          git push -f origin deploy-branch-v3
+          git push -f origin deploy-branch-main-v3
