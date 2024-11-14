@@ -174,7 +174,8 @@ export const BorrowModal = ({
 
 						<button
 							className="textButton smallTextButton"
-							onClick={handleMax}>
+							onClick={handleMax}
+							style={{ textTransform: "none" }}>
 							{t("max")}:&nbsp;{formatAsset(formatAssetAmount(max, WEN.decimals), WEN)}
 						</button>
 					</div>

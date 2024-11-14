@@ -182,7 +182,8 @@ export const DepositeModal = ({
 
 			<button
 				className="textButton smallTextButton"
-				onClick={handleMaxBorrow}>
+				onClick={handleMaxBorrow}
+				style={{ textTransform: "none" }}>
 				{t("max")}:&nbsp;{newAvailableBorrowFiat}
 			</button>
 		</div>
@@ -283,7 +284,11 @@ export const DepositeModal = ({
 					<div
 						className="flex-row-space-between"
 						style={{ alignItems: "center" }}>
-						<div className="label fat">{t("depositAmount")}</div>
+						<div
+							className="label fat"
+							style={{ textTransform: "capitalize" }}>
+							{t("depositAmount")}
+						</div>
 
 						<button
 							className="textButton smallTextButton"
