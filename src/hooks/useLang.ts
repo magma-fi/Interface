@@ -27,7 +27,7 @@ export function useLang() {
 
 	const t = (key: string, valuesObject: (Record<string, string> | null) = null) => {
 		if (!localizedStrings) {
-			return key;
+			return "";
 		} else {
 			const str = (localizedStrings && key) ? localizedStrings[key] : "";
 			return valuesObject ? str.replace(/\{(\w+)\}/g, (match, key) => {
