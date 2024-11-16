@@ -8,7 +8,7 @@ import { Coin, ErrorMessage, ValidationContext } from "../libs/types";
 import { WEN, globalContants } from "../libs/globalContants";
 import { AmountInput } from "../components/AmountInput";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO } from "lib-base";
+import { Decimal, Trove, Difference, CRITICAL_COLLATERAL_RATIO, UserTrove } from "lib-base";
 import { validateTroveChange } from "../components/Trove/validation/validateTroveChange";
 import { Fees } from "lib-base/dist/src/Fees";
 import { useStableTroveChange } from "../hooks/useStableTroveChange";
@@ -18,6 +18,9 @@ import { Slider } from "../components/Slider";
 import { ChangedValueLabel } from "../components/ChangedValueLabel";
 import { debounce } from "../libs/debounce";
 import { useMyTransactionState } from "../components/Transaction";
+import { useLiquity } from "../hooks/LiquityContext";
+import { Address } from "viem";
+import borrowerOperationsABI from "lib-ethers/abi/BorrowerOperations.json";
 
 let amountWithdrawn = 0;
 
@@ -35,13 +38,14 @@ export const WithdrawModal = ({
 	recoveryMode,
 	liquidationPoint,
 	availableWithdrawal,
-	availableBorrow
+	availableBorrow,
+	collateralFromCollSurplusPool
 }: {
 	isOpen: boolean;
 	onClose: () => void;
 	market: Coin;
 	price: Decimal;
-	trove: Trove;
+	trove: UserTrove;
 	fees: Fees;
 	validationContext: ValidationContext;
 	max: Decimal;
@@ -51,7 +55,9 @@ export const WithdrawModal = ({
 	liquidationPoint: Decimal;
 	availableWithdrawal: Decimal;
 	availableBorrow: Decimal;
+	collateralFromCollSurplusPool?: Decimal;
 }) => {
+	const { account, walletClient, liquity } = useLiquity();
 	const maxNumber = Number(max);
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
@@ -166,10 +172,21 @@ export const WithdrawModal = ({
 		}
 	}, [transactionState.type])
 
+	const handleClaimCollateral = async () => {
+		await walletClient!.writeContract({
+			account: account as Address,
+			address: liquity.connection.addresses.borrowerOperations as Address,
+			abi: borrowerOperationsABI,
+			functionName: "claimCollateral",
+			args: []
+		});
+		window.location.reload();
+	};
+
 	return isOpen ? <Modal
 		title={t("withdraw") + " " + market.symbol}
 		onClose={handleCloseModal}>
-		<div className="withdrawModal">
+		{trove.status !== "closedByLiquidation" && trove.status !== "closedByRedemption" && <div className="withdrawModal">
 			<div className="flex-column">
 				<div className="flex-column-align-left">
 					<div
@@ -267,33 +284,45 @@ export const WithdrawModal = ({
 					</div>
 				</div>
 			</div>
-		</div>
 
-		{
-			stableTroveChange &&
-				(
-					(!transactionState.id && transactionState.type === "idle")
-					|| transactionState.type === "cancelled"
-				)
-				? <TroveAction
-					transactionId={txId}
-					change={stableTroveChange}
-					maxBorrowingRate={borrowingRate.add(0.005)}
-					borrowingFeeDecayToleranceMinutes={60}>
-					<button
-						className="primaryButton bigButton"
-						style={{ width: "100%" }}>
-						<img src="images/repay-dark.png" />
+			<p className="tips">{t("tips4Down")}</p>
+		</div>}
 
-						{t("withdraw")}
-					</button>
-				</TroveAction> : <button
-					className="primaryButton bigButton"
-					style={{ width: "100%" }}
-					disabled>
-					<img src="images/repay-dark.png" />
+		{stableTroveChange && (
+			(!transactionState.id && transactionState.type === "idle")
+			|| transactionState.type === "cancelled"
+		) && (
+				trove.status === "open" ||
+				trove.status === "nonExistent"
+			) ? <TroveAction
+				transactionId={txId}
+				change={stableTroveChange}
+				maxBorrowingRate={borrowingRate.add(0.005)}
+				borrowingFeeDecayToleranceMinutes={60}>
+			<button
+				className="primaryButton bigButton"
+				style={{ width: "100%" }}>
+				<img src="images/repay-dark.png" />
 
-					{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("withdrawing") + "...") : t("withdraw")}
-				</button>}
+				{t("withdraw")}
+			</button>
+		</TroveAction> : ((
+			(trove.status === "closedByLiquidation" || trove.status === "closedByRedemption") &&
+			collateralFromCollSurplusPool?.gt(0)
+		) ? <button
+			className="primaryButton bigButton"
+			style={{ width: "100%" }}
+			onClick={handleClaimCollateral}>
+			<img src="images/repay-dark.png" />
+
+			{t("claimCollateral") + " " + collateralFromCollSurplusPool.toString(2) + " " + market.symbol}
+		</button> : <button
+			className="primaryButton bigButton"
+			style={{ width: "100%" }}
+			disabled>
+			<img src="images/repay-dark.png" />
+
+			{transactionState.type !== "confirmed" && transactionState.type !== "confirmedOneShot" && transactionState.type !== "idle" ? (t("withdrawing") + "...") : t("withdraw")}
+		</button>)}
 	</Modal> : <></>
 };
