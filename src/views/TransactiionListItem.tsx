@@ -4,6 +4,7 @@ import { Badge } from "../components/Badge";
 import { BadgeType, WEN } from "../libs/globalContants";
 import { useLiquity } from "../hooks/LiquityContext";
 import { formatAsset, formatCurrency } from "../utils";
+import { useLang } from "../hooks/useLang";
 
 export const TransactiionListItem = ({
 	data,
@@ -14,6 +15,7 @@ export const TransactiionListItem = ({
 	market: Coin;
 	price: number;
 }) => {
+	const { t } = useLang();
 	const { chainId, publicClient } = useLiquity();
 	const theTime = useMemo(() => new Date(data.transaction.timestamp * 1000), [data.transaction.timestamp]);
 	const date = theTime.toLocaleDateString();
@@ -57,6 +59,8 @@ export const TransactiionListItem = ({
 	}, [col, data.troveOperation, deb]);
 
 	const twoBadgeTypes = useMemo(() => {
+		if (data.troveOperation === TroveOperation.RedeemCollateral) return "Redeem Collateral";
+
 		if (badgeTypes.length !== 2) return "";
 
 		let str = "";

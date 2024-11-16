@@ -180,5 +180,6 @@
 	"back": "back",
 	"vault": "vault",
 	"exchange": "Exchange",
-	"migrate": "Migrate"
+	"migrate": "Migrate",
+	"redeemCollateral":"Redeem Collateral"
 }
