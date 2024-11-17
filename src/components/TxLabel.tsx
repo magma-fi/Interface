@@ -22,7 +22,11 @@ export const TxLabel = ({
 				width="40px" />}
 
 			<div className="flex-column-align-left">
-				{title && <div className="label">{title}</div>}
+				{title && <div
+					className="label"
+					style={{ textTransform: "capitalize" }}>
+					{title}
+				</div>}
 
 				{amount && <div className="label labelSmall">{amount}</div>}
 			</div>

@@ -181,7 +181,8 @@ export const PoolView = ({ market, magmaData, refreshTrigger }: {
 						<button
 							id={ModalAction.SwapWEN2IOTX}
 							onClick={handleRedeemCollateral}
-							className="secondaryButton fullWidth">
+							className="secondaryButton fullWidth"
+							style={{ textTransform: "none" }}>
 							<img src="images/swap-orange.png" />
 
 							{t("swapWen2Iotx")}
