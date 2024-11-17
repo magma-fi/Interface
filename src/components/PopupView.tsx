@@ -8,12 +8,16 @@ export const PopupView = ({
 	entryView = null,
 	showArrows = false,
 	alignTop = false,
+	alignLeft = false,
+	alignRignt = false,
 	popupView = <></>,
 	forcedClass = ""
 }: {
 	entryView: ReactNode;
 	showArrows: boolean;
 	alignTop: boolean;
+	alignLeft?: boolean;
+	alignRignt?: boolean;
 	popupView: ReactElement;
 	forcedClass: string;
 }) => {
@@ -70,8 +74,8 @@ export const PopupView = ({
 				style={{
 					top: alignTop ? "0" : "auto",
 					bottom: alignTop ? "auto" : "0",
-					right: "0",
-					left: "auto"
+					right: alignRignt ? "0" : "auto",
+					left: alignLeft ? "0" : "auto"
 				}}>
 				{popupView}
 			</div>}

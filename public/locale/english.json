@@ -181,5 +181,7 @@
 	"vault": "vault",
 	"exchange": "Exchange",
 	"migrate": "Migrate",
-	"redeemCollateral":"Redeem Collateral"
+	"redeemCollateral": "Redeem Collateral",
+	"magmaV2": "Magma V2",
+	"magmaV3": "Magma V3"
 }

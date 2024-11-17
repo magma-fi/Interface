@@ -11,7 +11,9 @@ export const multicaller: {
 	_calls: [],
 
 	init: function (multicallContract: DappContract) {
-		this._multicallContract = multicallContract;
+		if (!this._multicallContract) {
+			this._multicallContract = multicallContract;
+		}
 	},
 
 	addCall: function (call: callRequest) {
