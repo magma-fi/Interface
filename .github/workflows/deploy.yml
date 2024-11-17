@@ -40,6 +40,6 @@ jobs:
           mv /tmp/dist_v3/* .
           
           git add -A
-          git commit -m "Deploy the branch named features_upgrade"
+          git commit -m "Deploy the branch for main-v3"
           
           git push -f origin deploy-branch-main-v3
