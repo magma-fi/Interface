@@ -215,7 +215,8 @@ export const WithdrawModal = ({
 						previousPostfix="%"
 						newValue={newURPercentNumber}
 						nextPostfix="%"
-						positive={urIsGood} />
+						positive={urIsGood}
+						maximumFractionDigits={globalContants.DECIMALS_2} />
 				</div>
 
 				<div className="flex-row-space-between">

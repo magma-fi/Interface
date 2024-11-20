@@ -124,5 +124,7 @@ export const globalContants = {
 	HOST: "app.magma.finance/?ref=",
 	REF_KEY: "ref@",
 	DECIMALS_2: 2,
-	TARGET_TOKEN: "targetToken"
+	TARGET_TOKEN: "targetToken",
+	DEFAULT_CURRENCY_FRACTION: 2,
+	DEFAULT_TOKEN_FRACTION: 6
 };

@@ -216,7 +216,8 @@ export const RepayModal = ({
 						previousPostfix="%"
 						newValue={newURPercentNumber}
 						nextPostfix="%"
-						positive={urIsGood} />
+						positive={urIsGood}
+						maximumFractionDigits={globalContants.DECIMALS_2} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -246,7 +247,8 @@ export const RepayModal = ({
 						previousValue={debtDecimals}
 						newValue={debtDecimals + non0RepayInput}
 						nextPostfix={globalContants.USD}
-						positive={urIsGood} />
+						positive={urIsGood}
+						maximumFractionDigits={globalContants.DEFAULT_CURRENCY_FRACTION} />
 				</div>
 			</div>
 		</div>
