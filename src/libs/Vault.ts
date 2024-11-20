@@ -89,7 +89,7 @@ export class Vault {
 		const debtLine = collateralValue.dividedBy(CCR > 1 ? CCR : collateralRatio).multipliedBy(offset);
 		const debtValue = debt.shiftedBy(-loanToken.decimals);
 		if (debtLine.gt(debtValue)) {
-			return debtLine.minus(debtValue).shiftedBy(loanToken.decimals).multipliedBy(1 - feeRate);
+			return debtLine.minus(debtValue).shiftedBy(loanToken.decimals).multipliedBy(1 - feeRate).integerValue(BigNumber.ROUND_DOWN);
 		} else
 			return globalContants.BIG_NUMBER_0;
 	}
