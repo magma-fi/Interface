@@ -165,7 +165,8 @@ export const WithdrawModal = ({
 
 						<button
 							className="textButton smallTextButton"
-							onClick={handleMax}>
+							onClick={handleMax}
+							style={{ textTransform: "none" }}>
 							{t("max")}:&nbsp;{formatAsset(maxNumber, market)}
 						</button>
 					</div>
