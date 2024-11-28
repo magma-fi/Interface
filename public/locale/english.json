@@ -47,7 +47,7 @@
 	"vaultDebt": "Vault Debt",
 	"maxSafe": "Max Safe",
 	"fallCR": "The adjustment you're trying to make would cause the Total Collateral Ratio to fall below {amount}. Please increase your Trove's Collateral Ratio.",
-	"repayDebt": "repay debt",
+	"repayDebt": "Repay Debt",
 	"repayAmount": "Repay amount",
 	"debtMustBe": "Total debt must be at least {amount}",
 	"withdrawAmount": "withdraw Amount",

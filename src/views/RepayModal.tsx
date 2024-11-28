@@ -56,7 +56,7 @@ export const RepayModal = ({
 	const [valueForced, setValueForced] = useState(-1);
 	const [repayInput, setRepayInput] = useState(-1);
 	const non0RepayInput = repayInput >= 0 ? repayInput : 0;
-	const repayAmount = BigNumber(repayInput).shiftedBy(WEN.decimals);
+	const [repayAmount, setRepayAmount] = useState(globalContants.BIG_NUMBER_0);
 	const maxSafe = 1 / liquidationPoint;
 	const vaultUR = 1 / vault.collateralRatio(price);
 	const vaultUtilizationRateNumber = vaultUR;
@@ -91,6 +91,7 @@ export const RepayModal = ({
 		const val = maxNumber;
 		setValueForced(val);
 		setRepayInput(val);
+		setRepayAmount(max);
 		repaidAmount = val;
 	};
 
@@ -110,6 +111,7 @@ export const RepayModal = ({
 	const handleInputRepay = (val: number) => {
 		setValueForced(-1);
 		setRepayInput(val);
+		setRepayAmount(BigNumber(val).shiftedBy(WEN.decimals));
 		repaidAmount = val;
 	};
 
@@ -216,7 +218,8 @@ export const RepayModal = ({
 						previousPostfix="%"
 						newValue={newURPercentNumber}
 						nextPostfix="%"
-						positive={urIsGood} />
+						positive={urIsGood}
+						maximumFractionDigits={globalContants.DECIMALS_2} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -244,9 +247,10 @@ export const RepayModal = ({
 
 					<ChangedValueLabel
 						previousValue={debtDecimals}
-						newValue={debtDecimals + non0RepayInput}
+						newValue={debtDecimals - non0RepayInput}
 						nextPostfix={globalContants.USD}
-						positive={urIsGood} />
+						positive={urIsGood}
+						maximumFractionDigits={globalContants.DEFAULT_CURRENCY_FRACTION} />
 				</div>
 			</div>
 		</div>

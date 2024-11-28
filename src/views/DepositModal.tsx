@@ -331,7 +331,8 @@ export const DepositeModal = ({
 						previousPostfix="%"
 						newValue={newURPercentNumber}
 						nextPostfix="%"
-						positive={urIsGood} />
+						positive={urIsGood}
+						maximumFractionDigits={2} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -351,7 +352,8 @@ export const DepositeModal = ({
 						previousValue={vaultCollateralDecimals * price}
 						newValue={newVaultCollateralDecimals * price}
 						nextPostfix={globalContants.USD}
-						positive={urIsGood} />
+						positive={urIsGood}
+						maximumFractionDigits={2} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -372,7 +374,7 @@ export const DepositeModal = ({
 						newValue={newLiquidationPrice}
 						nextPostfix={globalContants.USD}
 						positive={urIsGood}
-						maximumFractionDigits={4} />
+						maximumFractionDigits={globalContants.DEFAULT_CURRENCY_FRACTION} />
 				</div>
 
 				{showExpandBorrowView && <>

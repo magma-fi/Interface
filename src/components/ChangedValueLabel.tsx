@@ -7,7 +7,7 @@ export const ChangedValueLabel = ({
 	nextPostfix,
 	positive = true,
 	showArrow = true,
-	maximumFractionDigits = globalContants.DECIMALS_2
+	maximumFractionDigits = globalContants.DEFAULT_TOKEN_FRACTION
 }: {
 	previousValue: number;
 	newValue: number;

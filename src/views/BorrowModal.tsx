@@ -76,7 +76,7 @@ export const BorrowModal = ({
 	const [tx, setTx] = useState("");
 	const [errorMsg, setErrorMsg] = useState<ErrorMessage>();
 	const newLiquidationPrice = updatedVaultDebt.dividedBy(vault.collateral).toNumber();
-	const availableBorrowDecimals = formatAssetAmount(availableBorrow, WEN.decimals) * 0.9999;
+	const availableBorrowDecimals = formatAssetAmount(availableBorrow, WEN.decimals);
 
 	useEffect(() => {
 		setForcedSlideValue(newUR);
@@ -222,6 +222,7 @@ export const BorrowModal = ({
 					<ChangedValueLabel
 						previousValue={vaultUtilizationRateNumberPercent}
 						previousPostfix="%"
+						maximumFractionDigits={2}
 						newValue={newUR * 100}
 						nextPostfix="%"
 						positive={newURisPositive} />
@@ -254,7 +255,8 @@ export const BorrowModal = ({
 						previousValue={vault.debt.shiftedBy(-WEN.decimals).toNumber()}
 						newValue={updatedVaultDebt.shiftedBy(-WEN.decimals).toNumber()}
 						nextPostfix={globalContants.USD}
-						positive={newURisPositive} />
+						positive={newURisPositive}
+						maximumFractionDigits={2} />
 				</div>
 
 				<div className="flex-row-space-between">
@@ -265,7 +267,7 @@ export const BorrowModal = ({
 						newValue={newLiquidationPrice}
 						nextPostfix={globalContants.USD}
 						positive={newLiquidationPrice < liquidationPrice}
-						maximumFractionDigits={4} />
+						maximumFractionDigits={2} />
 				</div>
 
 				<div className="flex-row-space-between">
