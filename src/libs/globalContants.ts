@@ -125,6 +125,6 @@ export const globalContants = {
 	REF_KEY: "ref@",
 	DECIMALS_2: 2,
 	TARGET_TOKEN: "targetToken",
-	DEFAULT_CURRENCY_FRACTION: 2,
+	DEFAULT_CURRENCY_FRACTION: 4,
 	DEFAULT_TOKEN_FRACTION: 6
 };
