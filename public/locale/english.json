@@ -35,7 +35,7 @@
 	"available2Borrow": "Available to Borrow",
 	"currentFee": "Current Fee",
 	"debt": "Debt",
-	"repay": "repay",
+	"repay": "Repay",
 	"available2Withdraw": "Available to Withdraw",
 	"withdraw": "withdraw",
 	"depositAmount": "Deposit amount",
@@ -183,5 +183,7 @@
 	"migrate": "Migrate",
 	"redeemCollateral": "Redeem Collateral",
 	"magmaV2": "Magma V2",
-	"magmaV3": "Magma V3"
+	"magmaV3": "Magma V3",
+	"to": "to",
+	"repayAll": "Repay All"
 }

@@ -76,14 +76,14 @@ export const formatCurrency = (value: number, maximumFractionDigits = globalCont
 	});
 };
 
-export const formatAsset = (amount: number, asset: Coin = IOTX, compact = false, maximumFractionDigits = globalContants.DEFAULT_TOKEN_FRACTION) => {
+export const formatAsset = (amount: number, asset: Coin = IOTX, compact = false, maximumFractionDigits = globalContants.DEFAULT_TOKEN_FRACTION, hideSymbol = false) => {
 	return amount.toLocaleString("en-US", {
 		style: "decimal",
 		minimumFractionDigits: 0,
 		maximumFractionDigits,
 		notation: compact ? "compact" : "standard",
 		compactDisplay: "short",
-	}) + " " + asset.symbol;
+	}) + (hideSymbol ? "" : ` ${asset.symbol}`);
 };
 
 export const formatPercent = (value: number) => {

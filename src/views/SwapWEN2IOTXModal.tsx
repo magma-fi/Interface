@@ -115,7 +115,8 @@ export const SwapWEN2IOTXModal = ({
 
 					<button
 						className="textButton smallTextButton"
-						onClick={handleMax}>
+						onClick={handleMax}
+						style={{ textTransform: "none" }}>
 						{t("debtBalance")}:&nbsp;{formatAsset(maxNumber, WEN)}
 					</button>
 				</div>

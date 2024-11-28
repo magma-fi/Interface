@@ -163,15 +163,16 @@ export const RepayModal = ({
 							style={{ gap: "0.5rem" }}>
 							<button
 								className="textButton smallTextButton"
-								onClick={handleMax}>
-								{t("max")}:&nbsp;{formatAsset(maxNumber, WEN)}
+								onClick={handleMax}
+								style={{ textTransform: "none" }}>
+								{t("repay")}&nbsp;{formatAsset(maxNumber, WEN, false, globalContants.DEFAULT_TOKEN_FRACTION, true)}
 							</button>
 
 							<button
 								className="textButton smallTextButton"
 								style={{ textTransform: "none" }}
 								onClick={onCloseVault}>
-								{t("or")}&nbsp;{t("closeVault")}
+								{t("or")}&nbsp;{t("closeVault")}&nbsp;{t("to")}&nbsp;{t("repayAll")}
 							</button>
 						</div>
 					</div>
