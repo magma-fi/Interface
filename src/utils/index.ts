@@ -65,22 +65,22 @@ export const formatAssetAmount = (bn: BigNumber, decimals = 18) => {
 	return bn.shiftedBy(-decimals).toNumber();
 };
 
-export const formatCurrency = (value: number) => {
+export const formatCurrency = (value: number, maximumFractionDigits = globalContants.DEFAULT_CURRENCY_FRACTION) => {
 	return value.toLocaleString("en-US", {
 		style: "currency",
 		minimumFractionDigits: 0,
-		maximumFractionDigits: globalContants.DECIMALS_2,
+		maximumFractionDigits,
 		currency: "USD",
 		notation: "compact",
 		compactDisplay: "short",
 	});
 };
 
-export const formatAsset = (amount: number, asset: Coin = IOTX, compact = false) => {
+export const formatAsset = (amount: number, asset: Coin = IOTX, compact = false, maximumFractionDigits = globalContants.DEFAULT_TOKEN_FRACTION) => {
 	return amount.toLocaleString("en-US", {
 		style: "decimal",
 		minimumFractionDigits: 0,
-		maximumFractionDigits: globalContants.DECIMALS_2,
+		maximumFractionDigits,
 		notation: compact ? "compact" : "standard",
 		compactDisplay: "short",
 	}) + " " + asset.symbol;
@@ -107,7 +107,7 @@ export function* generateTrials(totalNumberOfTrials: number, chainId: number) {
 
 export const randomInteger = () => Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 
-export const formatNumber = (value: number, decimals = globalContants.DECIMALS_2) => {
+export const formatNumber = (value: number, decimals = globalContants.DEFAULT_TOKEN_FRACTION) => {
 	return value.toLocaleString("en-US", {
 		minimumFractionDigits: 0,
 		maximumFractionDigits: decimals,
