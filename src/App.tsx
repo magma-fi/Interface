@@ -16,15 +16,12 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
   { batch: { multicall: true } }
 );
 
-const wagmiCfg = createConfig({
-  connectors: [
-    new InjectedConnector({
-      chains,
-      options: {
-        name: "MetaMask",
-        getProvider: () => window.ethereum
-      }
-    }),
+/**
+ * 通过这个方法获取connector。即使在不存在Metamask（卸载或禁用）的情况下，只要其它钱包也实现了window.ethereum，则仍然可以以Metamask的名义连接该钱包。
+ * @returns {Array} connectors
+ */
+const getConnectors = () => {
+  const connectors = [
     new InjectedConnector({
       chains,
       options: {
@@ -53,7 +50,23 @@ const wagmiCfg = createConfig({
         debug: false
       }
     })
-  ],
+  ];
+
+  if (window.ethereum) {
+    connectors.unshift(new InjectedConnector({
+      chains,
+      options: {
+        name: "MetaMask",
+        getProvider: () => window.ethereum
+      }
+    }));
+  }
+
+  return connectors;
+};
+
+const wagmiCfg = createConfig({
+  connectors: getConnectors(),
   autoConnect: true,
   publicClient,
   webSocketPublicClient
