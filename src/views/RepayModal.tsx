@@ -183,7 +183,7 @@ export const RepayModal = ({
 						allowSwap={false}
 						valueForced={valueForced}
 						onInput={handleInputRepay}
-						max={Number(max.toString())}
+						max={maxNumber}
 						warning={undefined}
 						error={errorInfo && (errorInfo.string || t(errorInfo.key!, errorInfo.values))} />
 				</div>
