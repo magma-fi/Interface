@@ -175,14 +175,39 @@ h5 {
 
 .footer {
   position: absolute;
-  bottom: -5rem;
+  bottom: -15rem;
   right: 0;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   gap: var(--flex-gap-middle);
+  margin-top: 1.5rem;
+
+  .scores {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: var(--flex-gap-larger);
+
+    .scoreLabel {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center;
+      align-items: center;
+      gap: var(--flex-gap-tiny);
+    }
+  }
+
+  .bottomRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
 }
 
 .flex-column {
@@ -1294,7 +1319,7 @@ input {
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
-.statsDetails{
+.statsDetails {
   align-items: flex-start;
   white-space: nowrap;
   padding: 1rem;
@@ -1555,6 +1580,18 @@ input {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    bottom: -20rem;
+    padding-bottom: 2rem;
+
+    .scores {
+      flex-direction: column;
+      gap: var(--flex-gap-middle);
+    }
+
+    .bottomRow {
+      flex-direction: column;
+      margin-top: 1rem;
+    }
   }
 
   .referralBox {
