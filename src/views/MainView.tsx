@@ -25,6 +25,7 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 import { Vault } from "../libs/Vault";
 import BigNumber from "bignumber.js";
 import { Dashboard } from "./Dashboard";
+import { magmaV2 } from "../libs/magmaV2";
 
 export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const { isConnected } = useAccount();
@@ -46,6 +47,12 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 	const [depositsByReferrer, setDepositsByReferrer] = useState<DepositByReferrer[]>()
 	const haveDeposited: boolean = Object.values(vaults).findIndex(vault => (vault as unknown as Vault).collateral.gt(0)) >= 0;
 	const [refresh, setRefresh] = useState(false);
+	const [TVL, setTVL] = useState(0);
+	const [wenTotalSupply, setWenTotalSupply] = useState(globalContants.BIG_NUMBER_0);
+	const [lusdInStabilityPool, setLusdInStabilityPool] = useState(0);
+	const [tvlV2, setTVLV2] = useState(0);
+	const [lusdInStabilityPoolV2, setLusdInStabilityPoolV2] = useState(0);
+	const [wenTotalSupplyV2, setWenTotalSupplyV2] = useState(globalContants.BIG_NUMBER_0);
 
 	// useEffect(() => {
 	// 	if (chainId === 0) return;
@@ -146,6 +153,27 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 		}
 	}, [account, chainId, signer, refresh]);
 
+	useEffect(() => {
+		const func = async () => {
+			magmaV2.init(chainId, signer as JsonRpcSigner);
+
+			const res = await magmaV2.getMagmaData();
+			if (res) {
+				setTVLV2(magmaV2.calculateTVL());
+				setLusdInStabilityPoolV2(magmaV2.calculateTotalWENStaked());
+				setWenTotalSupplyV2(res.wenTotalSupply);
+			}
+		};
+
+		if (magmaData) {
+			setTVL(magma.calculateTVL());
+			setWenTotalSupply(magmaData.wenTotalSupply);
+			setLusdInStabilityPool(magma.calculateTotalWENStaked());
+
+			func();
+		}
+	}, [chainId, magmaData, signer]);
+
 	const handleConnectWallet = () => {
 		setShowConnectModal(true);
 	};
@@ -216,10 +244,23 @@ export const MainView = ({ chains }: { chains: Chain[] }) => {
 
 						<Route
 							path="/"
-							element={<Dashboard magmaData={magmaData} />} />
+							element={<Dashboard
+								magmaData={magmaData}
+								TVL={TVL}
+								tvlV2={tvlV2}
+								wenTotalSupply={wenTotalSupply}
+								wenTotalSupplyV2={wenTotalSupplyV2}
+								lusdInStabilityPool={lusdInStabilityPool}
+								lusdInStabilityPoolV2={lusdInStabilityPoolV2} />} />
 					</Routes>
 
-					<Footer />
+					<Footer
+						TVL={TVL}
+						tvlV2={tvlV2}
+						wenTotalSupply={wenTotalSupply}
+						wenTotalSupplyV2={wenTotalSupplyV2}
+						lusdInStabilityPool={lusdInStabilityPool}
+						lusdInStabilityPoolV2={lusdInStabilityPoolV2} />
 				</div>
 
 				<SideBar />

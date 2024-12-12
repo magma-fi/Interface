@@ -8,20 +8,28 @@ import { formatAssetAmount, formatCurrency } from "../utils";
 import { TokenCard } from "./TokenCard";
 import { magmaV2 } from "../libs/magmaV2";
 import { JsonRpcSigner } from "@ethersproject/providers";
-import BigNumber from "bignumber.js";
 import { PopupView } from "../components/PopupView";
+import BigNumber from "bignumber.js";
 
-export const Dashboard = ({ magmaData }: {
+export const Dashboard = ({
+	magmaData,
+	TVL = 0,
+	wenTotalSupply = globalContants.BIG_NUMBER_0,
+	lusdInStabilityPool = 0,
+	tvlV2 = 0,
+	wenTotalSupplyV2 = globalContants.BIG_NUMBER_0,
+	lusdInStabilityPoolV2 = 0
+}: {
 	magmaData?: Record<string, any>;
+	TVL?: number;
+	wenTotalSupply?: BigNumber;
+	lusdInStabilityPool?: number;
+	tvlV2?: number;
+	wenTotalSupplyV2?: BigNumber;
+	lusdInStabilityPoolV2?: number;
 }) => {
 	const { t } = useLang();
-	const TVL = magmaData ? magma.calculateTVL() : 0;
-	const wenTotalSupply = magmaData?.wenTotalSupply || globalContants.BIG_NUMBER_0;
-	const lusdInStabilityPool = magmaData ? magma.calculateTotalWENStaked() : 0;
-	const [tvlV2, setTVLV2] = useState(0);
-	const [lusdInStabilityPoolV2, setLusdInStabilityPoolV2] = useState(0);
-	const [wenTotalSupplyV2, setWenTotalSupplyV2] = useState(globalContants.BIG_NUMBER_0);
-	const { chainId, account, signer } = useLiquity();
+	const { account } = useLiquity();
 	const tokens = Object.values(magma.tokens) || [];
 
 	const tvlOfAllVaults = magmaData ? magma.calculateTVLOfAllVault(magmaData.vaults, magmaData.price) : 0;
@@ -32,24 +40,6 @@ export const Dashboard = ({ magmaData }: {
 		window.localStorage.setItem(globalContants.TARGET_TOKEN, token);
 		window.location.href = "/borrow";
 	};
-
-	useEffect(() => {
-		// 未对magmaV2内的multicaller这一全局对象作进一步的处理，暂时保证在magma调用multicall之后再调用magmaV2的multicaller，以确保multicall的调用不会被覆盖。
-		if (chainId > 0 && signer && magmaData) {
-			magmaV2.init(chainId, signer as JsonRpcSigner);
-
-			const func = async () => {
-				const res = await magmaV2.getMagmaData();
-				if (res) {
-					setTVLV2(magmaV2.calculateTVL());
-					setLusdInStabilityPoolV2(magmaV2.calculateTotalWENStaked());
-					setWenTotalSupplyV2(res.wenTotalSupply);
-				}
-			};
-
-			func();
-		}
-	}, [chainId, signer, magmaData]);
 
 	return <div className="mainContainer dashboardLayout">
 		<div className="statsBar">

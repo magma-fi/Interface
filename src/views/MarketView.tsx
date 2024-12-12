@@ -85,13 +85,14 @@ export const MarketView = ({
 	const troveDebtValue = vault.debt.shiftedBy(-WEN.decimals);
 	const vaultDebtValuneNumber = troveDebtValue.toNumber();
 	const debtToLiquidate = vault.debt;
-	const liquidationPrice = vault.collateral.gt(0) ? debtToLiquidate.dividedBy(vault.collateral).toNumber() : 0;
+	const liquidationPrice = vault.collateral.gt(0) ? debtToLiquidate.multipliedBy(MCR).dividedBy(vault.collateral).toNumber() : 0;
 	const availableBorrow = vault.getAvailabelBorrow(price, liquidationPoint, borrowingRate, appMMROffset);
 	const availableBorrowDecimals = formatAssetAmount(availableBorrow, WEN.decimals);
 	const currentNetDebt = vault.debt.gt(1) ? vault.netDebt : globalContants.BIG_NUMBER_0;
 	const minNetDebt = magmaData?.MIN_NET_DEBT;
 	const reserve = magmaData?.LUSD_GAS_COMPENSATION;
 	const maxAvailableRepay = currentNetDebt.gt(minNetDebt.plus(reserve)) ? currentNetDebt.minus(minNetDebt).minus(reserve) : globalContants.BIG_NUMBER_0;
+	const available2Repay = BigNumber.min(maxAvailableRepay, lusdBalance);
 	const totalUtilizationRate = total.collateral.gt(reserve) ? total.debt.dividedBy(total.collateral.multipliedBy(price)).toNumber() : 0;
 	const troveUtilizationRate = vault.collateral.gt(0) ? troveDebtValue.dividedBy(troveCollateralValue).toNumber() : 0;
 	const troveUtilizationRate100 = troveUtilizationRate * 100;
@@ -511,7 +512,8 @@ export const MarketView = ({
 								<button
 									className="secondaryButton"
 									onClick={handleBorrow}
-									disabled={availableBorrow.lt(0.01) || vault.status === VaultStatusWithinMagma.limitedByRedemption}>
+									disabled={availableBorrow.lt(0.01) || vault.status === VaultStatusWithinMagma.limitedByRedemption}
+									style={{ textTransform: "none" }}>
 									<img src="images/borrow-dark.png" />
 
 									{t("borrow") + " " + WEN.symbol}
@@ -551,22 +553,21 @@ export const MarketView = ({
 								<button
 									className="secondaryButton"
 									onClick={handleRepay}
-									disabled={maxAvailableRepay.lt(0.01) || lusdBalance.eq(0) || vault.status === VaultStatusWithinMagma.limitedByRedemption}>
+									disabled={maxAvailableRepay.lt(0.01) || lusdBalance.eq(0) || vault.status === VaultStatusWithinMagma.limitedByRedemption}
+									style={{ textTransform: "none" }}>
 									<img src="images/repay.png" />
 
 									{t("repay") + " " + WEN.symbol}
 								</button>
 
-								{(maxAvailableRepay.lt(0.01) || lusdBalance.eq(0)) && <div
+								<div
 									className="label labelSmall"
 									style={{
 										textAlign: "center",
 										width: "100%"
 									}}>
-									{maxAvailableRepay.lt(0.01)
-										? t("available2Repay") + ": " + maxAvailableRepay.toFixed(2)
-										: (lusdBalance.eq(0) && " " + WEN.symbol + " " + t("balance") + ": 0")}
-								</div>}
+									{formatAssetAmount(available2Repay, WEN.decimals)}&nbsp;{WEN.symbol}&nbsp;{t("available2Repay")}
+								</div>
 							</div>
 						</div>
 
@@ -844,7 +845,7 @@ export const MarketView = ({
 			price={price}
 			vault={vault}
 			fees={fees}
-			max={BigNumber.min(maxAvailableRepay, lusdBalance)}
+			max={available2Repay}
 			onDone={handleRepayDone}
 			constants={magmaData}
 			availableWithdrawal={availableWithdrawal}

@@ -121,7 +121,8 @@ export const StakeModal = ({
 
 					<button
 						className="textButton smallTextButton"
-						onClick={handleMax}>
+						onClick={handleMax}
+						style={{ textTransform: "none" }}>
 						{t("max")}:&nbsp;{formatAsset(wenBalanceDecimals, WEN)}
 					</button>
 				</div>
