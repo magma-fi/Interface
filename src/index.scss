@@ -600,12 +600,10 @@ h5 {
 }
 
 .vaultList {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: var(--flex-gap-big);
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, calc(50% - var(--flex-gap-larger) / 2));
+  gap: var(--flex-gap-larger);
 }
 
 .tokenCard {
@@ -1473,6 +1471,9 @@ input {
     width: 100%;
     padding: 0 !important;
     margin: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: var(--flex-gap-big);
 
     .dashboardItem {
       flex: 1 1;
