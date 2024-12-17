@@ -275,6 +275,15 @@ export const PoolView = ({ market, magmaData, refreshTrigger }: {
 									<div className="label labelSmall">{rewardsFromCollateral.toString(2)}&nbsp;{market.symbol}</div>
 								</div>
 							</div>
+
+							{(stabilityDeposit as StabilityDeposit).lqtyReward.eq(0) &&
+								rewardsFromCollateral > 0 &&
+								<button
+									className="secondaryButton"
+									onClick={handleClaim}>
+									<img src="images/rewards.png" />
+									{t("claim")}
+								</button>}
 						</div>
 					</div>
 				</div>
