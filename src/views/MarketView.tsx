@@ -644,7 +644,7 @@ export const MarketView = ({
 					<div className="flex-row-space-between">
 						<div className="description">{t("wenTotalSupply")}</div>
 
-						<div>{formatAsset(formatAssetAmount(magmaData?.wenTotalSupply), WEN)}</div>
+						<div>{formatAsset(formatAssetAmount(magmaData?.entireSystemDebt), WEN)}</div>
 					</div>
 
 					<div className="flex-row-space-between">

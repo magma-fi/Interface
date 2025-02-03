@@ -171,7 +171,7 @@ export const SwapWEN2IOTXModal = ({
 
 					<div
 						className="label"
-						style={{ color: "#F6F6F7" }}>{formatAsset(feeDecimals, WEN)}</div>
+						style={{ color: "#F6F6F7" }}>{formatAsset(feeDecimals, IOTX)}</div>
 				</div>
 
 				<div className="flex-row-space-between">
