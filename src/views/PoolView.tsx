@@ -302,6 +302,13 @@ export const PoolView = ({ market, constants }: {
 									<div className="label labelSmall">{rewardsFromCollateral.toString(2)}&nbsp;{IOTX.symbol}</div>
 								</div>
 							</div>
+
+							{stabilityDeposit.lqtyReward.eq(0) && rewardsFromCollateral.gt(0) && <button
+								className="secondaryButton"
+								onClick={handleClaim}>
+								<img src="images/rewards.png" />
+								{t("claim")}
+							</button>}
 						</div>
 					</div>
 				</div>
