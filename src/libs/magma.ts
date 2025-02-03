@@ -5,7 +5,7 @@ import appConfig from "../appConfig.json";
 import { ApproxHintObject, Coin, JsonObject, StabilityDeposit, VaultStatus, Vaultish, callRequest } from "./types";
 import { Vault } from "./Vault";
 import { graphqlAsker } from "./graphqlAsker";
-import { IOTX, WEN, globalContants } from "./globalContants";
+import { IOTX, WEN, globalContants, uniIOTX } from "./globalContants";
 import { BigNumber } from "bignumber.js";
 import multicallAbi from "../abis/multicall.json";
 import troveManagerAbi from "../abis/TroveManager.json";
@@ -28,7 +28,7 @@ import { erc20ABI } from "wagmi";
 export const magma: {
 	borrowerOperationsContract?: DappContract;
 	magmaData: Record<string, any>;
-	vaults: Vault[];
+	vaults: Record<string, Vault[]>;
 	tokens: Record<string, Coin>;
 	_account: string;
 	_currentChainId: number;
@@ -51,7 +51,7 @@ export const magma: {
 	_wenGasCompensation: BigNumber;
 	init: (chainId: number, signer: JsonRpcSigner, account?: string) => void;
 	getCollSurplusPoolContract: (token: string) => DappContract;
-	getVaults: (forceReload: boolean, fromIndex: number, doneCallback?: (vs: Vault[]) => void) => void;
+	getVaults: (forceReload: boolean, fromIndex: number, doneCallback?: (vs: Vault[]) => void, collateralToken?: Coin) => void;
 	getMagmaData: () => Promise<Record<string, any> | undefined>;
 	getVaultByOwner: (owner: string) => Promise<Vault | undefined>;
 	findHintsForNominalCollateralRatio: (nominalCollateralRatio: number, ownAddress?: string, market?: Coin) => Promise<[string, string]>;
@@ -64,7 +64,7 @@ export const magma: {
 	swap: (wenAmount: BigNumber, collateralPrice: number, onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void, market?: Coin) => void;
 	getRedemptionFeeWithDecay: (amount: BigNumber, market: Coin) => Promise<BigNumber>;
 	getTotalCollateralRatio: (collateralToken?: Coin) => number;
-	liquidate: (onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void) => void;
+	liquidate: (borrower: string, onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void, token?: string) => void;
 	calculateTVL: () => number;
 	calculateTVLOfAllVault: (vaults: any, prices: any) => number;
 	calculateTotalLoanOfAllVault: (vaults: any) => number;
@@ -82,7 +82,10 @@ export const magma: {
 	_magmaCfg: {},
 	_tokensAsKey: [],
 	_tokenEntriesAsKey: [],
-	vaults: [],
+	vaults: {
+		[IOTX.symbol]: [],
+		[uniIOTX.symbol]: []
+	},
 	tokens: {},
 	magmaData: {
 		price: {},
@@ -140,32 +143,38 @@ export const magma: {
 		return this.magmaData;
 	},
 
-	getVaults: function (forceReload = false, fromIndex = 0, doneCallback) {
-		if (this.vaults.length === 0 || forceReload) {
+	getVaults: function (forceReload = false, fromIndex = 0, doneCallback, collateralToken = IOTX) {
+		if (this.vaults[collateralToken.symbol].length === 0 || forceReload) {
 			const query = graphqlAsker.requestVaults(fromIndex);
 
-			graphqlAsker.ask(this._currentChainId, query, (data: any) => {
-				if (data?.troves) {
-					data.troves.forEach((vault: JsonObject) => {
-						this.vaults.push(
-							new Vault({
-								id: vault.id,
-								status: vault.status as VaultStatus,
-								collateral: BigNumber(vault.rawCollateral),
-								debt: BigNumber(vault.rawDebt),
-								collateralRatioSortKey: vault.collateralRatioSortKey
-							} as Vaultish,
-								IOTX,
-								this._wenGasCompensation,
-								this._borrowingRate["IOTX"]
-							));
-					});
-				}
+			graphqlAsker.ask(
+				this._currentChainId,
+				query,
+				(data: any) => {
+					if (data?.troves) {
+						data.troves.forEach((vault: JsonObject) => {
+							this.vaults[collateralToken.symbol].push(
+								new Vault({
+									id: vault.id,
+									status: vault.status as VaultStatus,
+									collateral: BigNumber(vault.rawCollateral),
+									debt: BigNumber(vault.rawDebt),
+									collateralRatioSortKey: vault.collateralRatioSortKey
+								} as Vaultish,
+									collateralToken,
+									this._wenGasCompensation,
+									this._borrowingRate[collateralToken.symbol]
+								));
+						});
+					}
 
-				return doneCallback && doneCallback(this.vaults);
-			});
+					return doneCallback && doneCallback(this.vaults[collateralToken.symbol]);
+				},
+				undefined,
+				collateralToken
+			);
 		} else {
-			return doneCallback && doneCallback(this.vaults);
+			return doneCallback && doneCallback(this.vaults[collateralToken.symbol]);
 		}
 	},
 
@@ -766,13 +775,13 @@ export const magma: {
 		);
 	},
 
-	liquidate: function (onWait?, onFail?, onDone?): void {
-		this._troveManagerContract?.dappFunctions.liquidate.run(
+	liquidate: function (borrower: string, onWait?, onFail?, onDone?, token = "IOTX"): void {
+		this._troveManagerContract[token]?.dappFunctions.liquidate.run(
 			onWait,
 			onFail,
 			onDone,
 			{ from: this._account },
-			this._account
+			borrower
 		);
 	},
 
