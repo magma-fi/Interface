@@ -89,17 +89,25 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, magmaData })
 
     vs?.forEach(vault => {
       const collateralRatio = vault.collateralRatio(price[vault.collateralToken.symbol]);
-      if (recoveryMode[vault.collateralToken.symbol]) {
-        if (collateralRatio > mcr && collateralRatio < totalCollateralRatio) {
-          (vault as LiquidatableTrove).liquidatable = true;
-          tempArr.push(vault as LiquidatableTrove);
-        }
-      } else {
-        if (collateralRatio < (mcr / factor)) {
-          tempArr.push(vault as LiquidatableTrove);
+      // if (recoveryMode[vault.collateralToken.symbol]) {
+      //   if (collateralRatio > mcr && collateralRatio < totalCollateralRatio) {
+      //     (vault as LiquidatableTrove).liquidatable = true;
+      //     tempArr.push(vault as LiquidatableTrove);
+      //   }
+      // } else {
+      //   if (collateralRatio < (mcr / factor)) {
+      //     tempArr.push(vault as LiquidatableTrove);
 
-          if (collateralRatio < mcr) (vault as LiquidatableTrove).liquidatable = true;
-        }
+      //     if (collateralRatio < mcr) (vault as LiquidatableTrove).liquidatable = true;
+      //   }
+      // }
+      if (collateralRatio < (mcr / factor)) {
+        tempArr.push(vault as LiquidatableTrove);
+
+        if (collateralRatio < mcr) (vault as LiquidatableTrove).liquidatable = true;
+      } else if (collateralRatio > mcr && collateralRatio < totalCollateralRatio) {
+        (vault as LiquidatableTrove).liquidatable = true;
+        tempArr.push(vault as LiquidatableTrove);
       }
     });
 
@@ -284,7 +292,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, magmaData })
               <div className="tableCell">
                 <div className="label">{t("collateral")}</div>
 
-                <div>{formatAsset(formatAssetAmount(vault.collateral, IOTX.decimals), IOTX)}</div>
+                <div>{formatAsset(formatAssetAmount(vault.collateral, vault.collateralToken.decimals), vault.collateralToken)}</div>
               </div>
 
               <div className="tableCell">
