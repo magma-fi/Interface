@@ -1,0 +1,17 @@
+{
+  "short_name": "Magma",
+  "name": "Magma Finance",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "description": "Magma is a brand new DeFi primitive focused on realizing the full potential of liquid staking tokens (LSTs) and real world assets (RWAs). Magma enables users to mint a stablecoin, WEN, that is fully collateralized by liquid staking tokens.",
+  "iconPath": "favicon.png"
+}
