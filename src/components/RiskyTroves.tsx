@@ -8,7 +8,7 @@ import { useLiquity } from "../hooks/LiquityContext";
 // import { LoadingOverlay } from "./LoadingOverlay";
 // import { Abbreviation } from "./Abbreviation";
 import { useLang } from "../hooks/useLang";
-import { IOTX, WEN } from "../libs/globalContants";
+import { IOTX, uniIOTX, WEN } from "../libs/globalContants";
 import appConfig from "../appConfig.json";
 import { JsonObject, LiquidatableTrove } from "../libs/types";
 import { TxDone } from "./TxDone";
@@ -88,45 +88,55 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, magmaData })
     const tempArr: LiquidatableTrove[] = [];
 
     vs?.forEach(vault => {
-      const collateralRatio = vault.collateralRatio(price);
+      const collateralRatio = vault.collateralRatio(price[vault.collateralToken.symbol]);
+      // if (recoveryMode[vault.collateralToken.symbol]) {
+      //   if (collateralRatio > mcr && collateralRatio < totalCollateralRatio) {
+      //     (vault as LiquidatableTrove).liquidatable = true;
+      //     tempArr.push(vault as LiquidatableTrove);
+      //   }
+      // } else {
+      //   if (collateralRatio < (mcr / factor)) {
+      //     tempArr.push(vault as LiquidatableTrove);
 
-      // (vault as LiquidatableTrove).liquidatable = true; // for testing.
-      // return tempArr.push(vault as LiquidatableTrove); // for testing.
+      //     if (collateralRatio < mcr) (vault as LiquidatableTrove).liquidatable = true;
+      //   }
+      // }
+      if (collateralRatio < (mcr / factor)) {
+        tempArr.push(vault as LiquidatableTrove);
 
-      if (recoveryMode) {
-        if (collateralRatio > mcr && collateralRatio < totalCollateralRatio) {
-          (vault as LiquidatableTrove).liquidatable = true;
-          tempArr.push(vault as LiquidatableTrove);
-        }
-      } else {
-        if (collateralRatio < mcr / factor) {
-          tempArr.push(vault as LiquidatableTrove);
-
-          if (collateralRatio < mcr) (vault as LiquidatableTrove).liquidatable = true;
-        }
+        if (collateralRatio < mcr) (vault as LiquidatableTrove).liquidatable = true;
+      } else if (collateralRatio > mcr && collateralRatio < totalCollateralRatio) {
+        (vault as LiquidatableTrove).liquidatable = true;
+        tempArr.push(vault as LiquidatableTrove);
       }
     });
 
     return tempArr;
   }, [mcr, price, recoveryMode, totalCollateralRatio]);
 
-  const fetchVaults = useCallback((from = 0) => {
-    magma.getVaults(false, from, vs => {
-      // setPreviousBatchCount(vs?.length);
-      // setVaults(vs);
-      // setLoading(false);
+  const fetchVaults = useCallback((from = 0, collateralToken = IOTX) => {
+    magma.getVaults(
+      false,
+      from,
+      vs => {
+        const tempVaults = pickUpLiquidatableVault(vs);
+        setLiquidatableVaults(prevVaults => prevVaults.concat(tempVaults));
 
-      const tempVaults = pickUpLiquidatableVault(vs);
-      setLiquidatableVaults([...liquidatableVaults, ...tempVaults]);
-
-      setTimeout(() => {
-        if (liquidatableVaults.length < 20 && vs?.length === 100) {
-          fetchVaults(from + 1);
-        } else {
-          setLoading(false);
-        }
-      }, 1000);
-    });
+        setTimeout(() => {
+          // if (liquidatableVaults.length < 20 && vs?.length === 100) {
+          if (vs?.length === 100) {
+            // vs.length === 100 说明原始数据还有下一页。
+            fetchVaults(from + 1);
+          } else if (collateralToken.symbol === IOTX.symbol) {
+            // 原始数据到达了最后一页，并且是IOTX，再获取一次uniIOTX的数据。
+            fetchVaults(0, uniIOTX);
+          } else {
+            setLoading(false);
+          }
+        }, 1000);
+      },
+      collateralToken
+    );
   }, [pickUpLiquidatableVault]);
 
   useEffect(() => {
@@ -214,16 +224,23 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, magmaData })
   // };
 
   const handleLiquidate = (evt: React.MouseEvent<HTMLButtonElement>) => {
-    // const owner = evt.currentTarget.id;
-    // const send = liquity.send.liquidate.bind(liquity.send, owner)
-    // const id = txId;
-
-    setTxAmount(evt.currentTarget.dataset.amount!);
+    const theButton = evt.currentTarget;
+    theButton.disabled = true;
+    theButton.innerText = t("liquidating");
 
     magma.liquidate(
+      evt.currentTarget.dataset.borrow!,
       undefined,
-      undefined,
-      undefined
+      err => {
+        theButton.disabled = false;
+        theButton.innerText = t("liquidate");
+        window.alert(err.message);
+      },
+      () => {
+        theButton.disabled = false;
+        theButton.innerText = t("liquidate");
+      },
+      evt.currentTarget.dataset.token,
     );
   };
 
@@ -252,7 +269,12 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, magmaData })
 
 
   return <>
-    {/* {loading && <LoadingOverlay />} */}
+    {loading && <div className="flex-row-align-left">
+      <div style={{ textTransform: "capitalize" }}>{t("loading")}</div>
+
+      <img
+        src="images/loading.gif"
+        height="32px" /></div>}
 
     {!loading && <div style={{ width: "100%" }}>
       <div className="flex-row-space-between">
@@ -281,7 +303,7 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, magmaData })
               <div className="tableCell">
                 <div className="label">{t("collateral")}</div>
 
-                <div>{formatAsset(formatAssetAmount(vault.collateral, IOTX.decimals), IOTX)}</div>
+                <div>{formatAsset(formatAssetAmount(vault.collateral, vault.collateralToken.decimals), vault.collateralToken)}</div>
               </div>
 
               <div className="tableCell">
@@ -293,12 +315,13 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, magmaData })
               <div className="tableCell">
                 <div className="label">{t("utilizationRate")}</div>
 
-                <div>{((1 / vault.collateralRatio(price)) * 100).toFixed()}%</div>
+                <div>{((1 / vault.collateralRatio(price[vault.collateralToken.symbol])) * 100).toFixed()}%</div>
               </div>
 
               <div className="tableCell">
                 <button
-                  data-amount={vault.collateral.toString()}
+                  data-borrow={vault.owner}
+                  data-token={vault.collateralToken.symbol}
                   id={String(idx)}
                   className="secondaryButton"
                   onClick={handleLiquidate}

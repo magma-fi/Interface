@@ -1,4 +1,4 @@
-import { Coin, OptionItem } from "./types";
+import { Coin, Coin, OptionItem } from "./types";
 import { BigNumber } from "bignumber.js";
 
 export enum ModalAction {
@@ -47,6 +47,12 @@ export const WEN: Coin = {
 export const IOTX: Coin = {
 	symbol: "IOTX",
 	logo: "images/iotx.png",
+	decimals: 18
+}
+
+export const uniIOTX: Coin = {
+	logo: "images/uniIOTX.svg",
+	symbol: "uniIOTX",
 	decimals: 18
 }
 
