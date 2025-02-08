@@ -367,7 +367,8 @@ export const PoolView = ({ market, magmaData, refreshTrigger }: {
 			onDone={handleModalDone}
 			max={BigNumber.min(netDebt, lusdBalance)}
 			price={price}
-			market={market} />}
+			market={market}
+			wenTotalSupply={wenTotalSupply} />}
 
 		{showTxResult?.action === ModalAction.SwapWEN2IOTX && showTxResult.isShow && <TxDone
 			title={t("wenSwappedSuccessfully")}
