@@ -224,11 +224,22 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, magmaData })
   // };
 
   const handleLiquidate = (evt: React.MouseEvent<HTMLButtonElement>) => {
+    const theButton = evt.currentTarget;
+    theButton.disabled = true;
+    theButton.innerText = t("liquidating");
+
     magma.liquidate(
       evt.currentTarget.dataset.borrow!,
       undefined,
-      undefined,
-      undefined,
+      err => {
+        theButton.disabled = false;
+        theButton.innerText = t("liquidate");
+        window.alert(err.message);
+      },
+      () => {
+        theButton.disabled = false;
+        theButton.innerText = t("liquidate");
+      },
       evt.currentTarget.dataset.token,
     );
   };

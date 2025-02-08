@@ -186,5 +186,6 @@
 	"magmaV3": "Magma V3",
 	"to": "to",
 	"repayAll": "Repay in Full",
-	"loading": "loading..."
+	"loading": "loading...",
+	"liquidating": "liquidating"
 }
