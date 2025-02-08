@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Modal } from "../components/Modal";
@@ -35,22 +34,22 @@ export const SwapWEN2IOTXModal = ({
 	const maxNumber = formatAssetAmount(max, WEN.decimals);
 	const [fee, setFee] = useState(globalContants.BIG_NUMBER_0);
 	const redeemRate = price;
-	const feeDecimals = formatAssetAmount(fee, WEN.decimals);
+	const feeDecimals = formatAssetAmount(fee.dividedBy(price), WEN.decimals);
 	const receive = swapAmount.minus(fee).dividedBy(redeemRate);
 	const [sending, setSending] = useState(false);
 	const [iotxAsUnit, setIOTXAsUnit] = useState(true);
 	const [errInfo, setErrInfo] = useState<ErrorMessage>();
 
 	useEffect(() => {
-		const getData = async () => {
-			const res = await magma.getRedemptionFeeWithDecay(swapAmount, market);
-			if (res) setFee(res);
+		if (swapInput > 0) {
+			magma.getRedemptionRate(market).then(rate => {
+				const res = magma.calculateRedemptionFee(swapAmount, rate);
+				if (BigNumber.isBigNumber(res)) {
+					setFee(res);
+				}
+			});
 		}
-
-		if (swapAmount.gt(0)) {
-			getData();
-		}
-	}, [swapAmount]);
+	}, [swapInput]);
 
 	const handleMax = () => {
 		const val = maxNumber;
