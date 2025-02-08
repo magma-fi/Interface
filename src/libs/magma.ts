@@ -64,7 +64,7 @@ export const magma: {
 	swap: (wenAmount: BigNumber, collateralPrice: number, onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void, market?: Coin) => void;
 	getRedemptionFeeWithDecay: (amount: BigNumber, market: Coin) => Promise<BigNumber>;
 	getRedemptionRate: (market: Coin) => Promise<BigNumber>;
-	calculateRedemptionFee: (amount: BigNumber, rate: BigNumber) => BigNumber | undefined;
+	calculateRedemptionFee: (amount: BigNumber, rate: BigNumber, totalLUSDSupply: BigNumber) => BigNumber | undefined;
 	getTotalCollateralRatio: (collateralToken?: Coin) => number;
 	liquidate: (borrower: string, onWait?: (tx: string) => void, onFail?: (error: Error | any) => void, onDone?: (tx: string) => void, token?: string) => void;
 	calculateTVL: () => number;
@@ -851,9 +851,12 @@ export const magma: {
 		return sum;
 	},
 
-	calculateRedemptionFee: function (amount: BigNumber, rate: BigNumber): BigNumber | undefined {
+	calculateRedemptionFee: function (amount: BigNumber, rate: BigNumber, totalLUSDSupply: BigNumber): BigNumber | undefined {
 		try {
-			const fee = rate.multipliedBy(amount).dividedBy(globalContants.BIG_NUMBER_1);
+			const redeemedLUSDFraction = amount.dividedBy(totalLUSDSupply.shiftedBy(-WEN.decimals));
+			let newBaseRate = rate.plus(redeemedLUSDFraction.dividedBy(2));
+			newBaseRate = BigNumber.min(newBaseRate, globalContants.BIG_NUMBER_1);
+			const fee = newBaseRate.multipliedBy(amount).dividedBy(globalContants.BIG_NUMBER_1);
 			if (BigNumber.isBigNumber(fee)) {
 				return fee;
 			}
@@ -864,7 +867,7 @@ export const magma: {
 
 	getRedemptionRate: function (market: Coin): Promise<BigNumber> {
 		return new Promise((resolve, reject) => {
-			magma._troveManagerContract[market.symbol]?.dappFunctions.getRedemptionRate.call().then((res: any) => {
+			magma._troveManagerContract[market.symbol]?.dappFunctions.getRedemptionRateWithDecay.call().then((res: any) => {
 				if (res)
 					resolve(BigNumber(res._hex));
 				else

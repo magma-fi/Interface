@@ -18,7 +18,8 @@ export const SwapWEN2IOTXModal = ({
 	onDone = () => { },
 	max,
 	price,
-	market
+	market,
+	wenTotalSupply = globalContants.BIG_NUMBER_0
 }: {
 	isOpen: boolean;
 	onClose: () => void;
@@ -26,6 +27,7 @@ export const SwapWEN2IOTXModal = ({
 	max: BigNumber;
 	price: number;
 	market: Coin;
+	wenTotalSupply: BigNumber;
 }) => {
 	const { t } = useLang();
 	const [valueForced, setValueForced] = useState(-1);
@@ -43,7 +45,7 @@ export const SwapWEN2IOTXModal = ({
 	useEffect(() => {
 		if (swapInput > 0) {
 			magma.getRedemptionRate(market).then(rate => {
-				const res = magma.calculateRedemptionFee(swapAmount, rate);
+				const res = magma.calculateRedemptionFee(swapAmount, rate, wenTotalSupply);
 				if (BigNumber.isBigNumber(res)) {
 					setFee(res);
 				}
