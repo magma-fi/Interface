@@ -104,8 +104,9 @@ export const RiskyTroves: React.FC<RiskyTrovesProps> = ({ pageSize, magmaData })
       if (collateralRatio < (mcr / factor)) {
         tempArr.push(vault as LiquidatableTrove);
 
-        if (collateralRatio < mcr) (vault as LiquidatableTrove).liquidatable = true;
-      } else if (collateralRatio > mcr && collateralRatio < totalCollateralRatio) {
+        if (collateralRatio < mcr)
+          (vault as LiquidatableTrove).liquidatable = true;
+      } else if (recoveryMode[vault.collateralToken.symbol] && collateralRatio > mcr && collateralRatio < totalCollateralRatio) {
         (vault as LiquidatableTrove).liquidatable = true;
         tempArr.push(vault as LiquidatableTrove);
       }
