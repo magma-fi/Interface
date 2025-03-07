@@ -1,0 +1,63 @@
+const graphQLFetch = {
+	_subgraphURL: "",
+	_config: {
+		"4090": {
+			"IOTX": "https://graphnode.filda.io/subgraphs/name/magma-subgraph-iotex-testnet",
+			"uniIOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-testnet-demo-erc20"
+		},
+		"4689": {
+			"IOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-v3",
+			"uniIOTX": "https://graphnode.filda.io/subgraphs/name/magma-iotex-erc20-v3"
+		}
+	},
+
+	init: function (chainId, token) {
+		this._subgraphURL = this._config[chainId][token];
+	},
+
+	requestSequenceNumbersWithDay: async function (beginTime, endTime) {
+		const data = JSON.stringify({
+			query: `
+		{
+			troveChanges(
+				first: 1
+				where: {transaction_: {timestamp_gt: ${beginTime}, timestamp_lt: ${endTime}}}
+				orderBy: transaction__timestamp
+				orderDirection: desc
+			) {
+				id: sequenceNumber
+			}
+		}
+		`});
+
+		return await this.request(data);
+	},
+
+	requestSystemStateWithDay: async function (...idList) {
+		const data = JSON.stringify({
+			query: `
+			{
+				systemStates(where: {sequenceNumber_in: [${idList}]}) {
+					totalCollateral
+					totalDebt
+					id
+				}
+			}
+		`});
+
+		return await this.request(data);
+	},
+
+	request: async function (query) {
+		const response = await fetch(this._subgraphURL, {
+			method: 'post',
+			body: query,
+			headers: { 'Content-Type': 'application/json' },
+		});
+
+		const json = await response.json();
+		if (json?.data) {
+			return json.data;
+		}
+	}
+};
