@@ -185,7 +185,7 @@ export const PoolView = ({ market, magmaData, refreshTrigger }: {
 							style={{ textTransform: "none" }}>
 							<img src="images/swap-orange.png" />
 
-							{t("swapWen2Iotx")}
+							{t("swapWen2Iotx", { targetToken: market.symbol })}
 						</button>
 					</div>
 
