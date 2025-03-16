@@ -94,7 +94,7 @@ export const SwapWEN2IOTXModal = ({
 	};
 
 	return isOpen ? <Modal
-		title={t("swapWen2Iotx")}
+		title={t("swapWen2Iotx", { targetToken: market.symbol })}
 		onClose={handleCloseModal}>
 		<div
 			className="flex-column"
@@ -102,7 +102,7 @@ export const SwapWEN2IOTXModal = ({
 				gap: "1rem",
 				maxWidth: "372px"
 			}}>
-			<div className="description">{t("swapioUSD2IOTX")}</div>
+			<div className="description">{t("swapioUSD2IOTX", { targetToken: market.symbol })}</div>
 
 			<SnackBar
 				type="warningSnackBar"
@@ -118,7 +118,7 @@ export const SwapWEN2IOTXModal = ({
 						className="textButton smallTextButton"
 						onClick={handleMax}
 						style={{ textTransform: "none" }}>
-						{t("debtBalance")}:&nbsp;{formatAsset(maxNumber, WEN)}
+						{t("walletBalance")}:&nbsp;{formatAsset(maxNumber, WEN)}
 					</button>
 				</div>
 
@@ -154,7 +154,7 @@ export const SwapWEN2IOTXModal = ({
 							style={{ color: "#F6F6F7" }}>
 							<span>1&nbsp;</span>
 
-							{iotxAsUnit ? IOTX.symbol : WEN.symbol}
+							{iotxAsUnit ? market.symbol : WEN.symbol}
 
 							<span>&nbsp;=&nbsp;</span>
 
@@ -162,7 +162,7 @@ export const SwapWEN2IOTXModal = ({
 
 							<span>&nbsp;</span>
 
-							{iotxAsUnit ? WEN.symbol : IOTX.symbol}
+							{iotxAsUnit ? WEN.symbol : market.symbol}
 						</div>
 					</div>
 				</div>
@@ -172,7 +172,7 @@ export const SwapWEN2IOTXModal = ({
 
 					<div
 						className="label"
-						style={{ color: "#F6F6F7" }}>{formatAsset(feeDecimals, IOTX)}</div>
+						style={{ color: "#F6F6F7" }}>{formatAsset(feeDecimals, market)}</div>
 				</div>
 
 				<div className="flex-row-space-between">
@@ -188,7 +188,7 @@ export const SwapWEN2IOTXModal = ({
 
 					<div
 						className="label"
-						style={{ color: "#F6F6F7" }}>{formatAsset(formatAssetAmount(receive, IOTX.decimals), IOTX)}</div>
+						style={{ color: "#F6F6F7" }}>{formatAsset(formatAssetAmount(receive, market.decimals), market)}</div>
 				</div>
 			</div>
 		</div>
@@ -200,7 +200,7 @@ export const SwapWEN2IOTXModal = ({
 			onClick={handleSwap}>
 			<img src="images/swap-black.png" />
 
-			{sending ? (t("sending") + "...") : (t("swapWen2Iotx"))}
+			{sending ? (t("sending") + "...") : (t("swapWen2Iotx", { targetToken: market.symbol }))}
 		</button>
 	</Modal> : <></>
 };

@@ -185,7 +185,7 @@ export const PoolView = ({ market, magmaData, refreshTrigger }: {
 							style={{ textTransform: "none" }}>
 							<img src="images/swap-orange.png" />
 
-							{t("swapWen2Iotx")}
+							{t("swapWen2Iotx", { targetToken: market.symbol })}
 						</button>
 					</div>
 
@@ -365,7 +365,8 @@ export const PoolView = ({ market, magmaData, refreshTrigger }: {
 			isOpen={showModal.isShow}
 			onClose={handleCloseModal}
 			onDone={handleModalDone}
-			max={BigNumber.min(netDebt, lusdBalance)}
+			// max={BigNumber.min(netDebt, lusdBalance)}
+			max={lusdBalance}
 			price={price}
 			market={market}
 			wenTotalSupply={wenTotalSupply} />}
